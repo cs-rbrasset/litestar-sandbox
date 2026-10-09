@@ -1,0 +1,8 @@
+*.db
+__pycache__/
+.python-version
+.venv/
+CLAUDE.md
+.ruff_cache
+pyproject.toml
+uv.lock
