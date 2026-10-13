@@ -1,22 +1,34 @@
+from typing import TypeAlias
+
 from advanced_alchemy.extensions.litestar.providers import create_service_provider
 from litestar import Controller, get, post
-from litestar.di import Provide
+from litestar.di import NamedDependency, Provide
+from litestar.params import FromPath, SkipValidation
 from msgspec.structs import asdict
 
 from litestar_sandbox.modules.catalog.models import Product
+from litestar_sandbox.modules.catalog.protocols import ProductServiceProtocol
 from litestar_sandbox.modules.catalog.schemas import ProductCreate
 from litestar_sandbox.modules.catalog.services import ProductService
 
+ProductServiceDep: TypeAlias = NamedDependency[SkipValidation[ProductServiceProtocol]]
 
 class ProductController(Controller):
     path = "/products"
     dependencies = {"product_service": Provide(create_service_provider(ProductService))}
 
-
     @get("/{product_id:int}")
-    async def get_product(self, product_service: ProductService, product_id: int) -> Product:
+    async def get_product(
+        self,
+        product_service: ProductServiceDep,
+        product_id: FromPath[int]
+    ) -> Product:
         return await product_service.get(product_id)
 
     @post()
-    async def create_product(self, product_service: ProductService, data: ProductCreate) -> Product:
+    async def create_product(
+        self,
+        product_service: ProductServiceDep,
+        data: ProductCreate
+    ) -> Product:
         return await product_service.create(asdict(data))
