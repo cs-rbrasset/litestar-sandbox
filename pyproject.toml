@@ -1,0 +1,105 @@
+[project]
+name = "litestar-sandbox"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Claudio Silva", email = "cs@rbrasset.com.br" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "advanced-alchemy>=1.11.0",
+    "aiosqlite>=0.22.1",
+    "litestar[standard]>=2.24.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.10",
+    "ty>=0.0.85",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "B",        # flake8-bugbear
+    "A",        # flake8-builtins
+    "C4",       # flake8-comprehensions
+    "DTZ",      # flake8-datetimez (datetimes sem timezone)
+    "T20",      # flake8-print
+    "SIM",      # flake8-simplify
+    "TC",       # flake8-type-checking
+    "PTH",      # flake8-use-pathlib
+    "RET",      # flake8-return
+    "RUF",      # regras do próprio ruff
+    "PL",       # pylint
+    "PERF",     # perflint
+    "S",        # flake8-bandit (segurança)
+    "ASYNC",    # flake8-async
+    "FAST",     # boas práticas p/ frameworks ASGI
+]
+ignore = [
+    "E501",     # comprimento de linha fica a cargo do formatter
+    "PLR0913",  # muitos argumentos (comum em handlers/DTOs)
+    "PLR2004",  # magic numbers
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "PLR2004", "T20"]
+# Litestar Controllers declaram path/dependencies/guards como atributos de classe por design
+"**/controllers.py" = ["RUF012", "UP040"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["litestar_sandbox"]
+
+[tool.ruff.lint.flake8-type-checking]
+# Litestar/msgspec/SQLAlchemy resolvem anotações em runtime — não mover p/ TYPE_CHECKING
+runtime-evaluated-base-classes = [
+    "advanced_alchemy.base.UUIDBase",
+    "advanced_alchemy.base.UUIDAuditBase",
+    "advanced_alchemy.base.BigIntBase",
+    "advanced_alchemy.base.BigIntAuditBase",
+    "sqlalchemy.orm.DeclarativeBase",
+    "msgspec.Struct",
+    "pydantic.BaseModel",
+]
+runtime-evaluated-decorators = [
+    "litestar.get", "litestar.post", "litestar.put",
+    "litestar.patch", "litestar.delete", "litestar.route",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ty.environment]
+python-version = "3.14"
+python = ".venv"
+
+[tool.ty.src]
+include = ["src", "tests"]
+
+[tool.ty.terminal]
+error-on-warning = true
+
+[tool.ty.rules]
+# Promove para erro checagens que vêm como warning por padrão
+possibly-unresolved-reference = "error"
+redundant-cast = "error"
+unused-ignore-comment = "error"

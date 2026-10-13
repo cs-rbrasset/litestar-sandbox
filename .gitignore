@@ -4,5 +4,3 @@ __pycache__/
 .venv/
 CLAUDE.md
 .ruff_cache
-pyproject.toml
-uv.lock
