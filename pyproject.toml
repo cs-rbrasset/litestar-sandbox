@@ -66,6 +66,8 @@ ignore = [
 "tests/**/*.py" = ["S101", "PLR2004", "T20"]
 # Litestar Controllers declaram path/dependencies/guards como atributos de classe por design
 "**/controllers.py" = ["RUF012", "UP040"]
+# Litestar dependencies com Type Alias
+"**/deps.py" = ["UP040"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["litestar_sandbox"]
