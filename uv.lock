@@ -297,11 +297,11 @@ dependencies = [
     { name = "advanced-alchemy" },
     { name = "aiosqlite" },
     { name = "litestar", extra = ["standard"] },
-    { name = "pytest" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "pytest" },
     { name = "ruff" },
     { name = "ty" },
 ]
@@ -311,11 +311,11 @@ requires-dist = [
     { name = "advanced-alchemy", specifier = ">=1.11.0" },
     { name = "aiosqlite", specifier = ">=0.22.1" },
     { name = "litestar", extras = ["standard"], specifier = ">=2.24.0" },
-    { name = "pytest", specifier = ">=9.1.1" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "pytest", specifier = ">=9.1.1" },
     { name = "ruff", specifier = ">=0.16.10" },
     { name = "ty", specifier = ">=0.0.85" },
 ]
