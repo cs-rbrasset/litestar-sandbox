@@ -22,7 +22,7 @@ class ProductController(Controller):
     async def get_product(
         self, product_service: ProductServiceDep, product_id: FromPath[int]
     ) -> Product:
-        return await product_service.get(product_id)
+        return await product_service.get_active(product_id)
 
     @post()
     async def create_product(
@@ -34,17 +34,17 @@ class ProductController(Controller):
     async def list_products(
         self, product_service: ProductServiceDep, filters: FilterDep
     ) -> OffsetPagination[Product]:
-        items, total = await product_service.get_many_and_count(*filters)
+        items, total = await product_service.list_active(*filters)
         return product_service.to_schema(items, total, filters)
 
     @patch("/{product_id:int}")
     async def update_product(
         self, product_service: ProductServiceDep, product_id: FromPath[int], data: ProductUpdate
     ) -> Product:
-        return await product_service.update(data, product_id)
+        return await product_service.update_active(data, product_id)
 
     @delete("/{product_id:int}")
     async def delete_product(
         self, product_service: ProductServiceDep, product_id: FromPath[int]
     ) -> None:
-        await product_service.delete(product_id)
+        await product_service.archive(product_id)
