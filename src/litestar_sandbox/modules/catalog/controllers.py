@@ -3,7 +3,7 @@ from advanced_alchemy.extensions.litestar.providers import (
     create_service_provider,
 )
 from advanced_alchemy.service import OffsetPagination
-from litestar import Controller, get, patch, post
+from litestar import Controller, delete, get, patch, post
 from litestar.di import Provide
 from litestar.params import FromPath, URLEncodedBody
 
@@ -42,3 +42,9 @@ class ProductController(Controller):
         self, product_service: ProductServiceDep, product_id: FromPath[int], data: ProductUpdate
     ) -> Product:
         return await product_service.update(data, product_id)
+
+    @delete("/{product_id:int}")
+    async def delete_product(
+        self, product_service: ProductServiceDep, product_id: FromPath[int]
+    ) -> None:
+        await product_service.delete(product_id)
