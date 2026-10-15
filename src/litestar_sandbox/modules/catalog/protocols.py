@@ -7,7 +7,10 @@ if TYPE_CHECKING:
     from advanced_alchemy.service import OffsetPagination
 
     from litestar_sandbox.modules.catalog.models import Product
-    from litestar_sandbox.modules.catalog.schemas import ProductCreate, ProductUpdate
+    from litestar_sandbox.modules.catalog.schemas import (
+        ProductCreate,
+        ProductUpdate,
+    )
 
 
 class ProductServiceProtocol(Protocol):

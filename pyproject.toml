@@ -87,6 +87,7 @@ runtime-evaluated-decorators = [
     "litestar.get", "litestar.post", "litestar.put",
     "litestar.patch", "litestar.delete", "litestar.route",
 ]
+exempt-modules = ["typing", "litestar_sandbox.core.deps"] # aliases do core.deps são lidos pelo di do litestar em runtime
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -110,3 +111,4 @@ unused-ignore-comment = "error"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
