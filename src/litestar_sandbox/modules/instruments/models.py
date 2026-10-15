@@ -7,7 +7,7 @@ from sqlalchemy import Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 
-class Product(BigIntAuditBase):
+class Instrument(BigIntAuditBase):
     name: Mapped[str] = mapped_column(String(200), index=True)
     sku: Mapped[str] = mapped_column(String(200), unique=True)
     description: Mapped[str | None] = mapped_column(Text)
