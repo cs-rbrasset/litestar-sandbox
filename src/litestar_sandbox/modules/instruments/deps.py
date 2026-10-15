@@ -12,7 +12,7 @@ InstrumentServiceDep: TypeAlias = NamedDependency[SkipValidation[InstrumentServi
 
 instrument_filter_config: FilterConfig = {
     "pagination_type": "limit_offset",
-    "search": "name",
+    "search": {"name", "cetip_code"},
     "sort_field": "created_at",
     "sort_order": "desc",
 }

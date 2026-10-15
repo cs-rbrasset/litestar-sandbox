@@ -14,13 +14,12 @@ def test_list_instruments_starts_empty(app_client: TestClient[Litestar]) -> None
 def create_instrument(app_client: TestClient[Litestar], **overrides: str) -> dict:
     payload = {
         "name": "caneta azul",
-        "sku": "CA-N3-74",
-        "price": "10.00",
-        "description": "AZUL CANETA",
+        "cetip_code": "CANE4",
+        "instrument_type": "CRI",
     } | overrides
     return app_client.post("/api/v1/instruments", data=payload).json()
 
 
-def test_instrument_sku_is_normalized(app_client: TestClient[Litestar]) -> None:
-    instrument = create_instrument(app_client, sku="  AA-B1-00  ")
-    assert instrument["sku"] == "AA-B1-00"
+def test_instrument_cetip_code_is_normalized(app_client: TestClient[Litestar]) -> None:
+    instrument = create_instrument(app_client, cetip_code="  canE3 ")
+    assert instrument["cetip_code"] == "CANE3"

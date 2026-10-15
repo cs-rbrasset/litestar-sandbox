@@ -2,7 +2,7 @@
 
 Sandbox para aprender [Litestar](https://docs.litestar.dev/) construindo um **monólito modular** com [Advanced Alchemy](https://docs.advanced-alchemy.litestar.dev/). O domínio é o de uma **gestora de recursos** (cadastro de ativos, operações, posições), e o projeto serve de modelo para uma API real de uma gestora de porte médio.
 
-Por enquanto o banco é SQLite. O projeto real deve usar PostgreSQL.
+Por enquanto o banco é SQLite, inclusive na POC. O projeto real vai usar PostgreSQL.
 
 ## Como rodar
 
@@ -33,13 +33,21 @@ Todas as rotas ficam sob o prefixo `/api/v1`.
 | Método | Rota | Descrição |
 | --- | --- | --- |
 | GET | `/ping` | health check |
-| GET | `/instruments` | lista os ativos ativos, com paginação (`currentPage`, `pageSize`), busca por nome (`searchString`) e ordenação (`orderBy`, `sortOrder`) |
-| POST | `/instruments` | cria um ativo (form-urlencoded). O código é normalizado para maiúsculas, sem espaços nas pontas, e nunca é reaproveitado (`409` se repetido) |
+| GET | `/instruments` | lista os ativos ativos, com paginação (`currentPage`, `pageSize`), busca por nome ou código CETIP (`searchString`) e ordenação (`orderBy`, `sortOrder`) |
+| POST | `/instruments` | cria um ativo (form-urlencoded). O código CETIP é normalizado para maiúsculas, sem espaços nas pontas, e nunca é reaproveitado (`409` se repetido) |
 | GET | `/instruments/{id}` | busca um ativo por id (`404` se não existir ou estiver desativado) |
-| PATCH | `/instruments/{id}` | atualização parcial (JSON). Campos ausentes não mudam; `null` limpa campos opcionais |
+| PATCH | `/instruments/{id}` | atualização parcial (JSON). Só o `name` é editável; campos ausentes não mudam |
 | DELETE | `/instruments/{id}` | desativa o ativo (soft delete) e responde `204` |
 
-Os campos do ativo ainda são os do exercício anterior (`sku`, `price`, `description`) e serão remodelados na próxima fase.
+Campos de um ativo:
+
+| Campo | Regra |
+| --- | --- |
+| `cetip_code` | identificador do ativo no mercado. Letras e números, de 4 a 20 caracteres; único e imutável |
+| `name` | de 1 a 200 caracteres |
+| `instrument_type` | `CRI`, `DEB`, `CDB` ou `LCI`. Validado na API e por um `CHECK` no banco; imutável |
+
+O preço não faz parte do cadastro: em renda fixa ele é o PU de cada data, uma série temporal que pertence a um módulo próprio.
 
 ### Qualidade
 
@@ -67,6 +75,7 @@ src/litestar_sandbox/
     │   ├── controllers.py  # HTTP
     │   ├── deps.py         # alias de DI do service e config dos filtros
     │   ├── protocols.py    # contrato do service usado pelo controller
+    │   ├── enums.py        # InstrumentType (re-exportado pelo public.py)
     │   ├── schemas.py      # DTOs de entrada HTTP (msgspec)
     │   ├── services.py     # regras de negócio
     │   ├── repositories.py # acesso a dados
@@ -124,7 +133,7 @@ Em andamento (WIP).
 **Roteiro:**
 
 - [x] renomear `catalog` → `instruments` e `orders` → `trades`
-- [ ] remodelar o ativo: código, classe do ativo, moeda; o preço sai do cadastro
+- [x] remodelar o ativo: código CETIP, tipo do ativo (enum com `CHECK` no banco); o preço sai do cadastro
 - [ ] módulo de preços (série temporal por ativo e data)
 - [ ] módulo `trades` (operações), consumindo `instruments` pelo `public.py`
 - [ ] eventos de domínio emitidos pelo `trades`
@@ -140,4 +149,4 @@ Em andamento (WIP).
 - [ ] usuários, autenticação e trilha de auditoria (quem alterou o quê)
 - [ ] listeners idempotentes e padrão Outbox
 - [ ] jobs em background (importação de preços, cálculo de cota)
-- [ ] PostgreSQL
+- [ ] PostgreSQL (o destino final), com os testes rodando contra um PostgreSQL de verdade (por exemplo, com testcontainers). O SQLite se comporta diferente em alguns pontos: o `LIKE` dele ignora maiúsculas e minúsculas, e o do PostgreSQL não

@@ -1,15 +1,19 @@
 import datetime
-import decimal
 
 from advanced_alchemy.base import BigIntAuditBase
 from advanced_alchemy.types import DateTimeUTC
-from sqlalchemy import Numeric, String, Text
+from sqlalchemy import Enum, String
 from sqlalchemy.orm import Mapped, mapped_column
+
+from litestar_sandbox.modules.instruments.enums import InstrumentType
 
 
 class Instrument(BigIntAuditBase):
     name: Mapped[str] = mapped_column(String(200), index=True)
-    sku: Mapped[str] = mapped_column(String(200), unique=True)
-    description: Mapped[str | None] = mapped_column(Text)
-    price: Mapped[decimal.Decimal] = mapped_column(Numeric(10, 2))
-    deleted_at: Mapped[datetime.datetime | None] = mapped_column(DateTimeUTC(True), default=None)
+    cetip_code: Mapped[str] = mapped_column(String(20), unique=True)
+    instrument_type: Mapped[InstrumentType] = mapped_column(
+        Enum(InstrumentType, native_enum=False, create_constraint=True, length=20)
+    )
+    deleted_at: Mapped[datetime.datetime | None] = mapped_column(
+        DateTimeUTC(timezone=True), default=None
+    )

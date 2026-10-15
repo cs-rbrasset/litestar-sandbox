@@ -14,9 +14,9 @@ if TYPE_CHECKING:
     from litestar_sandbox.modules.instruments.schemas import InstrumentUpdate
 
 
-def _normalize_sku(data):
-    if is_dict(data) and "sku" in data and data.get("sku") is not None:
-        data["sku"] = data["sku"].strip().upper()
+def _normalize_cetip_code(data):
+    if is_dict(data) and "cetip_code" in data and data.get("cetip_code") is not None:
+        data["cetip_code"] = data["cetip_code"].strip().upper()
     return data
 
 
@@ -26,10 +26,10 @@ class InstrumentService(SQLAlchemyAsyncRepositoryService[Instrument, InstrumentR
     repository_type = InstrumentRepository
 
     async def to_model_on_create(self, data):
-        return await super().to_model_on_create(_normalize_sku(schema_dump(data)))
+        return await super().to_model_on_create(_normalize_cetip_code(schema_dump(data)))
 
     async def to_model_on_update(self, data):
-        return await super().to_model_on_update(_normalize_sku(schema_dump(data)))
+        return await super().to_model_on_update(_normalize_cetip_code(schema_dump(data)))
 
     async def get_active(self, item_id: int) -> Instrument:
         return await self.get_one(Instrument.id == item_id, self._active)
