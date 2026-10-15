@@ -19,6 +19,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "import-linter>=2.15",
     "pytest>=9.1.1",
     "ruff>=0.16.10",
     "ty>=0.0.85",
@@ -108,7 +109,34 @@ possibly-unresolved-reference = "error"
 redundant-cast = "error"
 unused-ignore-comment = "error"
 
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.importlinter]
+root_package = "litestar_sandbox"
+
+[[tool.importlinter.contracts]]
+name = "core não depende de módulos"
+type = "forbidden"
+source_modules = ["litestar_sandbox.core"]
+forbidden_modules = ["litestar_sandbox.modules"]
+
+[[tool.importlinter.contracts]]
+name = "instruments não depende de trades"
+type = "forbidden"
+source_modules = ["litestar_sandbox.modules.instruments"]
+forbidden_modules = ["litestar_sandbox.modules.trades"]
+
+# Proíbe o pacote inteiro e libera só o public.py: um arquivo interno novo já nasce proibido.
+# allow_indirect_imports: o public.py importa o service do próprio módulo para montar o
+# provider, então trades -> instruments.public -> instruments.services é um caminho legítimo.
+[[tool.importlinter.contracts]]
+name = "trades só acessa instruments.public"
+type = "forbidden"
+source_modules = ["litestar_sandbox.modules.trades"]
+forbidden_modules = ["litestar_sandbox.modules.instruments"]
+ignore_imports = ["litestar_sandbox.modules.trades.** -> litestar_sandbox.modules.instruments.public"]
+allow_indirect_imports = true
+# Temporário: o trades ainda não importa o instruments.public, e o padrão ("error") falharia
+# com "No matches for ignored import". Remover quando o trades passar a usar o public.py.
+unmatched_ignore_imports_alerting = "warn"
