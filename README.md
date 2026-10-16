@@ -118,6 +118,8 @@ Uma requisição percorre as camadas nesta ordem: controller → service → rep
 - **Nada é apagado.** O `DELETE` desativa o registro (`deleted_at`), e as leituras ignoram os desativados. O service expõe só métodos que respeitam essa regra, e o Protocol do controller não oferece o hard delete.
 - **Os aliases de DI usam `X: TypeAlias = ...`, e não `type X = ...`.** O Litestar não reconhece o `SkipValidation` dentro de um alias `type`. Os detalhes estão nos comentários do `pyproject.toml`.
 - **Os módulos de cadastro usam o service do Advanced Alchemy.** Módulos com cálculos pesados (cota, P&L, rentabilidade) devem ter uma camada de domínio em Python puro, testável sem banco.
+- **Módulos se comunicam por eventos, sem se conhecer.** O `trades` declara no `public.py` o id do evento (`TRADE_SETTLED`) e o evento (`TradeSettled`, um `Struct` congelado que carrega todos os dados da boleta), e o emite com `request.app.emit(...)` ao liquidar. Quem escuta depende do `trades`, e nunca o contrário.
+- **Limitação conhecida dos eventos (dual write):** o evento é emitido em memória, dentro do handler, e o commit no banco acontece depois. Se o commit falhar, o evento já saiu; se o processo cair depois do commit, o evento se perde. A solução de produção é o padrão Outbox (no backlog).
 
 ## Como este projeto está sendo construído
 
@@ -157,7 +159,7 @@ Em andamento (WIP).
 - [x] remodelar o ativo: código CETIP, tipo do ativo (enum com `CHECK` no banco); o preço sai do cadastro
 - [ ] módulo de preços (série temporal por ativo e data)
 - [x] módulo `trades` (operações), consumindo `instruments` pelo `public.py`
-- [ ] eventos de domínio emitidos pelo `trades`
+- [x] eventos de domínio emitidos pelo `trades` (`TradeSettled`, ao liquidar)
 - [ ] módulo `positions` (posições e P&L), alimentado por eventos, com tabelas próprias
 - [ ] contrato `layers` no import-linter
 

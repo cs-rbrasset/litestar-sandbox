@@ -3,7 +3,7 @@ from advanced_alchemy.extensions.litestar.providers import (
     create_service_provider,
 )
 from advanced_alchemy.service import OffsetPagination
-from litestar import Controller, get, post
+from litestar import Controller, Request, get, post
 from litestar.di import Provide
 from litestar.params import FromPath
 
@@ -15,6 +15,7 @@ from litestar_sandbox.modules.trades.deps import (
     trade_filter_config,
 )
 from litestar_sandbox.modules.trades.models import Trade
+from litestar_sandbox.modules.trades.public import TRADE_SETTLED, TradeSettled
 from litestar_sandbox.modules.trades.schemas import TradeCreate
 from litestar_sandbox.modules.trades.services import TradeService
 
@@ -44,8 +45,24 @@ class TradeController(Controller):
         return await trade_service.get_trade(trade_id)
 
     @post("/{trade_id:int}/settle", status_code=200)
-    async def settle_trade(self, trade_service: TradeServiceDep, trade_id: FromPath[int]) -> Trade:
-        return await trade_service.settle(trade_id)
+    async def settle_trade(
+        self, trade_service: TradeServiceDep, trade_id: FromPath[int], request: Request
+    ) -> Trade:
+        trade = await trade_service.settle(trade_id)
+        request.app.emit(
+            TRADE_SETTLED,
+            TradeSettled(
+                trade_id=trade.id,
+                fund_cnpj=trade.fund_cnpj,
+                instrument_id=trade.instrument_id,
+                cetip_code=trade.cetip_code,
+                trade_date=trade.trade_date,
+                side=trade.side,
+                quantity=trade.quantity,
+                unit_price=trade.unit_price,
+            ),
+        )
+        return trade
 
     @post("/{trade_id:int}/cancel", status_code=200)
     async def cancel_trade(self, trade_service: TradeServiceDep, trade_id: FromPath[int]) -> Trade:
