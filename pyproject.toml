@@ -137,6 +137,3 @@ source_modules = ["litestar_sandbox.modules.trades"]
 forbidden_modules = ["litestar_sandbox.modules.instruments"]
 ignore_imports = ["litestar_sandbox.modules.trades.** -> litestar_sandbox.modules.instruments.public"]
 allow_indirect_imports = true
-# Temporário: o trades ainda não importa o instruments.public, e o padrão ("error") falharia
-# com "No matches for ignored import". Remover quando o trades passar a usar o public.py.
-unmatched_ignore_imports_alerting = "warn"
