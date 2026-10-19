@@ -166,7 +166,7 @@ Em andamento (WIP).
 **Backlog**, em ordem de valor para um projeto real:
 
 - [ ] schemas de resposta (`InstrumentRead`, `TradeRead`): hoje as respostas serializam o model ORM, e colunas internas como `deleted_at` aparecem no contrato
-- [ ] **contract-first** (avaliar depois da POC, quando o front-end que substitui o Streamlit começar). Ver a seção "Contract-first" abaixo
+- [ ] **contract-first** (avaliar depois da POC, quando o front-end em Next.js que substitui o Streamlit começar). Ver a seção "Contract-first" abaixo
 - [ ] migrations com Alembic
 - [ ] exceções de domínio e exception handlers
 - [ ] testes de um módulo isolado, com fakes dos Protocols públicos
@@ -180,11 +180,13 @@ Em andamento (WIP).
 
 Hoje a API é **code-first**: o Litestar gera o OpenAPI a partir dos `Struct`s e dos handlers (`uv run litestar --app litestar_sandbox.app:create_app schema openapi --output openapi.json`). A proposta é passar a **contract-first** quando houver um front-end em outra linguagem consumindo a API.
 
+O front-end da aplicação real vai ser em **Next.js**, um projeto separado e em TypeScript, o que reforça a proposta: o contrato OpenAPI passa a ser o ponto de encontro entre os dois projetos. (A integração nativa do Litestar com HTMX foi considerada e descartada por isso: ela serve para interfaces renderizadas no próprio servidor Python. A página em `web/` é só uma visualização da POC.)
+
 **O fluxo proposto:**
 
 1. `contracts/openapi.yaml` é a fonte da verdade, revisada em PR por quem implementa e por quem consome (ou escrita em [TypeSpec](https://typespec.io/), que compila para OpenAPI).
 2. Os `Struct`s do msgspec são **gerados** a partir dele com o [datamodel-code-generator](https://github.com/koxudaxi/datamodel-code-generator) (`--output-model-type msgspec.Struct --use-annotated`) e nunca editados à mão.
-3. O front-end gera o cliente TypeScript e um servidor mock ([Prism](https://github.com/stoplightio/prism)) a partir do mesmo arquivo.
+3. O front-end em Next.js gera o cliente TypeScript (por exemplo, com [openapi-typescript](https://openapi-ts.dev/) ou [orval](https://orval.dev/)) e um servidor mock ([Prism](https://github.com/stoplightio/prism)) a partir do mesmo arquivo. Uma mudança incompatível no contrato quebra o build do front-end, e não a tela em produção.
 4. O CI compara o OpenAPI gerado pela API com o contrato ([oasdiff](https://github.com/oasdiff/oasdiff)) e roda testes de contrato ([Schemathesis](https://schemathesis.readthedocs.io/)).
 
 **O que um teste com o datamodel-code-generator mostrou:**
