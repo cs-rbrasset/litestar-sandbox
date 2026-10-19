@@ -8,6 +8,7 @@ from litestar.di import Provide
 from litestar.params import FromPath
 
 from litestar_sandbox.core.deps import FilterDep
+from litestar_sandbox.core.events import publish
 from litestar_sandbox.modules.instruments.public import provide_instrument_api
 from litestar_sandbox.modules.trades.deps import (
     InstrumentPublicAPIDep,
@@ -49,7 +50,8 @@ class TradeController(Controller):
         self, trade_service: TradeServiceDep, trade_id: FromPath[int], request: Request
     ) -> Trade:
         trade = await trade_service.settle(trade_id)
-        request.app.emit(
+        publish(
+            request.app,
             TRADE_SETTLED,
             TradeSettled(
                 trade_id=trade.id,
