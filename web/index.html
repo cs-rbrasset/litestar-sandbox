@@ -86,10 +86,10 @@
     <!-- ================= POSITIONS ================= -->
     <section>
       <h2>Posições <code>/positions</code></h2>
-      <p class="hint">Posição do fundo numa data, a partir das boletas liquidadas. (Módulo em construção: até ele existir, esta consulta responde 404.)</p>
+      <p class="hint">Posição do fundo numa data, a partir das boletas liquidadas.</p>
       <form hx-get="/api/v1/positions" hx-target="#positions-result" mustache-template="tpl-positions">
         <input name="fund_cnpj" placeholder="CNPJ do fundo" value="12345678000190" required>
-        <input name="date" type="date" required>
+        <input name="reference_date" type="date" required>
         <button>Consultar</button>
       </form>
       <div id="positions-result"></div>
@@ -148,13 +148,12 @@
   </template>
 
   <template id="tpl-positions">
-    {{#items.length}}
-    <table>
+    {{! a API devolve uma lista pura: dentro da seção length o contexto vira o número, por isso a tabela abre e fecha em seções separadas das linhas }}
+    {{#length}}<table>
       <thead><tr><th>Ativo</th><th class="num">Quantidade</th></tr></thead>
-      <tbody>{{#items}}<tr><td><code>{{cetip_code}}</code></td><td class="num">{{quantity}}</td></tr>{{/items}}</tbody>
-    </table>
-    {{/items.length}}
-    {{^items.length}}<p class="empty">Sem posição nesta data.</p>{{/items.length}}
+      <tbody>{{/length}}{{#.}}<tr><td><code>{{cetip_code}}</code></td><td class="num">{{quantity}}</td></tr>{{/.}}{{#length}}</tbody>
+    </table>{{/length}}
+    {{^length}}<p class="empty">Sem posição nesta data.</p>{{/length}}
   </template>
 
   <script>
