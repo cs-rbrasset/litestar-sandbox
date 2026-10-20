@@ -1,0 +1,157 @@
+[project]
+name = "litestar-sandbox"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Claudio Silva", email = "cs@rbrasset.com.br" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "advanced-alchemy>=1.11.0",
+    "aiosqlite>=0.22.1",
+    "litestar[standard]>=2.24.0",
+    "psycopg[binary]>=3.3.6",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "import-linter>=2.15",
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
+    "ty>=0.0.85",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "B",        # flake8-bugbear
+    "A",        # flake8-builtins
+    "C4",       # flake8-comprehensions
+    "DTZ",      # flake8-datetimez (datetimes sem timezone)
+    "T20",      # flake8-print
+    "SIM",      # flake8-simplify
+    "TC",       # flake8-type-checking
+    "PTH",      # flake8-use-pathlib
+    "RET",      # flake8-return
+    "RUF",      # regras do próprio ruff
+    "PL",       # pylint
+    "PERF",     # perflint
+    "S",        # flake8-bandit (segurança)
+    "ASYNC",    # flake8-async
+    "FAST",     # boas práticas p/ frameworks ASGI
+]
+ignore = [
+    "E501",     # comprimento de linha fica a cargo do formatter
+    "PLR0913",  # muitos argumentos (comum em handlers/DTOs)
+    "PLR2004",  # magic numbers
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101", "PLR2004", "T20"]
+# Litestar Controllers declaram path/dependencies/guards como atributos de classe por design
+"**/controllers.py" = ["RUF012", "UP040"]
+# Litestar dependencies com Type Alias
+"**/deps.py" = ["UP040"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["litestar_sandbox"]
+
+[tool.ruff.lint.flake8-type-checking]
+# Litestar/msgspec/SQLAlchemy resolvem anotações em runtime — não mover p/ TYPE_CHECKING
+runtime-evaluated-base-classes = [
+    "advanced_alchemy.base.UUIDBase",
+    "advanced_alchemy.base.UUIDAuditBase",
+    "advanced_alchemy.base.BigIntBase",
+    "advanced_alchemy.base.BigIntAuditBase",
+    "sqlalchemy.orm.DeclarativeBase",
+    "msgspec.Struct",
+    "pydantic.BaseModel",
+]
+runtime-evaluated-decorators = [
+    "litestar.get", "litestar.post", "litestar.put",
+    "litestar.patch", "litestar.delete", "litestar.route",
+]
+exempt-modules = ["typing", "litestar_sandbox.core.deps"] # aliases do core.deps são lidos pelo di do litestar em runtime
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ty.environment]
+python-version = "3.14"
+python = ".venv"
+
+[tool.ty.src]
+include = ["src", "tests"]
+
+[tool.ty.terminal]
+error-on-warning = true
+
+[tool.ty.rules]
+# Promove para erro checagens que vêm como warning por padrão
+possibly-unresolved-reference = "error"
+redundant-cast = "error"
+unused-ignore-comment = "error"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.importlinter]
+root_package = "litestar_sandbox"
+
+[[tool.importlinter.contracts]]
+name = "core não depende de módulos"
+type = "forbidden"
+source_modules = ["litestar_sandbox.core"]
+forbidden_modules = ["litestar_sandbox.modules"]
+
+[[tool.importlinter.contracts]]
+name = "instruments não depende de trades"
+type = "forbidden"
+source_modules = ["litestar_sandbox.modules.instruments"]
+forbidden_modules = ["litestar_sandbox.modules.trades"]
+
+# Proíbe o pacote inteiro e libera só o public.py: um arquivo interno novo já nasce proibido.
+# allow_indirect_imports: o public.py importa o service do próprio módulo para montar o
+# provider, então trades -> instruments.public -> instruments.services é um caminho legítimo.
+[[tool.importlinter.contracts]]
+name = "trades só acessa instruments.public"
+type = "forbidden"
+source_modules = ["litestar_sandbox.modules.trades"]
+forbidden_modules = ["litestar_sandbox.modules.instruments"]
+ignore_imports = ["litestar_sandbox.modules.trades.** -> litestar_sandbox.modules.instruments.public"]
+allow_indirect_imports = true
+
+# positions consome o TradeSettled pelo contrato público do trades; o instrument_id e o
+# cetip_code chegam no evento, então não há motivo para conhecer o instruments.
+[[tool.importlinter.contracts]]
+name = "positions só acessa trades.public"
+type = "forbidden"
+source_modules = ["litestar_sandbox.modules.positions"]
+forbidden_modules = ["litestar_sandbox.modules.trades", "litestar_sandbox.modules.instruments"]
+ignore_imports = ["litestar_sandbox.modules.positions.** -> litestar_sandbox.modules.trades.public"]
+allow_indirect_imports = true
+
+# positions é a ponta do fluxo: ninguém depende dele, só o app.py, que monta tudo.
+[[tool.importlinter.contracts]]
+name = "nenhum módulo depende de positions"
+type = "forbidden"
+source_modules = ["litestar_sandbox.modules.instruments", "litestar_sandbox.modules.trades"]
+forbidden_modules = ["litestar_sandbox.modules.positions"]

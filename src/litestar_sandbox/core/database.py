@@ -1,13 +1,18 @@
-import os
+from typing import TYPE_CHECKING
 
 from advanced_alchemy.extensions.litestar import SQLAlchemyAsyncConfig, SQLAlchemyPlugin
 
-database_url = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./sandbox.db")
+if TYPE_CHECKING:
+    from litestar_sandbox.core.settings import DatabaseSettings
 
-database_config = SQLAlchemyAsyncConfig(
-    connection_string=database_url,
-    before_send_handler="autocommit",
-    create_all=True
-)
 
-sqlalchemy_plugin = SQLAlchemyPlugin(database_config)
+def create_sqlalchemy_config(database_settings: DatabaseSettings) -> SQLAlchemyAsyncConfig:
+    return SQLAlchemyAsyncConfig(
+        connection_string=database_settings.database_url,
+        before_send_handler="autocommit",
+        create_all=True,
+    )
+
+
+def create_sqlalchemy_plugin(config: SQLAlchemyAsyncConfig) -> SQLAlchemyPlugin:
+    return SQLAlchemyPlugin(config)
