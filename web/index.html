@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sandbox Gestora</title>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/client-side-templates.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/json-enc.js"></script>
+  <script src="https://unpkg.com/mustache@4.2.0/mustache.min.js"></script>
+  <style>
+    :root { --bg: #f6f7f9; --card: #fff; --ink: #1d2433; --muted: #6b7385; --line: #e3e6ec;
+            --accent: #2457c5; --ok: #1f8a4c; --warn: #b26a00; --bad: #b42318; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 14px/1.45 system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+    header { padding: 16px 24px; background: var(--ink); color: #fff; }
+    header h1 { margin: 0; font-size: 18px; }
+    header p { margin: 4px 0 0; color: #c9cfdb; font-size: 13px; }
+    main { display: grid; gap: 16px; padding: 16px 24px; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+    section { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+    h2 { margin: 0 0 4px; font-size: 16px; }
+    .hint { margin: 0 0 12px; color: var(--muted); font-size: 12px; }
+    form { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    input, select, button { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; }
+    input, select { min-width: 0; flex: 1 1 120px; }
+    button { background: var(--accent); color: #fff; border-color: var(--accent); cursor: pointer; }
+    button.secondary { background: #fff; color: var(--ink); border-color: var(--line); }
+    button.small { padding: 2px 8px; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); font-size: 13px; }
+    th { color: var(--muted); font-weight: 600; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .badge { padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .PENDING { background: #fff4e0; color: var(--warn); }
+    .SETTLED { background: #e6f5ec; color: var(--ok); }
+    .CANCELLED { background: #fdeceb; color: var(--bad); }
+    #messages { position: fixed; right: 16px; bottom: 16px; display: grid; gap: 8px; max-width: 420px; }
+    .msg { padding: 10px 12px; border-radius: 6px; background: var(--ink); color: #fff; font-size: 13px; }
+    .msg.error { background: var(--bad); }
+    .empty { color: var(--muted); font-style: italic; }
+  </style>
+</head>
+<body hx-ext="client-side-templates">
+  <header>
+    <h1>Sandbox Gestora</h1>
+    <p>Visualização da POC: instruments → trades → (evento TradeSettled) → positions</p>
+  </header>
+
+  <main>
+    <!-- ================= INSTRUMENTS ================= -->
+    <section>
+      <h2>Ativos <code>/instruments</code></h2>
+      <p class="hint">Desativar faz soft delete: o ativo some daqui e o trades passa a recusá-lo.</p>
+      <form hx-post="/api/v1/instruments" hx-swap="none"
+            hx-on::after-request="if (event.detail.successful) { this.reset(); notify('Ativo criado'); htmx.trigger(document.body, 'instruments-changed'); }">
+        <input name="cetip_code" placeholder="Código CETIP (ex.: 21J0786123)" required>
+        <input name="name" placeholder="Nome" required>
+        <select name="instrument_type">
+          <option>CRI</option><option>DEB</option><option>CDB</option><option>LCI</option>
+        </select>
+        <button>Criar</button>
+      </form>
+      <div hx-get="/api/v1/instruments?pageSize=100" hx-trigger="load, instruments-changed from:body"
+           mustache-template="tpl-instruments"></div>
+    </section>
+
+    <!-- ================= TRADES ================= -->
+    <section>
+      <h2>Boletas <code>/trades</code></h2>
+      <p class="hint">Liquidar emite o evento <code>TradeSettled</code>, que o positions escuta.</p>
+      <form hx-post="/api/v1/trades" hx-ext="json-enc" hx-swap="none"
+            hx-on::after-request="if (event.detail.successful) { notify('Boleta registrada'); htmx.trigger(document.body, 'trades-changed'); }">
+        <select name="instrument_id" hx-get="/api/v1/instruments?pageSize=100"
+                hx-trigger="load, instruments-changed from:body" mustache-template="tpl-instrument-options" required></select>
+        <input name="fund_cnpj" placeholder="CNPJ do fundo (14 dígitos)" value="12345678000190" required>
+        <input name="trade_date" type="date" required>
+        <select name="side"><option>BUY</option><option>SELL</option></select>
+        <input name="quantity" type="number" min="1" step="1" placeholder="Quantidade" required>
+        <input name="unit_price" placeholder="PU (ex.: 1000.12345678)" required>
+        <button>Registrar</button>
+      </form>
+      <div hx-get="/api/v1/trades?pageSize=100" hx-trigger="load, trades-changed from:body, instruments-changed from:body"
+           mustache-template="tpl-trades"></div>
+    </section>
+
+    <!-- ================= POSITIONS ================= -->
+    <section>
+      <h2>Posições <code>/positions</code></h2>
+      <p class="hint">Posição do fundo numa data, a partir das boletas liquidadas. (Módulo em construção: até ele existir, esta consulta responde 404.)</p>
+      <form hx-get="/api/v1/positions" hx-target="#positions-result" mustache-template="tpl-positions">
+        <input name="fund_cnpj" placeholder="CNPJ do fundo" value="12345678000190" required>
+        <input name="date" type="date" required>
+        <button>Consultar</button>
+      </form>
+      <div id="positions-result"></div>
+    </section>
+  </main>
+
+  <div id="messages"></div>
+
+  <!-- ================= TEMPLATES (Mustache) ================= -->
+  <template id="tpl-instruments">
+    {{#items.length}}
+    <table>
+      <thead><tr><th>Id</th><th>Código</th><th>Nome</th><th>Tipo</th><th></th></tr></thead>
+      <tbody>
+        {{#items}}
+        <tr>
+          <td>{{id}}</td><td><code>{{cetip_code}}</code></td><td>{{name}}</td><td>{{instrument_type}}</td>
+          <td><button class="small secondary" hx-delete="/api/v1/instruments/{{id}}" hx-swap="none"
+                      hx-confirm="Desativar {{cetip_code}}?"
+                      hx-on::after-request="if (event.detail.successful) { notify('Ativo desativado'); htmx.trigger(document.body, 'instruments-changed'); }">desativar</button></td>
+        </tr>
+        {{/items}}
+      </tbody>
+    </table>
+    {{/items.length}}
+    {{^items.length}}<p class="empty">Nenhum ativo.</p>{{/items.length}}
+  </template>
+
+  <template id="tpl-instrument-options">
+    {{#items}}<option value="{{id}}">{{cetip_code}} · {{name}}</option>{{/items}}
+    {{^items}}<option value="">(cadastre um ativo)</option>{{/items}}
+  </template>
+
+  <template id="tpl-trades">
+    {{#items.length}}
+    <table>
+      <thead><tr><th>Id</th><th>Data</th><th>Ativo</th><th>Lado</th><th class="num">Qtd</th><th class="num">PU</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {{#items}}
+        <tr>
+          <td>{{id}}</td><td>{{trade_date}}</td><td><code>{{cetip_code}}</code></td><td>{{side}}</td>
+          <td class="num">{{quantity}}</td><td class="num">{{unit_price}}</td>
+          <td><span class="badge {{status}}">{{status}}</span></td>
+          <td>
+            <button class="small" hx-post="/api/v1/trades/{{id}}/settle" hx-swap="none"
+                    hx-on::after-request="if (event.detail.successful) { notify('Boleta {{id}} liquidada: evento emitido'); htmx.trigger(document.body, 'trades-changed'); }">liquidar</button>
+            <button class="small secondary" hx-post="/api/v1/trades/{{id}}/cancel" hx-swap="none"
+                    hx-on::after-request="if (event.detail.successful) { notify('Boleta {{id}} cancelada'); htmx.trigger(document.body, 'trades-changed'); }">cancelar</button>
+          </td>
+        </tr>
+        {{/items}}
+      </tbody>
+    </table>
+    {{/items.length}}
+    {{^items.length}}<p class="empty">Nenhuma boleta.</p>{{/items.length}}
+  </template>
+
+  <template id="tpl-positions">
+    {{#items.length}}
+    <table>
+      <thead><tr><th>Ativo</th><th class="num">Quantidade</th></tr></thead>
+      <tbody>{{#items}}<tr><td><code>{{cetip_code}}</code></td><td class="num">{{quantity}}</td></tr>{{/items}}</tbody>
+    </table>
+    {{/items.length}}
+    {{^items.length}}<p class="empty">Sem posição nesta data.</p>{{/items.length}}
+  </template>
+
+  <script>
+    // Mensagens flutuantes (sucesso e erro).
+    function notify(text, isError = false) {
+      const box = document.createElement("div");
+      box.className = "msg" + (isError ? " error" : "");
+      box.textContent = text;
+      document.getElementById("messages").append(box);
+      setTimeout(() => box.remove(), isError ? 7000 : 3000);
+    }
+
+    // Erros da API (400, 404, 409...): mostra o "detail" e, se houver, as mensagens por campo.
+    document.body.addEventListener("htmx:responseError", (evt) => {
+      const xhr = evt.detail.xhr;
+      let text = `HTTP ${xhr.status}`;
+      try {
+        const body = JSON.parse(xhr.responseText);
+        text += `: ${body.detail ?? ""}`;
+        for (const e of body.extra ?? []) text += ` · ${e.key ?? ""} ${e.message ?? ""}`;
+      } catch { /* resposta sem JSON */ }
+      notify(text, true);
+    });
+
+    // Observação: o json-enc manda os números do formulário como string ("10").
+    // O Litestar decodifica o corpo em modo não estrito e converte para int.
+
+    // Datas padrão: hoje.
+    const today = new Date().toISOString().slice(0, 10);
+    document.querySelectorAll('input[type="date"]').forEach((el) => (el.value = today));
+  </script>
+</body>
+</html>
