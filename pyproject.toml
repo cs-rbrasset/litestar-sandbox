@@ -138,3 +138,20 @@ source_modules = ["litestar_sandbox.modules.trades"]
 forbidden_modules = ["litestar_sandbox.modules.instruments"]
 ignore_imports = ["litestar_sandbox.modules.trades.** -> litestar_sandbox.modules.instruments.public"]
 allow_indirect_imports = true
+
+# positions consome o TradeSettled pelo contrato público do trades; o instrument_id e o
+# cetip_code chegam no evento, então não há motivo para conhecer o instruments.
+[[tool.importlinter.contracts]]
+name = "positions só acessa trades.public"
+type = "forbidden"
+source_modules = ["litestar_sandbox.modules.positions"]
+forbidden_modules = ["litestar_sandbox.modules.trades", "litestar_sandbox.modules.instruments"]
+ignore_imports = ["litestar_sandbox.modules.positions.** -> litestar_sandbox.modules.trades.public"]
+allow_indirect_imports = true
+
+# positions é a ponta do fluxo: ninguém depende dele, só o app.py, que monta tudo.
+[[tool.importlinter.contracts]]
+name = "nenhum módulo depende de positions"
+type = "forbidden"
+source_modules = ["litestar_sandbox.modules.instruments", "litestar_sandbox.modules.trades"]
+forbidden_modules = ["litestar_sandbox.modules.positions"]
