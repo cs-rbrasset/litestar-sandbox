@@ -1,6 +1,8 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from litestar import Litestar
     from litestar.testing import TestClient
 
@@ -11,15 +13,8 @@ def test_list_instruments_starts_empty(app_client: TestClient[Litestar]) -> None
     assert response.json()["total"] == 0
 
 
-def create_instrument(app_client: TestClient[Litestar], **overrides: str) -> dict:
-    payload = {
-        "name": "caneta azul",
-        "cetip_code": "CANE4",
-        "instrument_type": "CRI",
-    } | overrides
-    return app_client.post("/api/v1/instruments", data=payload).json()
-
-
-def test_instrument_cetip_code_is_normalized(app_client: TestClient[Litestar]) -> None:
-    instrument = create_instrument(app_client, cetip_code="  canE3 ")
+def test_instrument_cetip_code_is_normalized(
+    create_instrument: Callable[..., dict[str, Any]],
+) -> None:
+    instrument = create_instrument(cetip_code="  canE3 ")
     assert instrument["cetip_code"] == "CANE3"
