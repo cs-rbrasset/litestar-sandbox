@@ -30,7 +30,7 @@ class TradeService(SQLAlchemyAsyncRepositoryService[Trade, TradeRepository]):
         )
 
     async def _transition(self, item_id: int, to: TradeStatus) -> Trade:
-        trade = await self.get(item_id=item_id)
+        trade = await self.repository.get(item_id=item_id, with_for_update=True)
         if trade.status is not TradeStatus.PENDING:
             raise ClientException(status_code=409, detail=f"trade {item_id} is {trade.status}")
         return await self.update({"status": to}, item_id=item_id)
