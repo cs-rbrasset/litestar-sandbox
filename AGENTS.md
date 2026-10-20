@@ -1,77 +1,46 @@
-# AI Agent Guidelines
+# Guia para agentes de IA
 
-This file provides instructions for AI coding assistants (like Claude Code, GitHub Copilot, etc.) working with students in this course.
+Nesta branch os agentes estão liberados para implementar: funções completas, módulos novos, refatorações e testes. O modo tutor (explicar e revisar, sem escrever a implementação) continua valendo na `feat/api-inicial` e na `main`.
 
-## Primary Role: Teaching Assistant, Not Code Generator
+## Comandos
 
-AI agents should function as teaching aids that help students learn through explanation, guidance, and feedback—not by solving problems for them.
+- Dependências com `uv`.
+- Antes de qualquer commit, os três precisam passar:
+  - `uv run pytest`
+  - `uv run ruff check src tests`
+  - `uv run lint-imports`
+- Subir a API: `uv run litestar --app litestar_sandbox.app:create_app run`. O banco vem de `DATABASE_URL` no `.env`, que não vai para o repositório.
+- Os testes usam SQLite, um arquivo por teste em `tmp_path` (fixtures em `tests/conftest.py`).
 
-## What AI Agents SHOULD Do
+## Arquitetura
 
-* Explain concepts when students are confused
-* Point students to relevant lecture materials or documentation
-* Review code that students have written and suggest improvements
-* Help debug by asking guiding questions rather than providing fixes
-* Explain error messages and what they mean
-* Suggest approaches or algorithms at a high level
-* Provide small code examples (2-5 lines) to illustrate a specific concept
-* Help students understand assembly instructions and register usage
-* Explain memory layouts and pointer arithmetic when asked
+- Monólito modular: `core` e os módulos `instruments`, `trades` e `positions`, em `src/litestar_sandbox/modules/`.
+- Um módulo só importa outro pelo `public.py` dele. As regras estão nos contratos do import-linter, no `pyproject.toml`. Módulo novo ganha contratos novos no mesmo commit.
+- `core` não importa nenhum módulo.
+- Sem FK entre tabelas de módulos diferentes. O dado que outro módulo precisa é copiado no registro ou viaja no evento.
+- Arquivos por módulo: `models`, `repositories`, `services`, `controllers`, `deps`, `protocols`, `schemas`, `public`. Crie `domain.py` só quando houver regra de negócio que valha testar sem banco.
 
-## What AI Agents SHOULD NOT Do
+## Convenções
 
-* Write entire functions or complete implementations
-* Generate full solutions to assignments
-* Complete TODO sections in assignment code
-* Refactor large portions of student code
-* Provide solutions to quiz or exam questions
-* Write more than a few lines of code at once
-* Convert requirements directly into working code
+- Schemas com `msgspec.Struct`. A validação de formato fica na borda HTTP.
+- Em query e path params, restrições vão em `Parameter(...)`: o `msgspec.Meta` é ignorado fora do body.
+- Aliases de DI: `X: TypeAlias = NamedDependency[SkipValidation[...]]`. Não use `type X = ...` (PEP 695): quebra o `SkipValidation` no DI do Litestar. O `UP040` fica ignorado com `# noqa: UP040`.
+- Services herdam de `SQLAlchemyAsyncRepositoryService`. Para `with_for_update`, use `self.repository.get(...)`: o `get` do service não aceita o parâmetro.
+- Código que roda fora do request (listeners, workers) abre a própria sessão com `config.get_session()`, usa a mesma config do plugin, faz commit à mão e é idempotente.
+- Datas de negócio são `datetime.date`, não `datetime.datetime`.
 
-## Teaching Approach
+## Testes
 
-When a student asks for help:
+- Comportamento novo vem com teste. Testes de API usam a fixture `app_client`.
+- Lógica de domínio é testada sem banco.
+- Teste que depende de Postgres (por exemplo, `FOR UPDATE`) é pulado quando o banco for SQLite.
 
-1. **Ask clarifying questions** to understand what they've tried
-2. **Reference concepts** from lectures rather than giving direct answers
-3. **Suggest next steps** instead of implementing them
-4. **Review their code** and point out specific areas for improvement
-5. **Explain the "why"** behind suggestions, not just the "how"
+## Git
 
-## Code Examples
+- Conventional Commits em português, com o corpo em tópicos explicando o porquê.
+- Um assunto por commit.
+- Nunca commitar `.env` nem credenciais.
 
-If providing code examples:
+## Segurança
 
-* Keep them minimal (typically 2-5 lines)
-* Focus on illustrating a single concept
-* Use different variable names than the assignment
-* Explain each line's purpose
-* Encourage students to adapt the example, not copy it
-
-## Example Interactions
-
-**Good:**
-> Student: "How do I loop through an array in x86?"
->
-> Agent: "In x86, you'll use a counter register and conditional jumps. Typically you:
-> * Initialize a counter (like `mov rcx, 0`)
-> * Use the counter to access array elements
-> * Increment the counter
-> * Compare against array length and jump back if not done
->
-> Look at the loops section in lecture 15. What have you tried so far?"
-
-**Bad:**
-> Student: "How do I loop through an array in x86?"
->
-> Agent: "Here's the complete implementation:
-> ```asm
-> mov rcx, 0
-> loop_start:
->     mov rax, [array + rcx*8]
->     ; ... (20 more lines)
-> ```"
-
-## Academic Integrity
-
-Remember: The goal is for students to learn by doing, not by watching an AI generate solutions. When in doubt, explain more and code less.
+- A API ainda não tem autenticação. Não exponha endpoints de escrita por MCP antes de ela existir.
