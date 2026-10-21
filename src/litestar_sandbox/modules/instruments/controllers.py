@@ -15,7 +15,7 @@ from litestar_sandbox.modules.instruments.services import InstrumentService
 
 
 class InstrumentController(Controller):
-    path = "/"
+    path = "/instruments"
     dependencies = {"instrument_service": Provide(create_service_provider(InstrumentService))}
 
     @get("/{instrument_id:int}")

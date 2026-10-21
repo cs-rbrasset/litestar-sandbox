@@ -22,7 +22,7 @@ from litestar_sandbox.modules.trades.services import TradeService
 
 
 class TradeController(Controller):
-    path = "/"
+    path = "/trades"
     dependencies = {"trade_service": Provide(create_service_provider(TradeService))}
 
     @post(dependencies={"instruments_api": Provide(provide_instrument_api)})

@@ -10,6 +10,7 @@ requires-python = ">=3.14"
 dependencies = [
     "advanced-alchemy>=1.11.0",
     "aiosqlite>=0.22.1",
+    "litestar-autowire>=0.2.0",
     "litestar[standard]>=2.24.0",
     "psycopg[binary]>=3.3.6",
 ]

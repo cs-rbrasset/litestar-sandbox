@@ -346,6 +346,18 @@ standard = [
 ]
 
 [[package]]
+name = "litestar-autowire"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "litestar" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/97/45/80b71ce065883100863f2c614acb15fa66e95b856a1ca3755543c967b2f2/litestar_autowire-0.2.0.tar.gz", hash = "sha256:db71621dec2563bd84eecea9377080ec1ec3b30ce5c4afae36bf8f440e2a51fc", size = 151927, upload-time = "2026-07-07T17:21:21.415Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/98/c1/abc6042f0b06cb9665a58df9a01d7a51cde73e2f32255e5b5017a93477b3/litestar_autowire-0.2.0-py3-none-any.whl", hash = "sha256:ba4811777fbb01a53ac2f02841f2ecd595740b80c7135fdc74443193623b1e79", size = 13027, upload-time = "2026-07-07T17:21:20.217Z" },
+]
+
+[[package]]
 name = "litestar-htmx"
 version = "0.5.0"
 source = { registry = "https://pypi.org/simple" }
@@ -362,6 +374,7 @@ dependencies = [
     { name = "advanced-alchemy" },
     { name = "aiosqlite" },
     { name = "litestar", extra = ["standard"] },
+    { name = "litestar-autowire" },
     { name = "psycopg", extra = ["binary"] },
 ]
 
@@ -378,6 +391,7 @@ requires-dist = [
     { name = "advanced-alchemy", specifier = ">=1.11.0" },
     { name = "aiosqlite", specifier = ">=0.22.1" },
     { name = "litestar", extras = ["standard"], specifier = ">=2.24.0" },
+    { name = "litestar-autowire", specifier = ">=0.2.0" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6" },
 ]
 

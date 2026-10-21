@@ -10,7 +10,7 @@ from litestar_sandbox.modules.positions.services import PositionService
 
 
 class PositionController(Controller):
-    path = "/"
+    path = "/positions"
     dependencies = {"position_service": Provide(create_service_provider(PositionService))}
 
     @get()

@@ -18,6 +18,8 @@ Nesta branch os agentes estão liberados para implementar: funções completas, 
 - Um módulo só importa outro pelo `public.py` dele. As regras estão nos contratos do import-linter, no `pyproject.toml`. Módulo novo ganha contratos novos no mesmo commit.
 - `core` não importa nenhum módulo.
 - Sem FK entre tabelas de módulos diferentes. O dado que outro módulo precisa é copiado no registro ou viaja no evento.
+- O `litestar-autowire` monta o app: descobre os `Controller` de `controllers.py` e os `EventListener` de `listeners.py` em cada módulo. O `app.py` não importa módulos. Cada controller declara o próprio `path` (`/instruments`, `/trades`...).
+- Listener é definido no nível do módulo e recebe `app` do `publish`; a config do banco vem de `get_sqlalchemy_config(app)`.
 - Arquivos por módulo: `models`, `repositories`, `services`, `controllers`, `deps`, `protocols`, `schemas`, `public`. Crie `domain.py` só quando houver regra de negócio que valha testar sem banco.
 
 ## Convenções
