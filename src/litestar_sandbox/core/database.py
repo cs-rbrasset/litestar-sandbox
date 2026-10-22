@@ -1,15 +1,18 @@
 from typing import TYPE_CHECKING, Any
 
-from advanced_alchemy.config import AsyncSessionConfig
 from advanced_alchemy.extensions.litestar import SQLAlchemyAsyncConfig, SQLAlchemyPlugin
 from sqlalchemy import event, text
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from litestar_sandbox.core.identity import current_identity, current_trace_id
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from litestar import Litestar
     from sqlalchemy.engine import Connection
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from sqlalchemy.orm import Session
 
     from litestar_sandbox.core.settings import DatabaseSettings
 
@@ -18,11 +21,6 @@ class MissingIdentityError(RuntimeError):
     """Transação aberta sem identidade: a trilha de auditoria ficaria sem autor."""
 
 
-class IdentitySession(Session):
-    """Sessão síncrona por baixo do AsyncSession da app; carrega o evento de identidade."""
-
-
-@event.listens_for(IdentitySession, "after_begin")
 def _push_identity(session: Session, transaction: Any, connection: Connection) -> None:
     """Empurra quem está agindo para o Postgres no início de cada transação.
 
@@ -43,11 +41,29 @@ def _push_identity(session: Session, transaction: Any, connection: Connection) -
     )
 
 
+class IdentityAsyncConfig(SQLAlchemyAsyncConfig):
+    """Config que registra o evento de identidade nas sessões da app.
+
+    O evento vai no sessionmaker síncrono que o advanced-alchemy cria por baixo do
+    async_sessionmaker. Passar sync_session_class no session_config não funciona: o
+    advanced-alchemy sobrescreve esse parâmetro com o próprio sessionmaker, em silêncio.
+    """
+
+    def create_session_maker(self) -> Callable[[], AsyncSession]:
+        maker = super().create_session_maker()
+        if isinstance(maker, async_sessionmaker):
+            sync_maker = maker.kw["sync_session_class"]
+            if not event.contains(sync_maker, "after_begin", _push_identity):
+                event.listen(sync_maker, "after_begin", _push_identity)
+        return maker
+
+
 def create_sqlalchemy_config(database_settings: DatabaseSettings) -> SQLAlchemyAsyncConfig:
-    session_class = IdentitySession if database_settings.assume_identity else Session
-    return SQLAlchemyAsyncConfig(
+    config_class = (
+        IdentityAsyncConfig if database_settings.assume_identity else SQLAlchemyAsyncConfig
+    )
+    return config_class(
         connection_string=database_settings.database_url,
-        session_config=AsyncSessionConfig(sync_session_class=session_class),
         before_send_handler="autocommit",
         create_all=True,
     )

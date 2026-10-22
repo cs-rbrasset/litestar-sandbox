@@ -110,7 +110,11 @@ O fluxo segue o handoff do banco (seções 2 e 3):
 Estado atual:
 
 - **Verificador:** só o `DevTokenVerifier`, com tokens fixos em `AUTH_DEV_TOKENS`. Vazio: ninguém entra. O verificador do Entra ID (JWT RS256 contra o JWKS do tenant) entra no lugar dele, sem mudar o middleware.
-- **`SET ROLE` desligado por padrão** (`DB_ASSUME_IDENTITY=false`): ligue só depois de aplicar o `db/identity.sql` no banco, senão toda transação no Postgres falha. O SQL ainda não foi testado contra Postgres. Ele usa uma função `SECURITY INVOKER`, porque o Postgres recusa `SET ROLE` dentro de `SECURITY DEFINER`.
+- **`SET ROLE` desligado por padrão** (`DB_ASSUME_IDENTITY=false`): ligue só depois de aplicar o `db/identity.sql` no banco, senão toda transação no Postgres falha. O SQL está aplicado no Supabase de testes (Postgres 17.11), e o `db/identity_rollback.sql` desfaz. A função é `SECURITY INVOKER`, e não `SECURITY DEFINER` como o handoff sugeria: o Postgres recusa com `cannot set parameter "role" within security-definer function` (verificado).
+- **Enquanto a app conectar como `postgres`**, o `SET ROLE` registra quem fez, mas não restringe nada: o `postgres` já lê tudo. A separação de privilégios do handoff vale quando a conexão for o `app_login`, o que pede migrations com Alembic no lugar do `create_all`.
+- **Testes contra Postgres:** `TEST_DATABASE_URL=<url do Supabase de testes> uv run pytest tests/core/test_identity_postgres.py`. Sem a variável, são pulados.
+- **Windows + psycopg:** o psycopg assíncrono não roda no `ProactorEventLoop`, o padrão do asyncio no Windows, e o `litestar run` falha no startup com `Psycopg cannot use the 'ProactorEventLoop'`. Os testes contra Postgres usam o `SelectorEventLoop`; para rodar a app no Windows contra Postgres, use o `asyncpg` (`postgresql+asyncpg://`).
+- **A armadilha do advanced-alchemy:** passar `sync_session_class` no `session_config` não registra nada, porque ele sobrescreve o parâmetro com o próprio `sessionmaker`. O evento vai no `sessionmaker` síncrono que ele cria (`IdentityAsyncConfig`).
 - **Front:** pede o token numa tela de entrada e o envia em cada chamada pelo interceptor do cliente gerado. Com o Entra ID, a sessão passa para um cookie `httpOnly` emitido pela API.
 
 ### Qualidade
