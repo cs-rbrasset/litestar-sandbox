@@ -64,7 +64,9 @@ def test_settled_buy_becomes_position(
 
     positions = wait_for_positions(app_client, "2026-10-20", expected=100)
 
-    assert positions == [{"instrument_id": instrument["id"], "cetip_code": "ABCD4", "quantity": 100}]
+    assert positions == [
+        {"instrument_id": instrument["id"], "cetip_code": "ABCD4", "quantity": 100}
+    ]
 
 
 def test_sell_reduces_position(

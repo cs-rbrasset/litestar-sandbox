@@ -42,6 +42,10 @@ def test_negative_position_is_kept() -> None:
 
 
 def test_positions_are_sorted_by_cetip_code() -> None:
-    movements = [movement(1, D1, 1, "ZZZZ4"), movement(2, D1, 1, "AAAA4"), movement(3, D1, 1, "MMMM4")]
+    movements = [
+        movement(1, D1, 1, "ZZZZ4"),
+        movement(2, D1, 1, "AAAA4"),
+        movement(3, D1, 1, "MMMM4"),
+    ]
     codes = [p.cetip_code for p in positions_at_date(movements, D1)]
     assert codes == ["AAAA4", "MMMM4", "ZZZZ4"]
