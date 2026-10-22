@@ -11,6 +11,8 @@ Nesta branch os agentes estão liberados para implementar: funções completas, 
   - `uv run lint-imports`
 - Subir a API: `uv run litestar --app litestar_sandbox.app:create_app run`. O banco vem de `DATABASE_URL` no `.env`, que não vai para o repositório.
 - Os testes usam SQLite, um arquivo por teste em `tmp_path` (fixtures em `tests/conftest.py`).
+- Front-end em `web/` (React + Vite, servido pela API com o litestar-vite): `VITE_DEV_MODE=true uv run litestar ... run` sobe API e Vite juntos. Mudou a API? `uv run litestar --app litestar_sandbox.app:create_app assets generate-types` e depois `cd web && npx tsc -b --noEmit`. No Windows, use `PYTHONUTF8=1` na CLI do litestar-vite.
+- Não registre o prefixo `/api/v1` em `Litestar(path=...)`: ele fica no `ApiRouter` (ver `app.py`), senão a SPA sai de `/`.
 
 ## Arquitetura
 

@@ -70,6 +70,28 @@ Boletas não são editadas nem apagadas: uma boleta errada é cancelada e regist
 | `quantity` | inteiro maior que zero (CRI, DEB, CDB e LCI são negociados em unidades) |
 | `unit_price` | PU, decimal maior que zero, com até 8 casas |
 
+### Front-end
+
+Uma SPA em React + TypeScript (Vite, Tailwind e TanStack Query), em `web/`, servida pela própria API com o [litestar-vite](https://github.com/litestar-org/litestar-vite): mesma origem, sem CORS. A API fica sob `/api/v1`, e a SPA responde em `/` e nos caminhos das telas (`/ativos`, `/boletas`, `/posicoes`).
+
+```bash
+cd web && npm install && cd ..                      # uma vez
+VITE_DEV_MODE=true uv run litestar --app litestar_sandbox.app:create_app run
+```
+
+Em dev, o Litestar sobe o dev server do Vite sozinho e faz o proxy do HMR pela porta da API (`http://127.0.0.1:8000`). Para produção:
+
+```bash
+uv run litestar --app litestar_sandbox.app:create_app assets generate-types   # OpenAPI -> cliente TS
+cd web && npm run build                                                         # web/public, com manifest
+uv run litestar --app litestar_sandbox.app:create_app run                       # sem VITE_DEV_MODE: serve o build
+```
+
+- O cliente da API (`web/src/generated/api`) é gerado do OpenAPI pelo `@hey-api/openapi-ts` e não vai para o repositório. Mudou um endpoint? Rode o `generate-types` de novo, e o TypeScript aponta onde a tela quebrou. Em dev, o plugin regenera sozinho.
+- O CSS entra por `<link>` no `web/index.html`: o litestar-vite reescreve os `href` e `src` que estão no HTML para os arquivos com hash do build, mas não injeta o CSS associado ao entry.
+- O prefixo `/api/v1` fica num `Router` (o `ApiRouter`, onde o autowire registra os controllers), e não em `Litestar(path=...)`: com o prefixo na app, a SPA iria parar em `/api/v1/`. O `extra_route_prefixes` impede que um `/api/...` inexistente caia no fallback da SPA e responda `200` com HTML.
+- No terminal do Windows, a CLI do litestar-vite quebra ao imprimir `✓` (`UnicodeEncodeError`): rode com `PYTHONUTF8=1`.
+
 ### Qualidade
 
 ```bash
@@ -88,6 +110,7 @@ src/litestar_sandbox/
 ├── core/                   # compartilhado; não conhece nenhum módulo
 │   ├── settings.py         # DatabaseSettings (lê DATABASE_URL)
 │   ├── database.py         # config do SQLAlchemy e plugin
+│   ├── frontend.py         # VitePlugin: a SPA de web/ servida pela API
 │   └── deps.py             # aliases de injeção de dependência genéricos (FilterDep, SessionDep)
 └── modules/
     ├── instruments/        # cadastro de ativos
@@ -180,7 +203,7 @@ Em andamento (WIP).
 
 Hoje a API é **code-first**: o Litestar gera o OpenAPI a partir dos `Struct`s e dos handlers (`uv run litestar --app litestar_sandbox.app:create_app schema openapi --output openapi.json`). A proposta é passar a **contract-first** quando houver um front-end em outra linguagem consumindo a API.
 
-O front-end da aplicação real vai ser em **Next.js**, um projeto separado e em TypeScript, o que reforça a proposta: o contrato OpenAPI passa a ser o ponto de encontro entre os dois projetos. (A integração nativa do Litestar com HTMX foi considerada e descartada por isso: ela serve para interfaces renderizadas no próprio servidor Python. A página em `web/` é só uma visualização da POC.)
+O front-end é uma SPA em React servida pela própria API (seção "Front-end"), e o contrato OpenAPI é o ponto de encontro entre os dois lados: o cliente TypeScript é gerado dele. O Next.js, cogitado antes por familiaridade, ficou para ser reavaliado quando o portal de clientes sair do papel: a SPA mantém um runtime e uma autenticação só, atendendo o front e o MCP, e componentes React com um SDK gerado migram para o Next.js se for preciso.
 
 **O fluxo proposto:**
 
