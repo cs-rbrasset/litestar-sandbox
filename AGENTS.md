@@ -47,4 +47,7 @@ Nesta branch os agentes estão liberados para implementar: funções completas, 
 
 ## Segurança
 
-- A API ainda não tem autenticação. Não exponha endpoints de escrita por MCP antes de ela existir.
+- A API exige `Authorization: Bearer` (`core/auth.py`), mas o único verificador é o de tokens fixos de dev. Não exponha endpoints de escrita por MCP antes do verificador do Entra ID.
+- Testes de API usam a fixture `app_client`, que já envia o token de teste; para testar a ausência de token, crie um `TestClient` sem o header.
+- Código que abre sessão fora de request (listener, job) precisa de `use_identity(...)`: com `DB_ASSUME_IDENTITY=true`, uma transação sem identidade falha no Postgres.
+- Nunca construa o nome de uma role a partir de texto do usuário: a `Identity` só aceita o formato de `DB_ROLE_PATTERN`.

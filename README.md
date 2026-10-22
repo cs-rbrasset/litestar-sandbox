@@ -92,6 +92,27 @@ uv run litestar --app litestar_sandbox.app:create_app run                       
 - O prefixo `/api/v1` fica num `Router` (o `ApiRouter`, onde o autowire registra os controllers), e não em `Litestar(path=...)`: com o prefixo na app, a SPA iria parar em `/api/v1/`. O `extra_route_prefixes` impede que um `/api/...` inexistente caia no fallback da SPA e responda `200` com HTML.
 - No terminal do Windows, a CLI do litestar-vite quebra ao imprimir `✓` (`UnicodeEncodeError`): rode com `PYTHONUTF8=1`.
 
+### Autenticação e identidade
+
+Toda a API exige `Authorization: Bearer <token>`, menos o `/api/v1/ping`, o OpenAPI (`/api/v1/schema`) e a SPA. Sem token, ou com token desconhecido, a resposta é `401`.
+
+```bash
+AUTH_DEV_TOKENS="tok-alice=u_alice:Alice,tok-bob=u_bob:Bob" uv run litestar --app litestar_sandbox.app:create_app run
+curl -H "Authorization: Bearer tok-alice" http://127.0.0.1:8000/api/v1/instruments
+```
+
+O fluxo segue o handoff do banco (seções 2 e 3):
+
+1. O `AuthMiddleware` (`core/auth.py`) valida o token com um `TokenVerifier` e coloca a `Identity` em `request.user` e num `ContextVar`, junto com o `trace_id` (o `X-Request-ID`, ou um gerado). O contexto é restaurado ao fim da requisição: nada vaza para a próxima.
+2. O evento `after_begin` da sessão (`core/database.py`) empurra a identidade para o Postgres em cada transação: `select app.assumir_identidade(<role>)` (um `SET LOCAL ROLE`) e `set_config('app.trace_id', ...)`. No SQLite não faz nada.
+3. Sem identidade, uma transação no Postgres **falha** (`MissingIdentityError`), em vez de gravar trilha sem autor. Código fora de request declara em nome de quem age: o listener de `positions` usa `use_identity(SYSTEM)` (role `app_sistema`).
+
+Estado atual:
+
+- **Verificador:** só o `DevTokenVerifier`, com tokens fixos em `AUTH_DEV_TOKENS`. Vazio: ninguém entra. O verificador do Entra ID (JWT RS256 contra o JWKS do tenant) entra no lugar dele, sem mudar o middleware.
+- **`SET ROLE` desligado por padrão** (`DB_ASSUME_IDENTITY=false`): ligue só depois de aplicar o `db/identity.sql` no banco, senão toda transação no Postgres falha. O SQL ainda não foi testado contra Postgres. Ele usa uma função `SECURITY INVOKER`, porque o Postgres recusa `SET ROLE` dentro de `SECURITY DEFINER`.
+- **Front:** pede o token numa tela de entrada e o envia em cada chamada pelo interceptor do cliente gerado. Com o Entra ID, a sessão passa para um cookie `httpOnly` emitido pela API.
+
 ### Qualidade
 
 ```bash
@@ -111,6 +132,8 @@ src/litestar_sandbox/
 │   ├── settings.py         # DatabaseSettings (lê DATABASE_URL)
 │   ├── database.py         # config do SQLAlchemy e plugin
 │   ├── frontend.py         # VitePlugin: a SPA de web/ servida pela API
+│   ├── auth.py             # AuthMiddleware e verificadores de token
+│   ├── identity.py         # Identity, ContextVar e use_identity()
 │   └── deps.py             # aliases de injeção de dependência genéricos (FilterDep, SessionDep)
 └── modules/
     ├── instruments/        # cadastro de ativos

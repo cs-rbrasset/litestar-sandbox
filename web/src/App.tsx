@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
+import { auth } from "./auth.ts";
 import { InstrumentsPanel } from "./components/instruments.tsx";
 import { PositionsPanel } from "./components/positions.tsx";
+import { SignIn } from "./components/sign-in.tsx";
 import { TradesPanel } from "./components/trades.tsx";
+import { Button } from "./components/ui.tsx";
 
 const DEFAULT_FUND = "12345678000190";
 
@@ -18,6 +22,20 @@ type StepId = (typeof STEPS)[number]["id"];
 const fromPath = (): StepId => STEPS.find((s) => location.pathname === `/${s.id}`)?.id ?? "ativos";
 
 export default function App() {
+  const token = useSyncExternalStore(auth.subscribe, auth.token);
+  const queryClient = useQueryClient();
+
+  // ao sair (ou ao token expirar), nada do usuário anterior fica no cache
+  useEffect(() => {
+    if (token === null) {
+      queryClient.clear();
+    }
+  }, [token, queryClient]);
+
+  return token === null ? <SignIn /> : <Workspace />;
+}
+
+function Workspace() {
   const [step, setStep] = useState<StepId>(fromPath);
 
   useEffect(() => {
@@ -63,6 +81,9 @@ export default function App() {
               </button>
             ))}
           </nav>
+          <Button variant="ghost" size="sm" className="mb-3" onClick={auth.signOut}>
+            Sair
+          </Button>
         </div>
       </header>
 

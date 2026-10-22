@@ -4,6 +4,8 @@ import pytest
 from litestar.testing import TestClient
 
 from litestar_sandbox.app import create_app
+from litestar_sandbox.core.auth import DevTokenVerifier
+from litestar_sandbox.core.identity import Identity
 from litestar_sandbox.core.settings import DatabaseSettings
 
 if TYPE_CHECKING:
@@ -21,14 +23,20 @@ def database_settings(tmp_path: Path) -> DatabaseSettings:
     return DatabaseSettings(database_url=f"sqlite+aiosqlite:///{tmp_path / 'test.db'}")
 
 
+TEST_TOKEN = "token-de-teste"  # noqa: S105 (token fixo do DevTokenVerifier, só nos testes)
+TEST_IDENTITY = Identity(subject="u_teste", db_role="u_teste", name="Pessoa de Teste")
+
+
 @pytest.fixture
 def app(database_settings: DatabaseSettings) -> Litestar:
-    return create_app(database_settings)
+    return create_app(database_settings, verifier=DevTokenVerifier({TEST_TOKEN: TEST_IDENTITY}))
 
 
 @pytest.fixture
 def app_client(app: Litestar) -> Iterator[TestClient[Litestar]]:
+    """Cliente já autenticado: os testes de negócio não repetem o token."""
     with TestClient(app=app) as client:
+        client.headers["Authorization"] = f"Bearer {TEST_TOKEN}"
         yield client
 
 
