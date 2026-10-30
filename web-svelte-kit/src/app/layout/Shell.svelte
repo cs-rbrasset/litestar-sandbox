@@ -11,14 +11,14 @@
 <div class="flex h-screen">
   <Sidebar />
 
-  <div class="flex min-w-0 flex-1 flex-col">
+  <div class="flex min-h-0 min-w-0 flex-1 flex-col">
     <header class="flex h-14 shrink-0 items-center justify-end gap-3 border-b border-border px-6">
       <ThemeToggle />
       <span class="text-sm text-muted-foreground">{name}</span>
       <Button variant="ghost" size="sm" onclick={auth.signOut}>Sair</Button>
     </header>
 
-    <main class="flex-1 overflow-y-auto px-6 py-8">
+    <main class="min-h-0 flex-1 overflow-y-auto px-6 py-8">
       {@render children()}
     </main>
   </div>

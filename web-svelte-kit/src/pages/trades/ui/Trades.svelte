@@ -171,7 +171,7 @@
                 </SelectTrigger>
                 <SelectContent>
                   {#each options as i (i.id)}
-                    <SelectItem value={String(i.id)}>{i.cetip_code} · {i.name}</SelectItem>
+                    <SelectItem value={String(i.id)} label={i.cetip_code}>{i.cetip_code} · {i.name}</SelectItem>
                   {/each}
                 </SelectContent>
               </Select>

@@ -77,6 +77,9 @@
       <div class="flex flex-col gap-1.5">
         <Label for="report-fund">CNPJ do fundo</Label>
         <Input id="report-fund" bind:value={fund} class="font-mono text-[13px]" inputmode="numeric" />
+        <!-- espaçador invisível: sem ele, essa coluna fica mais baixa que "Datas de referência"
+             (que tem a dica abaixo) e, com items-end, os dois inputs saem desalinhados -->
+        <span class="text-xs invisible" aria-hidden="true">.</span>
       </div>
       <div class="flex flex-col gap-1.5">
         <Label for="report-dates">Datas de referência</Label>
