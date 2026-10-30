@@ -1,11 +1,19 @@
 import asyncio
 from typing import TYPE_CHECKING
 
+import jwt
 import pytest
 from litestar import Litestar, Request, Router, get
 from litestar.testing import AsyncTestClient, TestClient
 
-from litestar_sandbox.core.auth import AuthMiddleware, DevTokenVerifier
+from litestar_sandbox.core import entra
+from litestar_sandbox.core.auth import (
+    AuthMiddleware,
+    CompositeVerifier,
+    DevTokenVerifier,
+    EntraTokenVerifier,
+    build_verifier,
+)
 from litestar_sandbox.core.identity import Identity, current_identity, current_trace_id
 
 if TYPE_CHECKING:
@@ -114,3 +122,140 @@ def test_empty_dev_tokens_let_nobody_in() -> None:
 def test_identity_rejects_unknown_role_formats(role: str) -> None:
     with pytest.raises(ValueError, match="db_role inválida"):
         Identity(subject="x", db_role=role, name="x")
+
+
+def test_entra_token_verifier_accepts_valid_claims(monkeypatch: pytest.MonkeyPatch) -> None:
+    settings = entra.EntraSettings(tenant_id="tenant-x", audience="api://client-x")
+
+    async def fake_verify(s: entra.EntraSettings, token: str) -> dict[str, str]:
+        assert s is settings
+        assert token == "access-token"
+        return {"oid": "ABCD-1234", "name": "Alice Teste"}
+
+    monkeypatch.setattr(entra, "verify_access_token", fake_verify)
+    identity = asyncio.run(EntraTokenVerifier(settings).verify("access-token"))
+    assert identity == Identity(subject="abcd-1234", db_role="u_abcd-1234", name="Alice Teste")
+
+
+def test_entra_token_verifier_rejects_invalid_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    settings = entra.EntraSettings(tenant_id="tenant-x", audience="api://client-x")
+
+    async def fake_verify(s: entra.EntraSettings, token: str) -> dict[str, str]:
+        raise jwt.InvalidTokenError
+
+    monkeypatch.setattr(entra, "verify_access_token", fake_verify)
+    assert asyncio.run(EntraTokenVerifier(settings).verify("lixo")) is None
+
+
+def test_entra_token_verifier_rejects_claims_without_oid(monkeypatch: pytest.MonkeyPatch) -> None:
+    settings = entra.EntraSettings(tenant_id="tenant-x", audience="api://client-x")
+
+    async def fake_verify(s: entra.EntraSettings, token: str) -> dict[str, str]:
+        return {"name": "Alice Teste"}  # sem "oid"
+
+    monkeypatch.setattr(entra, "verify_access_token", fake_verify)
+    assert asyncio.run(EntraTokenVerifier(settings).verify("sem-oid")) is None
+
+
+POSTGRES_URL = "postgresql+asyncpg://u:p@localhost/db"
+
+
+def _fake_verify_for(oid: str):  # mesma assinatura de entra.verify_access_token
+    async def fake_verify(s: entra.EntraSettings, token: str) -> dict[str, str]:
+        return {"oid": oid, "name": "Alice Teste"}
+
+    return fake_verify
+
+
+def test_entra_token_verifier_ensures_role_on_first_login(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(entra, "verify_access_token", _fake_verify_for("abcd"))
+    calls: list[str] = []
+
+    async def fake_ensure(engine: object, db_role: str) -> None:
+        calls.append(db_role)
+
+    monkeypatch.setattr(entra, "ensure_person_role", fake_ensure)
+    settings = entra.EntraSettings(tenant_id="tenant-x", audience="api://client-x")
+    verifier = EntraTokenVerifier(settings, POSTGRES_URL)
+    identity = asyncio.run(verifier.verify("tok"))
+    assert identity == Identity("abcd", "u_abcd", "Alice Teste")
+    assert calls == ["u_abcd"]
+
+
+def test_entra_token_verifier_ensures_role_only_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(entra, "verify_access_token", _fake_verify_for("abcd"))
+    calls: list[str] = []
+
+    async def fake_ensure(engine: object, db_role: str) -> None:
+        calls.append(db_role)
+
+    monkeypatch.setattr(entra, "ensure_person_role", fake_ensure)
+    verifier = EntraTokenVerifier(
+        entra.EntraSettings(tenant_id="tenant-x", audience="api://client-x"), POSTGRES_URL
+    )
+    asyncio.run(verifier.verify("tok"))
+    asyncio.run(verifier.verify("tok"))
+    assert calls == ["u_abcd"]  # segunda vez: já tá no cache, não bate no Postgres de novo
+
+
+def test_entra_token_verifier_skips_role_ensure_without_postgres_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(entra, "verify_access_token", _fake_verify_for("abcd"))
+
+    async def fake_ensure(engine: object, db_role: str) -> None:
+        msg = "não deveria ter sido chamado"
+        raise AssertionError(msg)
+
+    monkeypatch.setattr(entra, "ensure_person_role", fake_ensure)
+    settings = entra.EntraSettings(tenant_id="tenant-x", audience="api://client-x")
+    for url in (None, "sqlite+aiosqlite:///./sandbox.db"):
+        identity = asyncio.run(EntraTokenVerifier(settings, url).verify("tok"))
+        assert identity == Identity("abcd", "u_abcd", "Alice Teste")
+
+
+def test_entra_token_verifier_role_ensure_failure_does_not_block_login(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(entra, "verify_access_token", _fake_verify_for("abcd"))
+
+    async def fake_ensure(engine: object, db_role: str) -> None:
+        msg = "sem CREATEROLE"
+        raise RuntimeError(msg)
+
+    monkeypatch.setattr(entra, "ensure_person_role", fake_ensure)
+    settings = entra.EntraSettings(tenant_id="tenant-x", audience="api://client-x")
+    identity = asyncio.run(EntraTokenVerifier(settings, POSTGRES_URL).verify("tok"))
+    assert identity == Identity("abcd", "u_abcd", "Alice Teste")
+
+
+def test_composite_verifier_tries_each_in_order(monkeypatch: pytest.MonkeyPatch) -> None:
+    settings = entra.EntraSettings(tenant_id="tenant-x", audience="api://client-x")
+
+    async def fake_verify(s: entra.EntraSettings, token: str) -> dict[str, str]:
+        if token != "access-token":
+            raise jwt.InvalidTokenError
+        return {"oid": "a", "name": "Alice"}
+
+    monkeypatch.setattr(entra, "verify_access_token", fake_verify)
+    composite = CompositeVerifier(DevTokenVerifier({"dev-bob": BOB}), EntraTokenVerifier(settings))
+    assert asyncio.run(composite.verify("dev-bob")) == BOB
+    assert asyncio.run(composite.verify("access-token")) == Identity("a", "u_a", "Alice")
+    assert asyncio.run(composite.verify("nem-um-nem-outro")) is None
+
+
+def test_build_verifier_is_dev_only_without_entra_tenant(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("ENTRA_TENANT_ID", raising=False)
+    monkeypatch.setenv("AUTH_DEV_TOKENS", "tok-alice=u_alice:Alice")
+    verifier = build_verifier()
+    assert isinstance(verifier, DevTokenVerifier)
+
+
+def test_build_verifier_adds_entra_verifier_when_tenant_present(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("ENTRA_TENANT_ID", "tenant-x")
+    monkeypatch.setenv("ENTRA_API_AUDIENCE", "api://client-x")
+    monkeypatch.setenv("AUTH_DEV_TOKENS", "")
+    verifier = build_verifier()
+    assert isinstance(verifier, CompositeVerifier)

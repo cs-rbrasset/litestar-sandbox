@@ -1,7 +1,7 @@
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 
-import { auth } from "./auth.ts";
 import { InstrumentsPanel } from "./components/instruments.tsx";
 import { PositionsPanel } from "./components/positions.tsx";
 import { SignIn } from "./components/sign-in.tsx";
@@ -22,20 +22,23 @@ type StepId = (typeof STEPS)[number]["id"];
 const fromPath = (): StepId => STEPS.find((s) => location.pathname === `/${s.id}`)?.id ?? "ativos";
 
 export default function App() {
-  const token = useSyncExternalStore(auth.subscribe, auth.token);
+  const isAuthenticated = useIsAuthenticated();
+  const { accounts } = useMsal();
   const queryClient = useQueryClient();
 
-  // ao sair (ou ao token expirar), nada do usuário anterior fica no cache
+  // ao sair, nada do usuário anterior fica no cache
   useEffect(() => {
-    if (token === null) {
+    if (!isAuthenticated) {
       queryClient.clear();
     }
-  }, [token, queryClient]);
+  }, [isAuthenticated, queryClient]);
 
-  return token === null ? <SignIn /> : <Workspace />;
+  if (!isAuthenticated) return <SignIn />;
+  return <Workspace name={accounts[0]?.name ?? accounts[0]?.username ?? ""} />;
 }
 
-function Workspace() {
+function Workspace({ name }: { name: string }) {
+  const { instance } = useMsal();
   const [step, setStep] = useState<StepId>(fromPath);
 
   useEffect(() => {
@@ -81,9 +84,12 @@ function Workspace() {
               </button>
             ))}
           </nav>
-          <Button variant="ghost" size="sm" className="mb-3" onClick={auth.signOut}>
-            Sair
-          </Button>
+          <div className="mb-3 flex items-center gap-3">
+            <span className="text-sm text-slate-500">{name}</span>
+            <Button variant="ghost" size="sm" onClick={() => instance.logoutRedirect()}>
+              Sair
+            </Button>
+          </div>
         </div>
       </header>
 

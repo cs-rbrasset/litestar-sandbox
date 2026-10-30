@@ -1,11 +1,13 @@
+import os
 from typing import Any
 
 from litestar import Litestar, Router, get
+from litestar.config.cors import CORSConfig
 from litestar.openapi import OpenAPIConfig
 from litestar.openapi.spec import Components, SecurityScheme
 from litestar_autowire import AutowireConfig, AutowirePlugin
 
-from litestar_sandbox.core.auth import AuthMiddleware, DevTokenVerifier, TokenVerifier
+from litestar_sandbox.core.auth import AuthMiddleware, TokenVerifier, build_verifier
 from litestar_sandbox.core.database import create_sqlalchemy_config, create_sqlalchemy_plugin
 from litestar_sandbox.core.frontend import create_vite_plugin
 from litestar_sandbox.core.settings import DatabaseSettings
@@ -29,13 +31,24 @@ async def ping() -> str:
     return "pong"
 
 
+def _cors_config() -> CORSConfig:
+    """Origens dos fronts à parte (sem litestar-vite): CORS_ALLOWED_ORIGINS="a,b".
+
+    web-next (porta 3000) e web-svelte-kit (porta 5173) são processos próprios. A SPA em
+    web/ é servida pela própria API (mesma origem) e não passa por aqui.
+    """
+    raw = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173")
+    origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
+    return CORSConfig(allow_origins=origins, allow_headers=["Authorization", "Content-Type"])
+
+
 def create_app(
     settings: DatabaseSettings | None = None, verifier: TokenVerifier | None = None
 ) -> Litestar:
     if settings is None:
         settings = DatabaseSettings.from_env()
     if verifier is None:
-        verifier = DevTokenVerifier.from_env()
+        verifier = build_verifier(settings.database_url)
     config = create_sqlalchemy_config(settings)
     autowire = AutowirePlugin(
         AutowireConfig(domain_packages=["litestar_sandbox.modules"], router_class=ApiRouter)
@@ -44,6 +57,7 @@ def create_app(
         route_handlers=[Router(API_PREFIX, route_handlers=[ping])],
         plugins=[create_sqlalchemy_plugin(config), autowire, create_vite_plugin(API_PREFIX)],
         middleware=[AuthMiddleware(verifier, API_PREFIX)],
+        cors_config=_cors_config(),
         openapi_config=OpenAPIConfig(
             title="litestar-sandbox",
             version="0.1.0",
