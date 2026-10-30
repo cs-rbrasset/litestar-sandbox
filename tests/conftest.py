@@ -23,7 +23,7 @@ def database_settings(tmp_path: Path) -> DatabaseSettings:
     return DatabaseSettings(database_url=f"sqlite+aiosqlite:///{tmp_path / 'test.db'}")
 
 
-TEST_TOKEN = "token-de-teste"  # noqa: S105 (token fixo do DevTokenVerifier, só nos testes)
+TEST_TOKEN = "token-de-teste"
 TEST_IDENTITY = Identity(subject="u_teste", db_role="u_teste", name="Pessoa de Teste")
 
 
