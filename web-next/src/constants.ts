@@ -1,1 +1,0 @@
-export const DEFAULT_FUND = "12345678000190";

@@ -9,18 +9,13 @@ from litestar_autowire import AutowireConfig, AutowirePlugin
 
 from litestar_sandbox.core.auth import AuthMiddleware, TokenVerifier, build_verifier
 from litestar_sandbox.core.database import create_sqlalchemy_config, create_sqlalchemy_plugin
-from litestar_sandbox.core.frontend import create_vite_plugin
 from litestar_sandbox.core.settings import DatabaseSettings
 
 API_PREFIX = "/api/v1"
 
 
 class ApiRouter(Router):
-    """Router em que o autowire registra os controllers descobertos.
-
-    O prefixo fica num Router, e não em Litestar(path=...): o prefixo da app valeria também
-    para a SPA, que iria parar em /api/v1/ em vez de /.
-    """
+    """Router em que o autowire registra os controllers descobertos."""
 
     def __init__(self, path: str = "/", **kwargs: Any) -> None:
         super().__init__(path=API_PREFIX, **kwargs)
@@ -32,12 +27,11 @@ async def ping() -> str:
 
 
 def _cors_config() -> CORSConfig:
-    """Origens dos fronts à parte (sem litestar-vite): CORS_ALLOWED_ORIGINS="a,b".
+    """API pura, sem front same-origin: CORS_ALLOWED_ORIGINS="a,b" pra trocar o default.
 
-    web-next (porta 3000) e web-svelte-kit (porta 5173) são processos próprios. A SPA em
-    web/ é servida pela própria API (mesma origem) e não passa por aqui.
+    web-svelte-kit (porta 5173) é processo próprio, cross-origin de verdade.
     """
-    raw = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173")
+    raw = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
     origins = [origin.strip() for origin in raw.split(",") if origin.strip()]
     return CORSConfig(allow_origins=origins, allow_headers=["Authorization", "Content-Type"])
 
@@ -55,7 +49,7 @@ def create_app(
     )
     return Litestar(
         route_handlers=[Router(API_PREFIX, route_handlers=[ping])],
-        plugins=[create_sqlalchemy_plugin(config), autowire, create_vite_plugin(API_PREFIX)],
+        plugins=[create_sqlalchemy_plugin(config), autowire],
         middleware=[AuthMiddleware(verifier, API_PREFIX)],
         cors_config=_cors_config(),
         openapi_config=OpenAPIConfig(

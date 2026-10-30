@@ -72,29 +72,24 @@ Boletas não são editadas nem apagadas: uma boleta errada é cancelada e regist
 
 ### Front-end
 
-Uma SPA em React + TypeScript (Vite, Tailwind e TanStack Query), em `web/`, servida pela própria API com o [litestar-vite](https://github.com/litestar-org/litestar-vite): mesma origem, sem CORS. A API fica sob `/api/v1`, e a SPA responde em `/` e nos caminhos das telas (`/ativos`, `/boletas`, `/posicoes`).
+Uma SPA em SvelteKit (Svelte 5, Tailwind, TanStack Query), em `web-svelte-kit/`, processo próprio — a API é pura, sem front same-origin, e o front fala com ela por HTTP cross-origin (`CORSConfig` em `app.py`).
 
 ```bash
-cd web && npm install && cd ..                      # uma vez
-VITE_DEV_MODE=true uv run litestar --app litestar_sandbox.app:create_app run
+cd web-svelte-kit && npm install && npm run dev   # porta 5173
+uv run litestar --app litestar_sandbox.app:create_app run
 ```
-
-Em dev, o Litestar sobe o dev server do Vite sozinho e faz o proxy do HMR pela porta da API (`http://127.0.0.1:8000`). Para produção:
 
 ```bash
-uv run litestar --app litestar_sandbox.app:create_app assets generate-types   # OpenAPI -> cliente TS
-cd web && npm run build                                                         # web/public, com manifest
-uv run litestar --app litestar_sandbox.app:create_app run                       # sem VITE_DEV_MODE: serve o build
+cd web-svelte-kit && npm run generate-types   # lê o schema direto de /api/v1/schema/openapi.json
 ```
 
-- O cliente da API (`web/src/generated/api`) é gerado do OpenAPI pelo `@hey-api/openapi-ts` e não vai para o repositório. Mudou um endpoint? Rode o `generate-types` de novo, e o TypeScript aponta onde a tela quebrou. Em dev, o plugin regenera sozinho.
-- O CSS entra por `<link>` no `web/index.html`: o litestar-vite reescreve os `href` e `src` que estão no HTML para os arquivos com hash do build, mas não injeta o CSS associado ao entry.
-- O prefixo `/api/v1` fica num `Router` (o `ApiRouter`, onde o autowire registra os controllers), e não em `Litestar(path=...)`: com o prefixo na app, a SPA iria parar em `/api/v1/`. O `extra_route_prefixes` impede que um `/api/...` inexistente caia no fallback da SPA e responda `200` com HTML.
-- No terminal do Windows, a CLI do litestar-vite quebra ao imprimir `✓` (`UnicodeEncodeError`): rode com `PYTHONUTF8=1`.
+O prefixo `/api/v1` fica num `Router` (o `ApiRouter`, onde o autowire registra os controllers), e não em `Litestar(path=...)` — convenção mantida mesmo sem front same-origin pra registrar.
+
+Já existiram portes do mesmo front em React (`web/`, servido pela própria API via litestar-vite) e Next.js (`web-next/`); os dois foram descartados depois da comparação, em favor do SvelteKit.
 
 ### Autenticação e identidade
 
-Toda a API exige `Authorization: Bearer <token>`, menos o `/api/v1/ping`, o OpenAPI (`/api/v1/schema`) e a SPA. Sem token, ou com token desconhecido, a resposta é `401`.
+Toda a API exige `Authorization: Bearer <token>`, menos o `/api/v1/ping` e o OpenAPI (`/api/v1/schema`). Sem token, ou com token desconhecido, a resposta é `401`.
 
 ```bash
 AUTH_DEV_TOKENS="tok-alice=u_alice:Alice,tok-bob=u_bob:Bob" uv run litestar --app litestar_sandbox.app:create_app run
@@ -115,7 +110,7 @@ Estado atual:
 - **Testes contra Postgres:** `TEST_DATABASE_URL=<url do Supabase de testes> uv run pytest tests/core/test_identity_postgres.py`. Sem a variável, são pulados.
 - **Windows + psycopg:** o psycopg assíncrono não roda no `ProactorEventLoop`, o padrão do asyncio no Windows, e o `litestar run` falha no startup com `Psycopg cannot use the 'ProactorEventLoop'`. Os testes contra Postgres usam o `SelectorEventLoop`; para rodar a app no Windows contra Postgres, use o `asyncpg` (`postgresql+asyncpg://`).
 - **A armadilha do advanced-alchemy:** passar `sync_session_class` no `session_config` não registra nada, porque ele sobrescreve o parâmetro com o próprio `sessionmaker`. O evento vai no `sessionmaker` síncrono que ele cria (`IdentityAsyncConfig`).
-- **Front:** os três (`web/`, `web-next/`, `web-svelte-kit/`) são clientes públicos do Entra ID via MSAL.js (`@azure/msal-browser`) — login redireciona pro próprio Entra, sem servidor nem banco no meio; o id_token é anexado em cada chamada pelo interceptor do cliente gerado.
+- **Front:** `web-svelte-kit/` é cliente público do Entra ID via MSAL.js (`@azure/msal-browser`) — login redireciona pro próprio Entra, sem servidor nem banco no meio; o id_token é anexado em cada chamada pelo interceptor do cliente gerado.
 
 ### Qualidade
 
@@ -135,7 +130,6 @@ src/litestar_sandbox/
 ├── core/                   # compartilhado; não conhece nenhum módulo
 │   ├── settings.py         # DatabaseSettings (lê DATABASE_URL)
 │   ├── database.py         # config do SQLAlchemy e plugin
-│   ├── frontend.py         # VitePlugin: a SPA de web/ servida pela API
 │   ├── auth.py             # AuthMiddleware e verificadores de token
 │   ├── identity.py         # Identity, ContextVar e use_identity()
 │   └── deps.py             # aliases de injeção de dependência genéricos (FilterDep, SessionDep)
