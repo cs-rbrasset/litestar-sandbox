@@ -24,6 +24,17 @@
   }
 }
 
+/* layerchart desenha o halo dos ticks com stroke: 2px sobre --color-surface-100, que não
+   existe no nosso tema — cai no fallback light-dark(white, black), sempre branco (não
+   definimos color-scheme). No dark isso é texto branco com contorno branco de 2px num
+   fonte de 10px: engrossa e cola as letras. Sem halo, cor segue --muted-foreground. */
+.lc-axis-tick-label,
+.lc-axis-label {
+  stroke: none;
+  fill: var(--muted-foreground);
+  font-weight: 400;
+}
+
 @theme inline {
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -95,6 +106,13 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* layerchart lê --color-surface-*: sem isso, o tooltip de hover cai no fallback
+     light-dark(white, black), que sem color-scheme definido é sempre branco — texto quase
+     branco (currentColor) em cima de fundo branco. Aponta pro --popover, que já é theme-aware. */
+  --color-surface-100: var(--popover);
+  --color-surface-300: var(--popover);
+  --color-surface-content: var(--popover-foreground);
 }
 
 .dark {

@@ -30,6 +30,22 @@ export function usePositions(fundCnpj: () => string, referenceDate: () => string
   }));
 }
 
+/** Sem endpoint de série temporal: busca cada data em paralelo (lista já vem amostrada/limitada). */
+export function usePositionsHistory(fundCnpj: () => string, dates: () => string[]) {
+  return createQuery(() => ({
+    queryKey: ["positions-history", fundCnpj(), dates()] as const,
+    queryFn: async () => {
+      const byDate = await Promise.all(
+        dates().map((reference_date) =>
+          unwrap(apiV1PositionsGetPositions({ query: { fund_cnpj: fundCnpj(), reference_date } })),
+        ),
+      );
+      return dates().map((date, i) => ({ date, items: byDate[i] }));
+    },
+    enabled: /^\d{14}$/.test(fundCnpj()) && dates().length > 0,
+  }));
+}
+
 export function useTriggerPositionsReport() {
   return createMutation(() => ({
     mutationFn: (body: PositionsReportRequest) =>

@@ -10,6 +10,7 @@
     Badge,
     Button,
     Card,
+    CardAction,
     CardContent,
     CardDescription,
     CardHeader,
@@ -18,7 +19,9 @@
     FormField,
     FormFieldErrors,
     FormLabel,
+    InfoTooltip,
     Input,
+    Loading,
     Select,
     SelectContent,
     SelectItem,
@@ -150,7 +153,7 @@
   <Card>
     <CardHeader>
       <CardTitle>Nova boleta</CardTitle>
-      <CardDescription>O ativo é validado pelo instruments.public.</CardDescription>
+      <CardAction><InfoTooltip text="O ativo é validado pelo instruments.public." /></CardAction>
     </CardHeader>
     <CardContent>
       <form use:enhanceForm class="flex flex-col gap-4">
@@ -248,11 +251,11 @@
   <Card>
     <CardHeader>
       <CardTitle>Boletas</CardTitle>
-      <CardDescription>Liquidar emite o TradeSettled, que o positions escuta.</CardDescription>
+      <CardAction><InfoTooltip text="Liquidar emite o TradeSettled, que o positions escuta." /></CardAction>
     </CardHeader>
     <CardContent>
       {#if trades.isLoading}
-        <p class="text-muted-foreground py-8 text-center text-sm">Carregando…</p>
+        <Loading label="Carregando boletas" />
       {:else if items.length === 0}
         <p class="text-muted-foreground py-8 text-center text-sm">Nenhuma boleta ainda.</p>
       {:else}

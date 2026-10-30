@@ -10,3 +10,20 @@ export const format = {
 };
 
 export const today = () => new Date().toLocaleDateString("sv-SE"); // AAAA-MM-DD no fuso local
+
+/** Datas (AAAA-MM-DD) entre start e end, inclusive, amostradas pra no máximo maxPoints. */
+export function datesBetween(start: string, end: string, maxPoints = 30): string[] {
+  const startDate = new Date(`${start}T00:00:00`);
+  const endDate = new Date(`${end}T00:00:00`);
+  const totalDays = Math.round((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1;
+  if (totalDays <= 0) return [];
+  const step = Math.max(1, Math.ceil(totalDays / maxPoints));
+  const dates: string[] = [];
+  for (let offset = 0; offset < totalDays; offset += step) {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + offset);
+    dates.push(d.toLocaleDateString("sv-SE"));
+  }
+  if (dates[dates.length - 1] !== end) dates.push(end);
+  return dates;
+}

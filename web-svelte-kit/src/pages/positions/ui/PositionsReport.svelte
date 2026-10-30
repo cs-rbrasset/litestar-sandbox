@@ -2,7 +2,7 @@
   import { describeError } from "#shared/api/index.ts";
   import { today } from "#shared/lib/format.ts";
   import { notify } from "#shared/ui/toast/index.ts";
-  import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "#shared/ui/index.ts";
+  import { Badge, Button, Card, CardAction, CardContent, CardHeader, CardTitle, InfoTooltip, Input, Label } from "#shared/ui/index.ts";
 
   import { useRequestPdfUrl, usePositionsReportStatus, useTriggerPositionsReport } from "../api/positions.ts";
 
@@ -68,7 +68,9 @@
 <Card>
   <CardHeader>
     <CardTitle>Relatório de posições (Prefect)</CardTitle>
-    <CardDescription>Agenda num worker à parte; o PDF sai do Supabase Storage via signed URL.</CardDescription>
+    <CardAction>
+      <InfoTooltip text="Agenda num worker à parte; o PDF sai do Supabase Storage via signed URL." />
+    </CardAction>
   </CardHeader>
   <CardContent>
     <div class="mb-6 grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">

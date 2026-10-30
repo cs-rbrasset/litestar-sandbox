@@ -3,7 +3,7 @@
 
   import { describeError } from "#shared/api/index.ts";
   import { format, today } from "#shared/lib/format.ts";
-  import { Card, CardContent, CardDescription, CardHeader, CardTitle, Input, Label } from "#shared/ui/index.ts";
+  import { Card, CardAction, CardContent, CardHeader, CardTitle, InfoTooltip, Input, Label, Loading } from "#shared/ui/index.ts";
   import DataTable, { features } from "#shared/ui/DataTable.svelte";
 
   import { usePositions } from "../api/positions.ts";
@@ -38,7 +38,9 @@
 <Card>
   <CardHeader>
     <CardTitle>Posição do fundo</CardTitle>
-    <CardDescription>Soma das movimentações liquidadas até a data, sem as posições zeradas.</CardDescription>
+    <CardAction>
+      <InfoTooltip text="Soma das movimentações liquidadas até a data, sem as posições zeradas." />
+    </CardAction>
   </CardHeader>
   <CardContent>
     <div class="mb-6 grid gap-4 sm:grid-cols-[1fr_12rem]">
@@ -60,7 +62,7 @@
         {describeError(positions.error)}
       </p>
     {:else if positions.isLoading}
-      <p class="text-muted-foreground py-8 text-center text-sm">Carregando…</p>
+      <Loading label="Carregando posição" />
     {:else if items.length === 0}
       <p class="text-muted-foreground py-8 text-center text-sm">Sem posição em {format.date(date)}.</p>
     {:else}

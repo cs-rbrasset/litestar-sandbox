@@ -7,6 +7,7 @@
   import { auth } from "#shared/auth/index.ts";
   import Shell from "../layout/Shell.svelte";
   import SignIn from "../layout/SignIn.svelte";
+  import { Loading, TooltipProvider } from "#shared/ui/index.ts";
   import { Toasts } from "#shared/ui/toast/index.ts";
 
   let { children }: { children: Snippet } = $props();
@@ -31,12 +32,16 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
-  {#if auth.account === undefined}
-    <!-- MSAL inicializando -->
-  {:else if auth.account === null}
-    <SignIn />
-  {:else}
-    <Shell name={auth.account.name ?? auth.account.username}>{@render children()}</Shell>
-  {/if}
-  <Toasts />
+  <TooltipProvider delayDuration={150}>
+    {#if auth.account === undefined}
+      <div class="flex h-screen items-center justify-center">
+        <Loading />
+      </div>
+    {:else if auth.account === null}
+      <SignIn />
+    {:else}
+      <Shell name={auth.account.name ?? auth.account.username}>{@render children()}</Shell>
+    {/if}
+    <Toasts />
+  </TooltipProvider>
 </QueryClientProvider>

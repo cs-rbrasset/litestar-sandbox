@@ -7,12 +7,15 @@
     Badge,
     Button,
     Card,
+    CardAction,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
+    InfoTooltip,
     Input,
     Label,
+    Loading,
     Select,
     SelectContent,
     SelectItem,
@@ -100,7 +103,7 @@
   <Card>
     <CardHeader>
       <CardTitle>Novo ativo</CardTitle>
-      <CardDescription>O código CETIP é normalizado para maiúsculas.</CardDescription>
+      <CardAction><InfoTooltip text="O código CETIP é normalizado para maiúsculas." /></CardAction>
     </CardHeader>
     <CardContent>
       <form onsubmit={submit} class="flex flex-col gap-4">
@@ -140,7 +143,7 @@
     </CardHeader>
     <CardContent>
       {#if instruments.isLoading}
-        <p class="text-muted-foreground py-8 text-center text-sm">Carregando…</p>
+        <Loading label="Carregando ativos" />
       {:else if items.length === 0}
         <p class="text-muted-foreground py-8 text-center text-sm">
           Nenhum ativo ainda. Cadastre o primeiro ao lado.
