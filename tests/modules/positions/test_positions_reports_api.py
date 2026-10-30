@@ -8,6 +8,7 @@ from prefect.client.schemas.objects import StateType
 from prefect.exceptions import ObjectNotFound
 
 from litestar_sandbox.modules.positions import controllers as positions_controllers
+from litestar_sandbox.modules.positions import listeners as positions_listeners
 
 if TYPE_CHECKING:
     from litestar import Litestar
@@ -31,7 +32,7 @@ def fake_delay(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
         return _FakeFuture(calls["task_run_id"])
 
     monkeypatch.setattr(
-        positions_controllers.recompute_positions_report, "delay", _fake_delay
+        positions_listeners.recompute_positions_report, "delay", _fake_delay
     )
     return calls
 
@@ -58,7 +59,7 @@ def test_trigger_report_503_when_prefect_unreachable(
     def _unreachable(**kwargs: Any) -> Any:
         raise httpx.ConnectError("connection refused")
 
-    monkeypatch.setattr(positions_controllers.recompute_positions_report, "delay", _unreachable)
+    monkeypatch.setattr(positions_listeners.recompute_positions_report, "delay", _unreachable)
 
     response = app_client.post(
         "/api/v1/positions/reports",

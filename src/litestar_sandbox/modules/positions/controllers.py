@@ -1,18 +1,24 @@
+import asyncio
 import datetime
 
 import httpx
 from advanced_alchemy.extensions.litestar.providers import create_service_provider
-from litestar import Controller, get, post
+from litestar import Controller, Request, get, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException, NotFoundException, ServiceUnavailableException
 from litestar.params import FromPath
 from prefect import get_client
 from prefect.exceptions import ObjectNotFound
 
+from litestar_sandbox.core.events import publish
 from litestar_sandbox.core.settings import SupabaseSettings
 from litestar_sandbox.core.storage import create_signed_url
 from litestar_sandbox.modules.positions.deps import PositionServiceDep
 from litestar_sandbox.modules.positions.domain import Position
+from litestar_sandbox.modules.positions.events import (
+    POSITIONS_REPORT_REQUESTED,
+    PositionsReportRequested,
+)
 from litestar_sandbox.modules.positions.schemas import (
     PositionsReportHandle,
     PositionsReportPdfUrl,
@@ -20,7 +26,8 @@ from litestar_sandbox.modules.positions.schemas import (
     PositionsReportStatus,
 )
 from litestar_sandbox.modules.positions.services import PositionService
-from litestar_sandbox.modules.positions.tasks import recompute_positions_report
+
+REPORT_DISPATCH_TIMEOUT_SECONDS = 10
 
 
 class PositionController(Controller):
@@ -37,15 +44,28 @@ class PositionController(Controller):
         return await position_service.positions_at(fund_cnpj, reference_date)
 
     @post("/reports", status_code=202)
-    async def trigger_report(self, data: PositionsReportRequest) -> PositionsReportHandle:
-        """Dispara a background task do Prefect (.delay): sem deployment, sem flow."""
+    async def trigger_report(
+        self, data: PositionsReportRequest, request: Request
+    ) -> PositionsReportHandle:
+        """Publica o pedido como evento: quem fala com o Prefect é o listener, não aqui.
+
+        Mesmo sem deployment nem flow do lado do Prefect (`.delay()` só cria o task run), o
+        controller segue sem importar `recompute_positions_report` — só o listener conhece essa
+        task. O `await` no future é o que mantém a resposta síncrona com o `task_run_id`.
+        """
+        future: asyncio.Future[str] = asyncio.get_running_loop().create_future()
+        publish(
+            request.app,
+            POSITIONS_REPORT_REQUESTED,
+            PositionsReportRequested(
+                fund_cnpj=data.fund_cnpj, reference_dates=data.reference_dates, future=future
+            ),
+        )
         try:
-            future = recompute_positions_report.delay(
-                fund_cnpj=data.fund_cnpj, reference_dates=data.reference_dates
-            )
-        except httpx.ConnectError as error:
+            task_run_id = await asyncio.wait_for(future, timeout=REPORT_DISPATCH_TIMEOUT_SECONDS)
+        except (TimeoutError, httpx.ConnectError) as error:
             raise _prefect_unavailable() from error
-        return PositionsReportHandle(task_run_id=str(future.task_run_id))
+        return PositionsReportHandle(task_run_id=task_run_id)
 
     @get("/reports/{task_run_id:str}")
     async def get_report(self, task_run_id: FromPath[str]) -> PositionsReportStatus:
