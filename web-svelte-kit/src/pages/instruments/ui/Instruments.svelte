@@ -4,6 +4,15 @@
   import { describeError, useInstruments, type InstrumentType } from "#shared/api/index.ts";
   import { notify } from "#shared/ui/toast/index.ts";
   import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
     Badge,
     Button,
     Card,
@@ -93,9 +102,25 @@
 
 {#snippet actionsCell(item: Instrument)}
   <div class="text-right">
-    <Button variant="destructive" size="sm" disabled={archive.isPending} onclick={() => archiveOne(item)}>
-      Arquivar
-    </Button>
+    <AlertDialog>
+      <AlertDialogTrigger>
+        {#snippet child({ props })}
+          <Button {...props} variant="destructive" size="sm" disabled={archive.isPending}>Arquivar</Button>
+        {/snippet}
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Arquivar {item.cetip_code}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            O ativo some da lista de ativos em uso. Essa ação não pode ser desfeita.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Voltar</AlertDialogCancel>
+          <AlertDialogAction variant="destructive" onclick={() => archiveOne(item)}>Arquivar</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 {/snippet}
 

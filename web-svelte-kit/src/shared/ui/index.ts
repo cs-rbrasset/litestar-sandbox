@@ -1,3 +1,14 @@
+export {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./alert-dialog/index.ts";
 export { Badge } from "./badge/index.ts";
 export { Button } from "./button/index.ts";
 export { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "./card/index.ts";

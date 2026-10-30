@@ -7,6 +7,15 @@
   import { format, today } from "#shared/lib/format.ts";
   import { notify } from "#shared/ui/toast/index.ts";
   import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
     Badge,
     Button,
     Card,
@@ -142,9 +151,25 @@
   {#if trade.status === "PENDING"}
     <div class="flex justify-end gap-1 whitespace-nowrap">
       <Button size="sm" disabled={transition.isPending} onclick={() => act(trade.id, "settle")}>Liquidar</Button>
-      <Button size="sm" variant="ghost" disabled={transition.isPending} onclick={() => act(trade.id, "cancel")}>
-        Cancelar
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger>
+          {#snippet child({ props })}
+            <Button {...props} size="sm" variant="ghost" disabled={transition.isPending}>Cancelar</Button>
+          {/snippet}
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar boleta #{trade.id}?</AlertDialogTitle>
+            <AlertDialogDescription>Essa ação não pode ser desfeita.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Voltar</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onclick={() => act(trade.id, "cancel")}>
+              Cancelar boleta
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   {/if}
 {/snippet}
