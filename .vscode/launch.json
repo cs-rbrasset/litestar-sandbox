@@ -1,0 +1,39 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Svelte: Launch + Debug (sobe o vite dev)",
+      "url": "http://127.0.0.1:5173",
+      "webRoot": "${workspaceFolder}/web-svelte-kit",
+      "preLaunchTask": "svelte: dev",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack:///./~/*": "${webRoot}/node_modules/*",
+        "webpack:///./*": "${webRoot}/*",
+        "webpack:///*": "*"
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Svelte: Debug (dev server já rodando em :5173)",
+      "url": "http://127.0.0.1:5173",
+      "webRoot": "${workspaceFolder}/web-svelte-kit",
+      "sourceMaps": true
+    },
+    {
+      "type": "debugpy",
+      "request": "launch",
+      "name": "Python: Litestar API (debug)",
+      "module": "litestar",
+      "args": ["--app", "litestar_sandbox.app:create_app", "run"],
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "envFile": "${workspaceFolder}/.env",
+      "env": { "PYTHONUTF8": "1" },
+      "justMyCode": false
+    }
+  ]
+}
