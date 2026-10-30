@@ -48,6 +48,12 @@ Decisões recentes, direcionadas por "menos cara de POC":
 - **`shared/ui/loading`**: um spinner padronizado único, pra nunca mais ter um "Carregando…" em texto solto (ou, pior, uma tela em branco) espalhado pelas telas.
 - **`shared/ui/info-tooltip`**: ícone de informação + tooltip no hover, substituindo as `CardDescription` que só explicavam uma regra de negócio (ex. "O ativo é validado pelo instruments.public."). Regra seguida: texto que é *dado* (contagem de itens, etc.) continua visível; texto que é só *explicação* vira tooltip.
 
-## Em aberto
+## Modais: AlertDialog
 
-Modais, botões e o resto da biblioteca de componentes padronizados ainda não foram desenhados — próximo passo combinado com o time.
+`shared/ui/button` já cobria as variantes que a shadcn-svelte define (`default`, `outline`, `secondary`, `ghost`, `destructive`, `link`) mais tamanhos extras (`xs`, `icon-*`) — não havia lacuna real ali, só a sensação de "falta terminar a lib".
+
+O que faltava de verdade: duas ações destrutivas sem confirmação (Cancelar boleta em `trades`, Arquivar ativo em `instruments`), disparando direto no clique. Resolvido com `shared/ui/alert-dialog` — wrapper em cima de `bits-ui` (`AlertDialog` namespace, reaproveita os primitivos do `Dialog` por baixo) no mesmo estilo de `select`/`tooltip`: cada peça (`Trigger`, `Content`, `Overlay`, `Title`...) é um `.svelte` fino que só aplica classe e repassa props.
+
+Não foi criado um `Dialog` genérico (não-alerta): não há, hoje, nenhum formulário ou conteúdo arbitrário que precise abrir em um modal — só confirmação de ação destrutiva. Adicionar um Dialog sem um uso concreto seria biblioteca por biblioteca.
+
+Resto da lib de componentes (checkbox, switch, dropdown-menu etc.) fica para quando uma tela precisar, não antes.
