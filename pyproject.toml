@@ -10,10 +10,15 @@ requires-python = ">=3.14"
 dependencies = [
     "advanced-alchemy>=1.11.0",
     "aiosqlite>=0.22.1",
+    "httpx>=0.28.1",
     "litestar-autowire>=0.2.0",
     "litestar-vite>=0.32.0",
     "litestar[standard]>=2.24.0",
+    "niquests>=3.16.0",
+    "prefect>=3.9.0",
     "psycopg[binary]>=3.3.6",
+    "pyjwt[crypto]>=2.11.0",
+    "xhtml2pdf>=0.2.28",
 ]
 
 [build-system]
@@ -67,7 +72,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["S101", "PLR2004", "T20"]
+"tests/**/*.py" = ["S101", "S105", "S106", "PLR2004", "T20"]
 # Litestar Controllers declaram path/dependencies/guards como atributos de classe por design
 "**/controllers.py" = ["RUF012", "UP040"]
 # Litestar dependencies com Type Alias
@@ -90,6 +95,7 @@ runtime-evaluated-base-classes = [
 runtime-evaluated-decorators = [
     "litestar.get", "litestar.post", "litestar.put",
     "litestar.patch", "litestar.delete", "litestar.route",
+    "prefect.flow", "prefect.task",
 ]
 exempt-modules = ["typing", "litestar_sandbox.core.deps"] # aliases do core.deps são lidos pelo di do litestar em runtime
 

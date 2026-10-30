@@ -5,3 +5,5 @@ __pycache__/
 CLAUDE.md
 .ruff_cache
 .env
+.claude/settings.local.json
+.claude/worktrees/
