@@ -190,6 +190,7 @@
                 type="single"
                 bind:value={instrumentIdValue, setInstrumentIdValue}
                 disabled={options.length === 0}
+                items={options.map((i) => ({ value: String(i.id), label: i.cetip_code }))}
               >
                 <SelectTrigger {...props} class="w-full">
                   <SelectValue placeholder="Cadastre um ativo primeiro" />
