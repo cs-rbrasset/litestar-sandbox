@@ -52,6 +52,109 @@ export const InstrumentUpdateSchema = {
     title: 'InstrumentUpdate'
 } as const;
 
+export const NoteCreateSchema = {
+    properties: {
+        title: {
+            type: 'string',
+            default: 'Sem título'
+        }
+    },
+    type: 'object',
+    required: [],
+    title: 'NoteCreate'
+} as const;
+
+export const NoteReadSchema = {
+    properties: {
+        id: {
+            type: 'integer'
+        },
+        title: {
+            type: 'string'
+        },
+        content: {
+            additionalProperties: {},
+            type: 'object'
+        },
+        published: {
+            type: 'boolean',
+            default: false
+        },
+        updated_at: {
+            oneOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'content',
+        'id',
+        'title'
+    ],
+    title: 'NoteRead'
+} as const;
+
+export const NoteSummarySchema = {
+    properties: {
+        id: {
+            type: 'integer'
+        },
+        title: {
+            type: 'string'
+        },
+        published: {
+            type: 'boolean'
+        },
+        updated_at: {
+            oneOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'id',
+        'published',
+        'title'
+    ],
+    title: 'NoteSummary'
+} as const;
+
+export const NoteUpdateSchema = {
+    properties: {
+        title: {
+            type: 'string'
+        },
+        content: {
+            additionalProperties: {},
+            type: 'object'
+        },
+        published: {
+            type: 'boolean',
+            default: false
+        }
+    },
+    type: 'object',
+    required: [
+        'content',
+        'title'
+    ],
+    title: 'NoteUpdate'
+} as const;
+
 export const PositionSchema = {
     properties: {
         instrument_id: {
@@ -193,6 +296,43 @@ export const TradeStatusSchema = {
     ],
     title: 'TradeStatus',
     default: 'PENDING'
+} as const;
+
+export const WikiEntrySchema = {
+    properties: {
+        id: {
+            type: 'integer'
+        },
+        title: {
+            type: 'string'
+        },
+        author_name: {
+            type: 'string'
+        },
+        content: {
+            additionalProperties: {},
+            type: 'object'
+        },
+        updated_at: {
+            oneOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ]
+        }
+    },
+    type: 'object',
+    required: [
+        'author_name',
+        'content',
+        'id',
+        'title'
+    ],
+    title: 'WikiEntry'
 } as const;
 
 export const litestar_sandbox_modules_instruments_controllers_InstrumentController_create_instrumentInstrumentResponseBodySchema = {

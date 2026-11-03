@@ -26,6 +26,47 @@ export type InstrumentUpdate = {
 };
 
 /**
+ * NoteCreate
+ */
+export type NoteCreate = {
+    title?: string;
+};
+
+/**
+ * NoteRead
+ */
+export type NoteRead = {
+    id: number;
+    title: string;
+    content: {
+        [key: string]: unknown;
+    };
+    published?: boolean;
+    updated_at?: string | null;
+};
+
+/**
+ * NoteSummary
+ */
+export type NoteSummary = {
+    id: number;
+    title: string;
+    published: boolean;
+    updated_at?: string | null;
+};
+
+/**
+ * NoteUpdate
+ */
+export type NoteUpdate = {
+    title: string;
+    content: {
+        [key: string]: unknown;
+    };
+    published?: boolean;
+};
+
+/**
  * Position
  */
 export type Position = {
@@ -85,6 +126,19 @@ export type TradeSide = 'BUY' | 'SELL';
  * TradeStatus
  */
 export type TradeStatus = 'PENDING' | 'SETTLED' | 'CANCELLED';
+
+/**
+ * WikiEntry
+ */
+export type WikiEntry = {
+    id: number;
+    title: string;
+    author_name: string;
+    content: {
+        [key: string]: unknown;
+    };
+    updated_at?: string | null;
+};
 
 /**
  * litestar_sandbox.modules.instruments.controllers.InstrumentController.create_instrumentInstrumentResponseBody
@@ -432,6 +486,168 @@ export type ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses = {
 };
 
 export type ApiV1InstrumentsInstrumentIdUpdateInstrumentResponse = ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses[keyof ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses];
+
+export type ApiV1NotesCreateNoteData = {
+    body: NoteCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/notes';
+};
+
+export type ApiV1NotesCreateNoteErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | {
+            [key: string]: unknown;
+        } | Array<unknown>;
+    };
+};
+
+export type ApiV1NotesCreateNoteError = ApiV1NotesCreateNoteErrors[keyof ApiV1NotesCreateNoteErrors];
+
+export type ApiV1NotesCreateNoteResponses = {
+    /**
+     * Document created, URL follows
+     */
+    201: NoteRead;
+};
+
+export type ApiV1NotesCreateNoteResponse = ApiV1NotesCreateNoteResponses[keyof ApiV1NotesCreateNoteResponses];
+
+export type ApiV1NotesNoteIdDeleteNoteData = {
+    body?: never;
+    path: {
+        note_id: number;
+    };
+    query?: never;
+    url: '/api/v1/notes/{note_id}';
+};
+
+export type ApiV1NotesNoteIdDeleteNoteErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | {
+            [key: string]: unknown;
+        } | Array<unknown>;
+    };
+};
+
+export type ApiV1NotesNoteIdDeleteNoteError = ApiV1NotesNoteIdDeleteNoteErrors[keyof ApiV1NotesNoteIdDeleteNoteErrors];
+
+export type ApiV1NotesNoteIdDeleteNoteResponses = {
+    /**
+     * Request fulfilled, nothing follows
+     */
+    204: void;
+};
+
+export type ApiV1NotesNoteIdDeleteNoteResponse = ApiV1NotesNoteIdDeleteNoteResponses[keyof ApiV1NotesNoteIdDeleteNoteResponses];
+
+export type ApiV1NotesNoteIdGetNoteData = {
+    body?: never;
+    path: {
+        note_id: number;
+    };
+    query?: never;
+    url: '/api/v1/notes/{note_id}';
+};
+
+export type ApiV1NotesNoteIdGetNoteErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | {
+            [key: string]: unknown;
+        } | Array<unknown>;
+    };
+};
+
+export type ApiV1NotesNoteIdGetNoteError = ApiV1NotesNoteIdGetNoteErrors[keyof ApiV1NotesNoteIdGetNoteErrors];
+
+export type ApiV1NotesNoteIdGetNoteResponses = {
+    /**
+     * Request fulfilled, document follows
+     */
+    200: NoteRead;
+};
+
+export type ApiV1NotesNoteIdGetNoteResponse = ApiV1NotesNoteIdGetNoteResponses[keyof ApiV1NotesNoteIdGetNoteResponses];
+
+export type ApiV1NotesNoteIdUpdateNoteData = {
+    body: NoteUpdate;
+    path: {
+        note_id: number;
+    };
+    query?: never;
+    url: '/api/v1/notes/{note_id}';
+};
+
+export type ApiV1NotesNoteIdUpdateNoteErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | {
+            [key: string]: unknown;
+        } | Array<unknown>;
+    };
+};
+
+export type ApiV1NotesNoteIdUpdateNoteError = ApiV1NotesNoteIdUpdateNoteErrors[keyof ApiV1NotesNoteIdUpdateNoteErrors];
+
+export type ApiV1NotesNoteIdUpdateNoteResponses = {
+    /**
+     * Request fulfilled, document follows
+     */
+    200: NoteRead;
+};
+
+export type ApiV1NotesNoteIdUpdateNoteResponse = ApiV1NotesNoteIdUpdateNoteResponses[keyof ApiV1NotesNoteIdUpdateNoteResponses];
+
+export type ApiV1NotesMineListMyNotesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/notes/mine';
+};
+
+export type ApiV1NotesMineListMyNotesResponses = {
+    /**
+     * Request fulfilled, document follows
+     */
+    200: Array<NoteSummary>;
+};
+
+export type ApiV1NotesMineListMyNotesResponse = ApiV1NotesMineListMyNotesResponses[keyof ApiV1NotesMineListMyNotesResponses];
+
+export type ApiV1NotesWikiListWikiEntriesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/notes/wiki';
+};
+
+export type ApiV1NotesWikiListWikiEntriesResponses = {
+    /**
+     * Request fulfilled, document follows
+     */
+    200: Array<WikiEntry>;
+};
+
+export type ApiV1NotesWikiListWikiEntriesResponse = ApiV1NotesWikiListWikiEntriesResponses[keyof ApiV1NotesWikiListWikiEntriesResponses];
 
 export type ApiV1PositionsGetPositionsData = {
     body?: never;

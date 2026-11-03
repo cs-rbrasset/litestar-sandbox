@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { ApiV1InstrumentsCreateInstrumentData, ApiV1InstrumentsCreateInstrumentErrors, ApiV1InstrumentsCreateInstrumentResponses, ApiV1InstrumentsInstrumentIdDeleteInstrumentData, ApiV1InstrumentsInstrumentIdDeleteInstrumentErrors, ApiV1InstrumentsInstrumentIdDeleteInstrumentResponses, ApiV1InstrumentsInstrumentIdGetInstrumentData, ApiV1InstrumentsInstrumentIdGetInstrumentErrors, ApiV1InstrumentsInstrumentIdGetInstrumentResponses, ApiV1InstrumentsInstrumentIdUpdateInstrumentData, ApiV1InstrumentsInstrumentIdUpdateInstrumentErrors, ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses, ApiV1InstrumentsListInstrumentsData, ApiV1InstrumentsListInstrumentsErrors, ApiV1InstrumentsListInstrumentsResponses, ApiV1PingPingData, ApiV1PingPingResponses, ApiV1PositionsGetPositionsData, ApiV1PositionsGetPositionsErrors, ApiV1PositionsGetPositionsResponses, ApiV1PositionsReportsTaskRunIdGetReportData, ApiV1PositionsReportsTaskRunIdGetReportErrors, ApiV1PositionsReportsTaskRunIdGetReportResponses, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfData, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfErrors, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfResponses, ApiV1PositionsReportsTriggerReportData, ApiV1PositionsReportsTriggerReportErrors, ApiV1PositionsReportsTriggerReportResponses, ApiV1TradesCreateTradeData, ApiV1TradesCreateTradeErrors, ApiV1TradesCreateTradeResponses, ApiV1TradesListTradesData, ApiV1TradesListTradesErrors, ApiV1TradesListTradesResponses, ApiV1TradesTradeIdCancelCancelTradeData, ApiV1TradesTradeIdCancelCancelTradeErrors, ApiV1TradesTradeIdCancelCancelTradeResponses, ApiV1TradesTradeIdGetTradeData, ApiV1TradesTradeIdGetTradeErrors, ApiV1TradesTradeIdGetTradeResponses, ApiV1TradesTradeIdSettleSettleTradeData, ApiV1TradesTradeIdSettleSettleTradeErrors, ApiV1TradesTradeIdSettleSettleTradeResponses } from './types.gen';
+import type { ApiV1InstrumentsCreateInstrumentData, ApiV1InstrumentsCreateInstrumentErrors, ApiV1InstrumentsCreateInstrumentResponses, ApiV1InstrumentsInstrumentIdDeleteInstrumentData, ApiV1InstrumentsInstrumentIdDeleteInstrumentErrors, ApiV1InstrumentsInstrumentIdDeleteInstrumentResponses, ApiV1InstrumentsInstrumentIdGetInstrumentData, ApiV1InstrumentsInstrumentIdGetInstrumentErrors, ApiV1InstrumentsInstrumentIdGetInstrumentResponses, ApiV1InstrumentsInstrumentIdUpdateInstrumentData, ApiV1InstrumentsInstrumentIdUpdateInstrumentErrors, ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses, ApiV1InstrumentsListInstrumentsData, ApiV1InstrumentsListInstrumentsErrors, ApiV1InstrumentsListInstrumentsResponses, ApiV1NotesCreateNoteData, ApiV1NotesCreateNoteErrors, ApiV1NotesCreateNoteResponses, ApiV1NotesMineListMyNotesData, ApiV1NotesMineListMyNotesResponses, ApiV1NotesNoteIdDeleteNoteData, ApiV1NotesNoteIdDeleteNoteErrors, ApiV1NotesNoteIdDeleteNoteResponses, ApiV1NotesNoteIdGetNoteData, ApiV1NotesNoteIdGetNoteErrors, ApiV1NotesNoteIdGetNoteResponses, ApiV1NotesNoteIdUpdateNoteData, ApiV1NotesNoteIdUpdateNoteErrors, ApiV1NotesNoteIdUpdateNoteResponses, ApiV1NotesWikiListWikiEntriesData, ApiV1NotesWikiListWikiEntriesResponses, ApiV1PingPingData, ApiV1PingPingResponses, ApiV1PositionsGetPositionsData, ApiV1PositionsGetPositionsErrors, ApiV1PositionsGetPositionsResponses, ApiV1PositionsReportsTaskRunIdGetReportData, ApiV1PositionsReportsTaskRunIdGetReportErrors, ApiV1PositionsReportsTaskRunIdGetReportResponses, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfData, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfErrors, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfResponses, ApiV1PositionsReportsTriggerReportData, ApiV1PositionsReportsTriggerReportErrors, ApiV1PositionsReportsTriggerReportResponses, ApiV1TradesCreateTradeData, ApiV1TradesCreateTradeErrors, ApiV1TradesCreateTradeResponses, ApiV1TradesListTradesData, ApiV1TradesListTradesErrors, ApiV1TradesListTradesResponses, ApiV1TradesTradeIdCancelCancelTradeData, ApiV1TradesTradeIdCancelCancelTradeErrors, ApiV1TradesTradeIdCancelCancelTradeResponses, ApiV1TradesTradeIdGetTradeData, ApiV1TradesTradeIdGetTradeErrors, ApiV1TradesTradeIdGetTradeResponses, ApiV1TradesTradeIdSettleSettleTradeData, ApiV1TradesTradeIdSettleSettleTradeErrors, ApiV1TradesTradeIdSettleSettleTradeResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -21,11 +21,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 /**
  * Ping
  */
-export const apiV1PingPing = <ThrowOnError extends boolean = false>(options?: Options<ApiV1PingPingData, ThrowOnError>): RequestResult<ApiV1PingPingResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ApiV1PingPingResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/ping',
-    ...options
-});
+export const apiV1PingPing = <ThrowOnError extends boolean = false>(options?: Options<ApiV1PingPingData, ThrowOnError>): RequestResult<ApiV1PingPingResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ApiV1PingPingResponses, unknown, ThrowOnError>({ url: '/api/v1/ping', ...options });
 
 /**
  * ListInstruments
@@ -79,6 +75,68 @@ export const apiV1InstrumentsInstrumentIdUpdateInstrument = <ThrowOnError extend
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * CreateNote
+ */
+export const apiV1NotesCreateNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotesCreateNoteData, ThrowOnError>): RequestResult<ApiV1NotesCreateNoteResponses, ApiV1NotesCreateNoteErrors, ThrowOnError> => (options.client ?? client).post<ApiV1NotesCreateNoteResponses, ApiV1NotesCreateNoteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notes',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * DeleteNote
+ */
+export const apiV1NotesNoteIdDeleteNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotesNoteIdDeleteNoteData, ThrowOnError>): RequestResult<ApiV1NotesNoteIdDeleteNoteResponses, ApiV1NotesNoteIdDeleteNoteErrors, ThrowOnError> => (options.client ?? client).delete<ApiV1NotesNoteIdDeleteNoteResponses, ApiV1NotesNoteIdDeleteNoteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notes/{note_id}',
+    ...options
+});
+
+/**
+ * GetNote
+ */
+export const apiV1NotesNoteIdGetNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotesNoteIdGetNoteData, ThrowOnError>): RequestResult<ApiV1NotesNoteIdGetNoteResponses, ApiV1NotesNoteIdGetNoteErrors, ThrowOnError> => (options.client ?? client).get<ApiV1NotesNoteIdGetNoteResponses, ApiV1NotesNoteIdGetNoteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notes/{note_id}',
+    ...options
+});
+
+/**
+ * UpdateNote
+ */
+export const apiV1NotesNoteIdUpdateNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotesNoteIdUpdateNoteData, ThrowOnError>): RequestResult<ApiV1NotesNoteIdUpdateNoteResponses, ApiV1NotesNoteIdUpdateNoteErrors, ThrowOnError> => (options.client ?? client).put<ApiV1NotesNoteIdUpdateNoteResponses, ApiV1NotesNoteIdUpdateNoteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notes/{note_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * ListMyNotes
+ */
+export const apiV1NotesMineListMyNotes = <ThrowOnError extends boolean = false>(options?: Options<ApiV1NotesMineListMyNotesData, ThrowOnError>): RequestResult<ApiV1NotesMineListMyNotesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ApiV1NotesMineListMyNotesResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notes/mine',
+    ...options
+});
+
+/**
+ * ListWikiEntries
+ */
+export const apiV1NotesWikiListWikiEntries = <ThrowOnError extends boolean = false>(options?: Options<ApiV1NotesWikiListWikiEntriesData, ThrowOnError>): RequestResult<ApiV1NotesWikiListWikiEntriesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ApiV1NotesWikiListWikiEntriesResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notes/wiki',
+    ...options
 });
 
 /**

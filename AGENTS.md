@@ -46,6 +46,10 @@ Nesta branch os agentes estão liberados para implementar: funções completas, 
 - Quando um componente passa a ser usado numa página pela primeira vez, o mesmo commit cria a `.stories.svelte` dele (mesmo padrão dos outros: `defineMeta` do `@storybook/addon-svelte-csf`, `<script module lang="ts">`).
 - Se um componente para de ser usado em qualquer página, remova a story dele junto.
 
+## Ações destrutivas (front-end)
+
+- Toda exclusão (artigo, boleta, ativo, o que for) passa por `AlertDialog` confirmando antes de executar — nunca `onclick` direto num botão de deletar/cancelar/arquivar. Padrão: `AlertDialogTrigger` no botão, `AlertDialogAction variant="destructive"` disparando a ação de verdade (ver `shared/ui/alert-dialog`, usado em `Trades.svelte`, `Instruments.svelte`, `NotepadEditor.svelte`).
+
 ## Git
 
 - Conventional Commits em português, com o corpo em tópicos explicando o porquê.
