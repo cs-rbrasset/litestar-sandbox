@@ -1,7 +1,17 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { API_URL } from "$app/env/public";
-  import { BookOpen, ExternalLink, Pin, PinOff, PieChart, Receipt, StickyNote, Warehouse } from "@lucide/svelte";
+  import {
+    BookOpen,
+    ExternalLink,
+    Home,
+    Pin,
+    PinOff,
+    PieChart,
+    Receipt,
+    StickyNote,
+    Warehouse,
+  } from "@lucide/svelte";
 
   import { cn } from "#shared/lib/utils.ts";
   import { Button, Tooltip, TooltipContent, TooltipTrigger } from "#shared/ui/index.ts";
@@ -9,7 +19,8 @@
   const STORAGE_KEY = "sidebar-pinned";
 
   const NAV = [
-    { href: "/", label: "Ativos", icon: Warehouse },
+    { href: "/", label: "Início", icon: Home },
+    { href: "/ativos", label: "Ativos", icon: Warehouse },
     { href: "/boletas", label: "Boletas", icon: Receipt },
     { href: "/posicoes", label: "Posições", icon: PieChart },
     { href: "/notepad", label: "Notepad", icon: StickyNote },

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Instruments } from "#pages/instruments/index.ts";
+  import { Home } from "#pages/home/index.ts";
 </script>
 
-<Instruments />
+<Home />
