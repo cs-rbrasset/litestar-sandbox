@@ -236,3 +236,4 @@ export {
   TooltipTrigger,
   TooltipProvider,
 } from "./tooltip/index.ts";
+export { WallpaperPicker } from "./wallpaper-picker/index.ts";

@@ -46,7 +46,7 @@
 >
   <aside
     class={cn(
-      "flex h-screen flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-200",
+      "flex h-screen flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground backdrop-blur-xl backdrop-saturate-150 transition-[width] duration-200",
       pinned ? "w-56" : cn("absolute left-0 top-0 z-20", expanded ? "w-56 shadow-lg" : "w-16"),
     )}
   >

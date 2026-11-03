@@ -5,6 +5,7 @@
   import "../app.css";
   import { configureApiClient } from "#shared/api/index.ts";
   import { auth } from "#shared/auth/index.ts";
+  import AcrylicBackdrop from "../layout/AcrylicBackdrop.svelte";
   import Shell from "../layout/Shell.svelte";
   import SignIn from "../layout/SignIn.svelte";
   import { Loading, TooltipProvider } from "#shared/ui/index.ts";
@@ -33,6 +34,7 @@
 
 <QueryClientProvider client={queryClient}>
   <TooltipProvider delayDuration={150}>
+    <AcrylicBackdrop />
     {#if auth.account === undefined}
       <div class="flex h-screen items-center justify-center">
         <Loading />
@@ -40,7 +42,7 @@
     {:else if auth.account === null}
       <SignIn />
     {:else}
-      <Shell name={auth.account.name ?? auth.account.username}>{@render children()}</Shell>
+      <Shell>{@render children()}</Shell>
     {/if}
     <Toasts />
   </TooltipProvider>
