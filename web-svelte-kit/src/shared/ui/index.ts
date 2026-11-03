@@ -69,6 +69,7 @@ export {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "./context-menu/index.ts";
+export { createEditor, Edra, getDefaultExtensions } from "./edra/shadcn/index.ts";
 export {
   Dialog,
   DialogClose,
