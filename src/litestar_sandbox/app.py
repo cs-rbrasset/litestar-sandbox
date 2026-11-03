@@ -4,11 +4,11 @@ from typing import Any
 from litestar import Litestar, Router, get
 from litestar.config.cors import CORSConfig
 from litestar.openapi import OpenAPIConfig
-from litestar.openapi.spec import Components, SecurityScheme
 from litestar_autowire import AutowireConfig, AutowirePlugin
 
-from litestar_sandbox.core.auth import AuthMiddleware, TokenVerifier, build_verifier
+from litestar_sandbox.core.auth import TokenVerifier, build_verifier
 from litestar_sandbox.core.database import create_sqlalchemy_config, create_sqlalchemy_plugin
+from litestar_sandbox.core.security import IdentityBridgePlugin, create_security_plugin
 from litestar_sandbox.core.settings import DatabaseSettings
 from litestar_sandbox.core.vite import create_vite_plugin
 
@@ -50,16 +50,19 @@ def create_app(
     )
     return Litestar(
         route_handlers=[Router(API_PREFIX, route_handlers=[ping])],
-        plugins=[create_sqlalchemy_plugin(config), autowire, create_vite_plugin()],
-        middleware=[AuthMiddleware(verifier, API_PREFIX)],
+        plugins=[
+            create_sqlalchemy_plugin(config),
+            autowire,
+            create_vite_plugin(),
+            create_security_plugin(verifier, API_PREFIX),
+            # depois do SecurityPlugin na lista: precisa que scope["user"] já exista
+            # (core/security.py: IdentityBridgePlugin).
+            IdentityBridgePlugin(),
+        ],
         cors_config=_cors_config(),
         openapi_config=OpenAPIConfig(
             title="litestar-sandbox",
             version="0.1.0",
             path=f"{API_PREFIX}/schema",
-            components=Components(
-                security_schemes={"BearerToken": SecurityScheme(type="http", scheme="bearer")}
-            ),
-            security=[{"BearerToken": []}],
         ),
     )

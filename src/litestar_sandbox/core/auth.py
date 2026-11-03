@@ -1,28 +1,25 @@
-"""Autenticação: valida o token, identifica a pessoa e abre o contexto da requisição.
+"""Autenticação: valida o token e identifica a pessoa.
 
 O verificador é plugável e composto: DevTokenVerifier (tokens fixos, dev e testes) sempre
 ativo, EntraTokenVerifier (access_token do Entra ID, validado contra o JWKS do tenant) ativo
 quando ENTRA_TENANT_ID está setado. A credencial sempre chega por `Authorization: Bearer` —
 o front (web-svelte-kit/) já pede o token com MSAL.js e o anexa na chamada; o backend nunca
-fala com o Entra pra login.
+fala com o Entra pra login. O encaixe no pipeline HTTP (extrair o Bearer, abrir o contexto
+de identidade pro SET LOCAL ROLE) é do SecurityPlugin — core/security.py embrulha o
+TokenVerifier daqui num AuthenticationMechanism; aqui só a verificação em si.
 """
 
 import logging
 import os
-import uuid
 from typing import TYPE_CHECKING, Protocol
 
-from litestar.exceptions import NotAuthorizedException
-from litestar.middleware import ASGIMiddleware
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from litestar_sandbox.core import entra
-from litestar_sandbox.core.identity import Identity, use_identity
+from litestar_sandbox.core.identity import Identity
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
-
-    from litestar.types import ASGIApp, Receive, Scope, Send
 
 logger = logging.getLogger(__name__)
 
@@ -128,47 +125,3 @@ def build_verifier(database_url: str | None = None) -> TokenVerifier:
     if settings is not None:
         verifiers.append(EntraTokenVerifier(settings, database_url))
     return verifiers[0] if len(verifiers) == 1 else CompositeVerifier(*verifiers)
-
-
-def _bearer_token(scope: Scope) -> str | None:
-    for key, value in scope["headers"]:
-        if key == b"authorization":
-            scheme, _, token = value.decode("latin-1").partition(" ")
-            if scheme.lower() != "bearer":
-                return None
-            return token.strip() or None
-    return None
-
-
-def _request_id(scope: Scope) -> str:
-    for key, value in scope["headers"]:
-        if key == b"x-request-id":
-            return value.decode("latin-1")[:64]
-    return uuid.uuid4().hex
-
-
-class AuthMiddleware(ASGIMiddleware):
-    """Exige `Authorization: Bearer <token>` na API e abre o contexto de identidade.
-
-    A SPA, os assets, o OpenAPI e o /ping ficam de fora. A identidade vale só durante a
-    requisição: use_identity() restaura o contexto ao sair, então nada vaza para a próxima.
-    """
-
-    def __init__(self, verifier: TokenVerifier, api_prefix: str) -> None:
-        self.verifier = verifier
-        self.exclude_path_pattern = (
-            rf"^(?!{api_prefix}/)",  # tudo fora da API: SPA, /static
-            rf"^{api_prefix}/ping$",
-            rf"^{api_prefix}/schema",
-        )
-
-    async def handle(self, scope: Scope, receive: Receive, send: Send, next_app: ASGIApp) -> None:
-        token = _bearer_token(scope)
-        if token is None:
-            raise NotAuthorizedException(detail="token ausente")
-        identity = await self.verifier.verify(token)
-        if identity is None:
-            raise NotAuthorizedException(detail="token inválido")
-        scope["user"] = identity
-        with use_identity(identity, trace_id=_request_id(scope)):
-            await next_app(scope, receive, send)

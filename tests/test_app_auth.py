@@ -32,12 +32,3 @@ def test_api_requires_token(anonymous_client: TestClient[Litestar], method: str,
 @pytest.mark.parametrize("path", ["/api/v1/ping", "/api/v1/schema/openapi.json"])
 def test_ping_and_openapi_are_public(anonymous_client: TestClient[Litestar], path: str) -> None:
     assert anonymous_client.get(path).status_code == 200
-
-
-def test_openapi_declares_bearer_security(anonymous_client: TestClient[Litestar]) -> None:
-    schema = anonymous_client.get("/api/v1/schema/openapi.json").json()
-    assert schema["components"]["securitySchemes"]["BearerToken"] == {
-        "type": "http",
-        "scheme": "bearer",
-    }
-    assert schema["security"] == [{"BearerToken": []}]

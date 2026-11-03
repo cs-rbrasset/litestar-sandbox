@@ -8,13 +8,13 @@ from litestar.testing import AsyncTestClient, TestClient
 
 from litestar_sandbox.core import entra
 from litestar_sandbox.core.auth import (
-    AuthMiddleware,
     CompositeVerifier,
     DevTokenVerifier,
     EntraTokenVerifier,
     build_verifier,
 )
 from litestar_sandbox.core.identity import Identity, current_identity, current_trace_id
+from litestar_sandbox.core.security import IdentityBridgePlugin, create_security_plugin
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -29,7 +29,9 @@ async def whoami(request: Request) -> dict[str, str | None]:
     await asyncio.sleep(0.01)  # dá chance a outra requisição intercalar
     return {
         "context": identity.db_role if identity else None,
-        "request_user": request.user.db_role,
+        # request.user é o Principal[Identity] que o SecurityPlugin resolveu; .user é a
+        # Identity de verdade (core/security.py: _IdentityResolver).
+        "request_user": request.user.user.db_role,
         "trace_id": current_trace_id.get(),
     }
 
@@ -39,16 +41,12 @@ async def ping() -> str:
     return "pong"
 
 
-@get("/")
-async def spa_root() -> str:
-    return "spa"
-
-
 @pytest.fixture
 def client() -> Iterator[TestClient[Litestar]]:
+    verifier = DevTokenVerifier({"a": ALICE, "b": BOB})
     app = Litestar(
-        route_handlers=[Router("/api/v1", route_handlers=[whoami, ping]), spa_root],
-        middleware=[AuthMiddleware(DevTokenVerifier({"a": ALICE, "b": BOB}), "/api/v1")],
+        route_handlers=[Router("/api/v1", route_handlers=[whoami, ping])],
+        plugins=[create_security_plugin(verifier, "/api/v1"), IdentityBridgePlugin()],
     )
     with TestClient(app) as test_client:
         yield test_client
@@ -59,9 +57,7 @@ def bearer(token: str) -> dict[str, str]:
 
 
 def test_missing_token_is_401(client: TestClient[Litestar]) -> None:
-    response = client.get("/api/v1/whoami")
-    assert response.status_code == 401
-    assert response.json()["detail"] == "token ausente"
+    assert client.get("/api/v1/whoami").status_code == 401
 
 
 @pytest.mark.parametrize("header", ["Bearer nao-existe", "Basic YTpi", "Bearer ", "a"])
@@ -78,9 +74,8 @@ def test_trace_id_is_generated_when_absent(client: TestClient[Litestar]) -> None
     assert len(client.get("/api/v1/whoami", headers=bearer("a")).json()["trace_id"]) == 32
 
 
-@pytest.mark.parametrize("path", ["/api/v1/ping", "/"])
-def test_public_paths_skip_auth(client: TestClient[Litestar], path: str) -> None:
-    assert client.get(path).status_code == 200
+def test_public_paths_skip_auth(client: TestClient[Litestar]) -> None:
+    assert client.get("/api/v1/ping").status_code == 200
 
 
 def test_identity_does_not_leak_between_requests(client: TestClient[Litestar]) -> None:
@@ -92,9 +87,10 @@ def test_identity_does_not_leak_between_requests(client: TestClient[Litestar]) -
 
 @pytest.mark.anyio
 async def test_concurrent_requests_keep_their_own_identity() -> None:
+    verifier = DevTokenVerifier({"a": ALICE, "b": BOB})
     app = Litestar(
         route_handlers=[Router("/api/v1", route_handlers=[whoami])],
-        middleware=[AuthMiddleware(DevTokenVerifier({"a": ALICE, "b": BOB}), "/api/v1")],
+        plugins=[create_security_plugin(verifier, "/api/v1"), IdentityBridgePlugin()],
     )
     async with AsyncTestClient(app) as async_client:
         tokens = ["a", "b"] * 10

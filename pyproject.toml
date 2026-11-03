@@ -12,6 +12,7 @@ dependencies = [
     "aiosqlite>=0.22.1",
     "httpx>=0.28.1",
     "litestar-autowire>=0.2.0",
+    "litestar-security>=0.7.1",
     "litestar-vite>=0.32.0",
     "litestar[standard]>=2.24.0",
     "niquests>=3.16.0",

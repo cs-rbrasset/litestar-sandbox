@@ -1127,6 +1127,7 @@ dependencies = [
     { name = "httpx" },
     { name = "litestar", extra = ["standard"] },
     { name = "litestar-autowire" },
+    { name = "litestar-security" },
     { name = "litestar-vite" },
     { name = "niquests" },
     { name = "prefect" },
@@ -1150,6 +1151,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "litestar", extras = ["standard"], specifier = ">=2.24.0" },
     { name = "litestar-autowire", specifier = ">=0.2.0" },
+    { name = "litestar-security", specifier = ">=0.7.1" },
     { name = "litestar-vite", specifier = ">=0.32.0" },
     { name = "niquests", specifier = ">=3.16.0" },
     { name = "prefect", specifier = ">=3.9.0" },
@@ -1164,6 +1166,20 @@ dev = [
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "ruff", specifier = ">=0.16.10" },
     { name = "ty", specifier = ">=0.0.85" },
+]
+
+[[package]]
+name = "litestar-security"
+version = "0.7.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "litestar" },
+    { name = "pyjwt", extra = ["crypto"] },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b5/01/f057f9d0fa8866040b3c47ecea8c6d1291b3c36100954e9436398e0535ee/litestar_security-0.7.1.tar.gz", hash = "sha256:db42108f11f2f96ed10b384607e8e4812d69bb44ff32de059ee6f6879687efa9", size = 842689, upload-time = "2026-11-02T03:00:44.829Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c9/5b/e477ee2405756a779f1d9d2aa485e66750b02c03bfaf30a3306c3835aaa5/litestar_security-0.7.1-py3-none-any.whl", hash = "sha256:5b2f889e027c9555f44b7ede504ae568b69e107449e75c8d74313d28411d069b", size = 386301, upload-time = "2026-11-02T03:00:43.113Z" },
 ]
 
 [[package]]
