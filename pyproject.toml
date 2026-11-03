@@ -164,3 +164,24 @@ name = "nenhum módulo depende de positions"
 type = "forbidden"
 source_modules = ["litestar_sandbox.modules.instruments", "litestar_sandbox.modules.trades"]
 forbidden_modules = ["litestar_sandbox.modules.positions"]
+
+# notes é independente: um notepad por pessoa, sem relação com instruments/trades/positions.
+[[tool.importlinter.contracts]]
+name = "notes não depende de outros módulos"
+type = "forbidden"
+source_modules = ["litestar_sandbox.modules.notes"]
+forbidden_modules = [
+    "litestar_sandbox.modules.instruments",
+    "litestar_sandbox.modules.trades",
+    "litestar_sandbox.modules.positions",
+]
+
+[[tool.importlinter.contracts]]
+name = "nenhum módulo depende de notes"
+type = "forbidden"
+source_modules = [
+    "litestar_sandbox.modules.instruments",
+    "litestar_sandbox.modules.trades",
+    "litestar_sandbox.modules.positions",
+]
+forbidden_modules = ["litestar_sandbox.modules.notes"]
