@@ -40,6 +40,12 @@ Nesta branch os agentes estão liberados para implementar: funções completas, 
 - Lógica de domínio é testada sem banco.
 - Teste que depende de Postgres (por exemplo, `FOR UPDATE`) é pulado quando o banco for SQLite.
 
+## Storybook
+
+- `web-svelte-kit/src/shared/ui/` tem ~45 componentes shadcn-svelte prontos (biblioteca), mas o Storybook (`npm run storybook`) só mostra story de componente **em uso de verdade** em alguma página (`src/pages/`, `src/app/layout/`). Componente novo na biblioteca não ganha `.stories.svelte` ainda.
+- Quando um componente passa a ser usado numa página pela primeira vez, o mesmo commit cria a `.stories.svelte` dele (mesmo padrão dos outros: `defineMeta` do `@storybook/addon-svelte-csf`, `<script module lang="ts">`).
+- Se um componente para de ser usado em qualquer página, remova a story dele junto.
+
 ## Git
 
 - Conventional Commits em português, com o corpo em tópicos explicando o porquê.
