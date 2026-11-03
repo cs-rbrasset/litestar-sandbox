@@ -1,10 +1,10 @@
 """Autenticação: valida o token, identifica a pessoa e abre o contexto da requisição.
 
 O verificador é plugável e composto: DevTokenVerifier (tokens fixos, dev e testes) sempre
-ativo, EntraTokenVerifier (id_token do Entra ID, validado contra o JWKS do tenant) ativo
+ativo, EntraTokenVerifier (access_token do Entra ID, validado contra o JWKS do tenant) ativo
 quando ENTRA_TENANT_ID está setado. A credencial sempre chega por `Authorization: Bearer` —
-cada front (web/, web-next/, web-svelte-kit/) já pede o token com MSAL.js e o anexa na
-chamada; o backend nunca fala com o Entra pra login.
+o front (web-svelte-kit/) já pede o token com MSAL.js e o anexa na chamada; o backend nunca
+fala com o Entra pra login.
 """
 
 import logging
@@ -53,7 +53,7 @@ class DevTokenVerifier:
 
 
 class EntraTokenVerifier:
-    """Valida o id_token que o front pediu ao Entra (core/entra.py).
+    """Valida o access_token que o front pediu ao Entra (core/entra.py).
 
     Resource server puro: não troca código, não emite cookie, não guarda estado nenhum —
     só confere assinatura RS256, emissor e audiência a cada request contra o JWKS do tenant.

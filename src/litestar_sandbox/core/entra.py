@@ -1,10 +1,10 @@
-"""Backend como resource server do Entra ID: só valida o id_token que cada front já traz.
+"""Backend como resource server do Entra ID: só valida o access_token que o front já traz.
 
-Quem fala com o Entra (login, PKCE, refresh) é cada front, todos com a mesma lib —
-@azure/msal-browser, cliente público (SPA), sem secret. O backend nunca vê client_secret
-nem redirect_uri de ninguém: só confere a assinatura RS256 contra o JWKS do tenant, o
-emissor e a audiência. É id_token, não access token com scope próprio: sem "Expose an API"
-(exige admin no Entra), a audiência que sobra de qualquer login é o próprio client_id.
+Quem fala com o Entra (login, PKCE, refresh) é o front — @azure/msal-browser, cliente
+público (SPA), sem secret. O backend nunca vê client_secret nem redirect_uri de ninguém: só
+confere a assinatura RS256 contra o JWKS do tenant, o emissor e a audiência. Com "Expose an
+API" feito no Entra (scope access_as_user), o front pede o access_token com esse scope
+(web-svelte-kit/src/shared/auth/msal.ts: LOGIN_SCOPES) e a audiência é o próprio client_id.
 """
 
 from __future__ import annotations
@@ -29,8 +29,9 @@ _HTTP_TIMEOUT = 30.0
 @dataclass(frozen=True)
 class EntraSettings:
     tenant_id: str
-    # client_id do App registration (SPA): é o valor que aparece no claim "aud" do id_token.
-    # Seria "api://<client-id-da-api>" com "Expose an API" — exige admin no Entra, sem isso.
+    # client_id do App registration (SPA): o scope access_as_user de "Expose an API" usa
+    # "api://<client_id>/access_as_user", mas o claim "aud" do access_token continua sendo
+    # o client_id puro — é esse valor que entra aqui.
     audience: str
 
     @classmethod
