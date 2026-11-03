@@ -10,6 +10,7 @@ from litestar_autowire import AutowireConfig, AutowirePlugin
 from litestar_sandbox.core.auth import AuthMiddleware, TokenVerifier, build_verifier
 from litestar_sandbox.core.database import create_sqlalchemy_config, create_sqlalchemy_plugin
 from litestar_sandbox.core.settings import DatabaseSettings
+from litestar_sandbox.core.vite import create_vite_plugin
 
 API_PREFIX = "/api/v1"
 
@@ -49,7 +50,7 @@ def create_app(
     )
     return Litestar(
         route_handlers=[Router(API_PREFIX, route_handlers=[ping])],
-        plugins=[create_sqlalchemy_plugin(config), autowire],
+        plugins=[create_sqlalchemy_plugin(config), autowire, create_vite_plugin()],
         middleware=[AuthMiddleware(verifier, API_PREFIX)],
         cors_config=_cors_config(),
         openapi_config=OpenAPIConfig(
