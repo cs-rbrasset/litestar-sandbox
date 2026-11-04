@@ -141,9 +141,9 @@ export type WikiEntry = {
 };
 
 /**
- * litestar_sandbox.modules.instruments.controllers.InstrumentController.create_instrumentInstrumentResponseBody
+ * modules.instruments.controllers.InstrumentController.create_instrumentInstrumentResponseBody
  */
-export type LitestarSandboxModulesInstrumentsControllersInstrumentControllerCreateInstrumentInstrumentResponseBody = {
+export type ModulesInstrumentsControllersInstrumentControllerCreateInstrumentInstrumentResponseBody = {
     name: string;
     cetip_code: string;
     instrument_type: InstrumentType;
@@ -154,9 +154,9 @@ export type LitestarSandboxModulesInstrumentsControllersInstrumentControllerCrea
 };
 
 /**
- * litestar_sandbox.modules.instruments.controllers.InstrumentController.get_instrumentInstrumentResponseBody
+ * modules.instruments.controllers.InstrumentController.get_instrumentInstrumentResponseBody
  */
-export type LitestarSandboxModulesInstrumentsControllersInstrumentControllerGetInstrumentInstrumentResponseBody = {
+export type ModulesInstrumentsControllersInstrumentControllerGetInstrumentInstrumentResponseBody = {
     name: string;
     cetip_code: string;
     instrument_type: InstrumentType;
@@ -167,9 +167,9 @@ export type LitestarSandboxModulesInstrumentsControllersInstrumentControllerGetI
 };
 
 /**
- * litestar_sandbox.modules.instruments.controllers.InstrumentController.list_instrumentsInstrumentResponseBody
+ * modules.instruments.controllers.InstrumentController.list_instrumentsInstrumentResponseBody
  */
-export type LitestarSandboxModulesInstrumentsControllersInstrumentControllerListInstrumentsInstrumentResponseBody = {
+export type ModulesInstrumentsControllersInstrumentControllerListInstrumentsInstrumentResponseBody = {
     name: string;
     cetip_code: string;
     instrument_type: InstrumentType;
@@ -180,9 +180,9 @@ export type LitestarSandboxModulesInstrumentsControllersInstrumentControllerList
 };
 
 /**
- * litestar_sandbox.modules.instruments.controllers.InstrumentController.update_instrumentInstrumentResponseBody
+ * modules.instruments.controllers.InstrumentController.update_instrumentInstrumentResponseBody
  */
-export type LitestarSandboxModulesInstrumentsControllersInstrumentControllerUpdateInstrumentInstrumentResponseBody = {
+export type ModulesInstrumentsControllersInstrumentControllerUpdateInstrumentInstrumentResponseBody = {
     name: string;
     cetip_code: string;
     instrument_type: InstrumentType;
@@ -193,9 +193,9 @@ export type LitestarSandboxModulesInstrumentsControllersInstrumentControllerUpda
 };
 
 /**
- * litestar_sandbox.modules.trades.controllers.TradeController.cancel_tradeTradeResponseBody
+ * modules.trades.controllers.TradeController.cancel_tradeTradeResponseBody
  */
-export type LitestarSandboxModulesTradesControllersTradeControllerCancelTradeTradeResponseBody = {
+export type ModulesTradesControllersTradeControllerCancelTradeTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -210,9 +210,9 @@ export type LitestarSandboxModulesTradesControllersTradeControllerCancelTradeTra
 };
 
 /**
- * litestar_sandbox.modules.trades.controllers.TradeController.create_tradeTradeResponseBody
+ * modules.trades.controllers.TradeController.create_tradeTradeResponseBody
  */
-export type LitestarSandboxModulesTradesControllersTradeControllerCreateTradeTradeResponseBody = {
+export type ModulesTradesControllersTradeControllerCreateTradeTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -227,9 +227,9 @@ export type LitestarSandboxModulesTradesControllersTradeControllerCreateTradeTra
 };
 
 /**
- * litestar_sandbox.modules.trades.controllers.TradeController.get_tradeTradeResponseBody
+ * modules.trades.controllers.TradeController.get_tradeTradeResponseBody
  */
-export type LitestarSandboxModulesTradesControllersTradeControllerGetTradeTradeResponseBody = {
+export type ModulesTradesControllersTradeControllerGetTradeTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -244,9 +244,9 @@ export type LitestarSandboxModulesTradesControllersTradeControllerGetTradeTradeR
 };
 
 /**
- * litestar_sandbox.modules.trades.controllers.TradeController.list_tradesTradeResponseBody
+ * modules.trades.controllers.TradeController.list_tradesTradeResponseBody
  */
-export type LitestarSandboxModulesTradesControllersTradeControllerListTradesTradeResponseBody = {
+export type ModulesTradesControllersTradeControllerListTradesTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -261,9 +261,9 @@ export type LitestarSandboxModulesTradesControllersTradeControllerListTradesTrad
 };
 
 /**
- * litestar_sandbox.modules.trades.controllers.TradeController.settle_tradeTradeResponseBody
+ * modules.trades.controllers.TradeController.settle_tradeTradeResponseBody
  */
-export type LitestarSandboxModulesTradesControllersTradeControllerSettleTradeTradeResponseBody = {
+export type ModulesTradesControllersTradeControllerSettleTradeTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -297,6 +297,8 @@ export type ApiV1InstrumentsListInstrumentsData = {
     body?: never;
     path?: never;
     query?: {
+        currentPage?: number;
+        pageSize?: number;
         /**
          * Field to search
          */
@@ -305,8 +307,6 @@ export type ApiV1InstrumentsListInstrumentsData = {
          * Search should be case sensitive
          */
         searchIgnoreCase?: boolean | null;
-        currentPage?: number;
-        pageSize?: number;
         /**
          * Order by field
          */
@@ -339,7 +339,7 @@ export type ApiV1InstrumentsListInstrumentsResponses = {
      * Request fulfilled, document follows
      */
     200: {
-        items?: Array<LitestarSandboxModulesInstrumentsControllersInstrumentControllerListInstrumentsInstrumentResponseBody>;
+        items?: Array<ModulesInstrumentsControllersInstrumentControllerListInstrumentsInstrumentResponseBody>;
         /**
          * Maximal number of items to send.
          */
@@ -383,7 +383,7 @@ export type ApiV1InstrumentsCreateInstrumentResponses = {
     /**
      * Document created, URL follows
      */
-    201: LitestarSandboxModulesInstrumentsControllersInstrumentControllerCreateInstrumentInstrumentResponseBody;
+    201: ModulesInstrumentsControllersInstrumentControllerCreateInstrumentInstrumentResponseBody;
 };
 
 export type ApiV1InstrumentsCreateInstrumentResponse = ApiV1InstrumentsCreateInstrumentResponses[keyof ApiV1InstrumentsCreateInstrumentResponses];
@@ -449,7 +449,7 @@ export type ApiV1InstrumentsInstrumentIdGetInstrumentResponses = {
     /**
      * Request fulfilled, document follows
      */
-    200: LitestarSandboxModulesInstrumentsControllersInstrumentControllerGetInstrumentInstrumentResponseBody;
+    200: ModulesInstrumentsControllersInstrumentControllerGetInstrumentInstrumentResponseBody;
 };
 
 export type ApiV1InstrumentsInstrumentIdGetInstrumentResponse = ApiV1InstrumentsInstrumentIdGetInstrumentResponses[keyof ApiV1InstrumentsInstrumentIdGetInstrumentResponses];
@@ -482,7 +482,7 @@ export type ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses = {
     /**
      * Request fulfilled, document follows
      */
-    200: LitestarSandboxModulesInstrumentsControllersInstrumentControllerUpdateInstrumentInstrumentResponseBody;
+    200: ModulesInstrumentsControllersInstrumentControllerUpdateInstrumentInstrumentResponseBody;
 };
 
 export type ApiV1InstrumentsInstrumentIdUpdateInstrumentResponse = ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses[keyof ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses];
@@ -808,7 +808,7 @@ export type ApiV1TradesTradeIdCancelCancelTradeResponses = {
     /**
      * Request fulfilled, document follows
      */
-    200: LitestarSandboxModulesTradesControllersTradeControllerCancelTradeTradeResponseBody;
+    200: ModulesTradesControllersTradeControllerCancelTradeTradeResponseBody;
 };
 
 export type ApiV1TradesTradeIdCancelCancelTradeResponse = ApiV1TradesTradeIdCancelCancelTradeResponses[keyof ApiV1TradesTradeIdCancelCancelTradeResponses];
@@ -817,6 +817,8 @@ export type ApiV1TradesListTradesData = {
     body?: never;
     path?: never;
     query?: {
+        currentPage?: number;
+        pageSize?: number;
         /**
          * Field to search
          */
@@ -825,8 +827,6 @@ export type ApiV1TradesListTradesData = {
          * Search should be case sensitive
          */
         searchIgnoreCase?: boolean | null;
-        currentPage?: number;
-        pageSize?: number;
         /**
          * Order by field
          */
@@ -859,7 +859,7 @@ export type ApiV1TradesListTradesResponses = {
      * Request fulfilled, document follows
      */
     200: {
-        items?: Array<LitestarSandboxModulesTradesControllersTradeControllerListTradesTradeResponseBody>;
+        items?: Array<ModulesTradesControllersTradeControllerListTradesTradeResponseBody>;
         /**
          * Maximal number of items to send.
          */
@@ -903,7 +903,7 @@ export type ApiV1TradesCreateTradeResponses = {
     /**
      * Document created, URL follows
      */
-    201: LitestarSandboxModulesTradesControllersTradeControllerCreateTradeTradeResponseBody;
+    201: ModulesTradesControllersTradeControllerCreateTradeTradeResponseBody;
 };
 
 export type ApiV1TradesCreateTradeResponse = ApiV1TradesCreateTradeResponses[keyof ApiV1TradesCreateTradeResponses];
@@ -936,7 +936,7 @@ export type ApiV1TradesTradeIdGetTradeResponses = {
     /**
      * Request fulfilled, document follows
      */
-    200: LitestarSandboxModulesTradesControllersTradeControllerGetTradeTradeResponseBody;
+    200: ModulesTradesControllersTradeControllerGetTradeTradeResponseBody;
 };
 
 export type ApiV1TradesTradeIdGetTradeResponse = ApiV1TradesTradeIdGetTradeResponses[keyof ApiV1TradesTradeIdGetTradeResponses];
@@ -969,7 +969,7 @@ export type ApiV1TradesTradeIdSettleSettleTradeResponses = {
     /**
      * Request fulfilled, document follows
      */
-    200: LitestarSandboxModulesTradesControllersTradeControllerSettleTradeTradeResponseBody;
+    200: ModulesTradesControllersTradeControllerSettleTradeTradeResponseBody;
 };
 
 export type ApiV1TradesTradeIdSettleSettleTradeResponse = ApiV1TradesTradeIdSettleSettleTradeResponses[keyof ApiV1TradesTradeIdSettleSettleTradeResponses];

@@ -1,5 +1,5 @@
 {
-  "name": "litestar-sandbox-web-svelte-kit",
+  "name": "litestar-sandbox-frontend",
   "private": true,
   "type": "module",
   "imports": {
