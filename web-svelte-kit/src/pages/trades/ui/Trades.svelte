@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createColumnHelper, renderSnippet } from "@tanstack/svelte-table";
+  import { createColumnHelper, renderComponent, renderSnippet } from "@tanstack/svelte-table";
   import { NumberFormatStyle, NumericFormat } from "svelte-number-format";
   import { defaults, superForm } from "sveltekit-superforms";
   import { zod4 } from "sveltekit-superforms/adapters";
@@ -25,6 +25,9 @@
     CardDescription,
     CardHeader,
     CardTitle,
+    DataTableColumnHeader,
+    DataTableView,
+    DebounceInput,
     FormControl,
     FormField,
     FormFieldErrors,
@@ -110,16 +113,49 @@
   const items = $derived(trades.data?.items ?? []);
   type Trade = (typeof items)[number];
 
+  // filtro client-side sobre o que já veio da API (sem outra chamada) — a busca por fundo
+  // (searchString) continua sendo o único filtro que vai pro servidor.
+  let quickFilter = $state("");
+  const filteredItems = $derived(
+    quickFilter.trim() === ""
+      ? items
+      : items.filter((trade) =>
+          [trade.cetip_code, trade.side === "BUY" ? "compra" : "venda", STATUS[trade.status ?? "PENDING"].label]
+            .join(" ")
+            .toLowerCase()
+            .includes(quickFilter.trim().toLowerCase()),
+        ),
+  );
+
   const helper = createColumnHelper<typeof features, Trade>();
   const columns = $derived([
     helper.accessor("id", { header: "#", cell: (ctx) => renderSnippet(idCell, ctx.getValue()) }),
-    helper.accessor("trade_date", { header: "Data", cell: (ctx) => renderSnippet(dateCell, ctx.getValue()) }),
-    helper.accessor("cetip_code", { header: "Ativo", cell: (ctx) => renderSnippet(cetipCodeCell, ctx.getValue()) }),
+    helper.accessor("trade_date", {
+      header: (ctx) => renderComponent(DataTableColumnHeader, { column: ctx.column, title: "Data" }),
+      cell: (ctx) => renderSnippet(dateCell, ctx.getValue()),
+    }),
+    helper.accessor("cetip_code", {
+      header: (ctx) => renderComponent(DataTableColumnHeader, { column: ctx.column, title: "Ativo" }),
+      cell: (ctx) => renderSnippet(cetipCodeCell, ctx.getValue()),
+    }),
     helper.accessor("side", { header: "Lado", cell: (ctx) => (ctx.getValue() === "BUY" ? "Compra" : "Venda") }),
-    helper.accessor("quantity", { header: "Qtd.", cell: (ctx) => renderSnippet(quantityCell, ctx.getValue()) }),
-    helper.accessor("unit_price", { header: "Preço", cell: (ctx) => renderSnippet(priceCell, ctx.getValue()) }),
-    helper.accessor("status", { header: "Status", cell: (ctx) => renderSnippet(statusCell, ctx.getValue() ?? "PENDING") }),
-    helper.display({ id: "actions", cell: (ctx) => renderSnippet(actionsCell, ctx.row.original) }),
+    helper.accessor("quantity", {
+      header: (ctx) => renderComponent(DataTableColumnHeader, { column: ctx.column, title: "Qtd." }),
+      cell: (ctx) => renderSnippet(quantityCell, ctx.getValue()),
+    }),
+    helper.accessor("unit_price", {
+      header: (ctx) => renderComponent(DataTableColumnHeader, { column: ctx.column, title: "Preço" }),
+      cell: (ctx) => renderSnippet(priceCell, ctx.getValue()),
+    }),
+    helper.accessor("status", {
+      header: (ctx) => renderComponent(DataTableColumnHeader, { column: ctx.column, title: "Status" }),
+      cell: (ctx) => renderSnippet(statusCell, ctx.getValue() ?? "PENDING"),
+    }),
+    helper.display({
+      id: "actions",
+      enableHiding: false,
+      cell: (ctx) => renderSnippet(actionsCell, ctx.row.original),
+    }),
   ]);
 </script>
 
@@ -293,7 +329,12 @@
       {:else if items.length === 0}
         <p class="text-muted-foreground py-8 text-center text-sm">Nenhuma boleta ainda.</p>
       {:else}
-        <DataTable {columns} data={items} numericColumnIds={["quantity", "unit_price"]} />
+        <DataTable {columns} data={filteredItems} numericColumnIds={["quantity", "unit_price"]}>
+          {#snippet toolbar({ table })}
+            <DebounceInput bind:value={quickFilter} placeholder="Filtrar boletas..." debounce={200} class="max-w-56" />
+            <DataTableView {table} label="Colunas" />
+          {/snippet}
+        </DataTable>
       {/if}
     </CardContent>
   </Card>
