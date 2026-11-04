@@ -33,11 +33,11 @@ Todas as rotas ficam sob o prefixo `/api/v1`.
 | Método | Rota | Descrição |
 | --- | --- | --- |
 | GET | `/ping` | health check |
-| GET | `/instruments` | lista os ativos ativos, com paginação (`currentPage`, `pageSize`), busca por nome ou código CETIP (`searchString`) e ordenação (`orderBy`, `sortOrder`) |
-| POST | `/instruments` | cria um ativo (form-urlencoded). O código CETIP é normalizado para maiúsculas, sem espaços nas pontas, e nunca é reaproveitado (`409` se repetido) |
-| GET | `/instruments/{id}` | busca um ativo por id (`404` se não existir ou estiver desativado) |
-| PATCH | `/instruments/{id}` | atualização parcial (JSON). Só o `name` é editável; campos ausentes não mudam |
-| DELETE | `/instruments/{id}` | desativa o ativo (soft delete) e responde `204` |
+| GET | `/ativos` | lista os ativos ativos, com paginação (`currentPage`, `pageSize`), busca por nome ou código CETIP (`searchString`) e ordenação (`orderBy`, `sortOrder`) |
+| POST | `/ativos` | cria um ativo (form-urlencoded). O código CETIP é normalizado para maiúsculas, sem espaços nas pontas, e nunca é reaproveitado (`409` se repetido) |
+| GET | `/ativos/{id}` | busca um ativo por id (`404` se não existir ou estiver desativado) |
+| PATCH | `/ativos/{id}` | atualização parcial (JSON). Só o `name` é editável; campos ausentes não mudam |
+| DELETE | `/ativos/{id}` | desativa o ativo (soft delete) e responde `204` |
 
 Campos de um ativo:
 
@@ -49,15 +49,15 @@ Campos de um ativo:
 
 O preço não faz parte do cadastro: em renda fixa ele é o PU de cada data, uma série temporal que pertence a um módulo próprio.
 
-### Boletas (`/trades`)
+### Boletas (`/boletas`)
 
 | Método | Rota | Descrição |
 | --- | --- | --- |
-| POST | `/trades` | registra uma boleta (JSON). O ativo é validado pelo `instruments.public`: se não existir ou estiver desativado, `400`. O código CETIP é copiado do ativo no momento do registro, e o status começa em `PENDING` |
-| GET | `/trades` | lista as boletas, com paginação, busca por `fund_cnpj` ou `cetip_code` e ordenação (padrão: `trade_date` decrescente) |
-| GET | `/trades/{id}` | busca uma boleta por id |
-| POST | `/trades/{id}/settle` | liquida a boleta (`PENDING → SETTLED`). Responde `200`, ou `409` se ela não estiver pendente |
-| POST | `/trades/{id}/cancel` | cancela a boleta (`PENDING → CANCELLED`). Responde `200`, ou `409` se ela não estiver pendente |
+| POST | `/boletas` | registra uma boleta (JSON). O ativo é validado pelo `ativos.public`: se não existir ou estiver desativado, `400`. O código CETIP é copiado do ativo no momento do registro, e o status começa em `PENDING` |
+| GET | `/boletas` | lista as boletas, com paginação, busca por `fund_cnpj` ou `cetip_code` e ordenação (padrão: `trade_date` decrescente) |
+| GET | `/boletas/{id}` | busca uma boleta por id |
+| POST | `/boletas/{id}/settle` | liquida a boleta (`PENDING → SETTLED`). Responde `200`, ou `409` se ela não estiver pendente |
+| POST | `/boletas/{id}/cancel` | cancela a boleta (`PENDING → CANCELLED`). Responde `200`, ou `409` se ela não estiver pendente |
 
 Boletas não são editadas nem apagadas: uma boleta errada é cancelada e registrada de novo.
 
@@ -93,14 +93,14 @@ Toda a API exige `Authorization: Bearer <token>`, menos o `/api/v1/ping` e o Ope
 
 ```bash
 AUTH_DEV_TOKENS="tok-alice=u_alice:Alice,tok-bob=u_bob:Bob" uv run litestar --app app:create_app run
-curl -H "Authorization: Bearer tok-alice" http://127.0.0.1:8000/api/v1/instruments
+curl -H "Authorization: Bearer tok-alice" http://127.0.0.1:8000/api/v1/ativos
 ```
 
 O fluxo segue o handoff do banco (seções 2 e 3):
 
 1. O `AuthMiddleware` (`core/auth.py`) valida o token com um `TokenVerifier` e coloca a `Identity` em `request.user` e num `ContextVar`, junto com o `trace_id` (o `X-Request-ID`, ou um gerado). O contexto é restaurado ao fim da requisição: nada vaza para a próxima.
 2. O evento `after_begin` da sessão (`core/database.py`) empurra a identidade para o Postgres em cada transação: `select app.assumir_identidade(<role>)` (um `SET LOCAL ROLE`) e `set_config('app.trace_id', ...)`. No SQLite não faz nada.
-3. Sem identidade, uma transação no Postgres **falha** (`MissingIdentityError`), em vez de gravar trilha sem autor. Código fora de request declara em nome de quem age: o listener de `positions` usa `use_identity(SYSTEM)` (role `app_sistema`).
+3. Sem identidade, uma transação no Postgres **falha** (`MissingIdentityError`), em vez de gravar trilha sem autor. Código fora de request declara em nome de quem age: o listener de `posicoes` usa `use_identity(SYSTEM)` (role `app_sistema`).
 
 Estado atual:
 
@@ -136,19 +136,19 @@ backend/api/                # flat, sem pacote wrapper — from core.X / from mo
 │   ├── identity.py         # Identity, ContextVar e use_identity()
 │   └── deps.py             # aliases de injeção de dependência genéricos (FilterDep, SessionDep)
 └── modules/
-    ├── instruments/        # cadastro de ativos
+    ├── ativos/              # cadastro de ativos
     │   ├── public.py       # a ÚNICA porta para outros módulos
     │   ├── controllers.py  # HTTP
     │   ├── deps.py         # alias de DI do service e config dos filtros
     │   ├── protocols.py    # contrato do service usado pelo controller
-    │   ├── enums.py        # shim: re-exporta de database/models/instruments/enums.py
+    │   ├── enums.py        # shim: re-exporta de database/models/ativos/enums.py
     │   ├── schemas.py      # DTOs de entrada HTTP (msgspec)
     │   ├── services.py     # regras de negócio
     │   ├── repositories.py # acesso a dados
-    │   └── models.py       # shim: re-exporta de database/models/instruments/model.py
-    ├── trades/              # boletas; usa o instruments só pelo public.py
-    ├── positions/           # posições, alimentado por eventos do trades
-    └── notes/               # artigos por pessoa + wiki (independente dos outros três)
+    │   └── models.py       # shim: re-exporta de database/models/ativos/model.py
+    ├── boletas/             # boletas; usa o ativos só pelo public.py
+    ├── posicoes/            # posições, alimentado por eventos do boletas
+    └── notas/               # artigos por pessoa + wiki (independente dos outros três)
 
 database/models/<área>/     # o model SQLAlchemy de verdade mora aqui, não no módulo da API
 ```
@@ -167,7 +167,7 @@ Uma requisição percorre as camadas nesta ordem: controller → service → rep
 - **Nada é apagado.** O `DELETE` desativa o registro (`deleted_at`), e as leituras ignoram os desativados. O service expõe só métodos que respeitam essa regra, e o Protocol do controller não oferece o hard delete.
 - **Os aliases de DI usam `X: TypeAlias = ...`, e não `type X = ...`.** O Litestar não reconhece o `SkipValidation` dentro de um alias `type`. Os detalhes estão nos comentários do `pyproject.toml`.
 - **Os módulos de cadastro usam o service do Advanced Alchemy.** Módulos com cálculos pesados (cota, P&L, rentabilidade) devem ter uma camada de domínio em Python puro, testável sem banco.
-- **Módulos se comunicam por eventos, sem se conhecer.** O `trades` declara no `public.py` o id do evento (`TRADE_SETTLED`) e o evento (`TradeSettled`, um `Struct` congelado que carrega todos os dados da boleta), e o emite com `request.app.emit(...)` ao liquidar. Quem escuta depende do `trades`, e nunca o contrário.
+- **Módulos se comunicam por eventos, sem se conhecer.** O `boletas` declara no `public.py` o id do evento (`TRADE_SETTLED`) e o evento (`TradeSettled`, um `Struct` congelado que carrega todos os dados da boleta), e o emite com `request.app.emit(...)` ao liquidar. Quem escuta depende do `boletas`, e nunca o contrário.
 - **Limitação conhecida dos eventos (dual write):** o evento é emitido em memória, dentro do handler, e o commit no banco acontece depois. Se o commit falhar, o evento já saiu; se o processo cair depois do commit, o evento se perde. A solução de produção é o padrão Outbox (no backlog).
 
 ## Como este projeto está sendo construído
@@ -209,7 +209,7 @@ Em andamento (WIP).
 - [ ] módulo de preços (série temporal por ativo e data)
 - [x] módulo `trades` (operações), consumindo `instruments` pelo `public.py`
 - [x] eventos de domínio emitidos pelo `trades` (`TradeSettled`, ao liquidar)
-- [ ] módulo `positions` (posições e P&L), alimentado por eventos, com tabelas próprias
+- [ ] módulo `posicoes` (posições e P&L), alimentado por eventos, com tabelas próprias
 - [ ] contrato `layers` no import-linter
 
 **Backlog**, em ordem de valor para um projeto real:
@@ -247,4 +247,4 @@ O front-end é uma SPA em React servida pela própria API (seção "Front-end"),
 
 **Os custos:** um passo a mais em cada mudança (editar o contrato, gerar e implementar), YAML verboso, e a comparação entre o contrato escrito e o gerado pelo Litestar precisa ser semântica, porque os dois nunca ficam idênticos.
 
-**O próximo passo sugerido:** migrar um módulo (o `instruments`) para `Struct`s gerados, com o oasdiff no CI, antes de adotar para todos.
+**O próximo passo sugerido:** migrar um módulo (o `ativos`) para `Struct`s gerados, com o oasdiff no CI, antes de adotar para todos.

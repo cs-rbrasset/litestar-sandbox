@@ -10,7 +10,7 @@ Diferença estrutural importante: `web/` é servido pela própria API via `lites
 
 ## Estrutura: Feature-Sliced Design
 
-`src/app`, `src/pages`, `src/shared` seguem FSD. Cada slice (`instruments`, `trades`, `positions`) tem seus próprios `api/` e `ui/`, e só se comunica com outro slice através do `index.ts` dele — mesmo princípio do "só importa via `public.py`" que já vale pros módulos do backend (ver `AGENTS.md`). A vantagem concreta: dá pra apagar ou reescrever a tela de `trades` inteira sem tocar em `positions`, porque a única coisa que um importa do outro é o que está exportado deliberadamente no `index.ts`.
+`src/app`, `src/pages`, `src/shared` seguem FSD. Cada slice (`ativos`, `boletas`, `posicoes`) tem seus próprios `api/` e `ui/`, e só se comunica com outro slice através do `index.ts` dele — mesmo princípio do "só importa via `public.py`" que já vale pros módulos do backend (ver `AGENTS.md`). A vantagem concreta: dá pra apagar ou reescrever a tela de `boletas` inteira sem tocar em `posicoes`, porque a única coisa que um importa do outro é o que está exportado deliberadamente no `index.ts`.
 
 `shared/ui` é onde moram os componentes de design system (ver seção shadcn-svelte abaixo) — nunca específicos de uma tela.
 
@@ -46,13 +46,13 @@ Decisões recentes, direcionadas por "menos cara de POC":
 - **Sidebar colapsável** em vez de header com abas: estado (colapsado/expandido) em `localStorage`, ícone + tooltip quando recolhida. Escolhida colapsável em vez de fixa simples porque aproxima mais do padrão de app profissional (tipo Linear/Vercel) que o time quer como referência, mesmo custando um componente a mais pra manter.
 - **Tema claro/escuro**: toggle na topbar, preferência em `localStorage`, aplicado via script bloqueante em `app.html` antes do primeiro paint (sem isso, pisca no tema errado por uma fração de segundo a cada carregamento).
 - **`shared/ui/loading`**: um spinner padronizado único, pra nunca mais ter um "Carregando…" em texto solto (ou, pior, uma tela em branco) espalhado pelas telas.
-- **`shared/ui/info-tooltip`**: ícone de informação + tooltip no hover, substituindo as `CardDescription` que só explicavam uma regra de negócio (ex. "O ativo é validado pelo instruments.public."). Regra seguida: texto que é *dado* (contagem de itens, etc.) continua visível; texto que é só *explicação* vira tooltip.
+- **`shared/ui/info-tooltip`**: ícone de informação + tooltip no hover, substituindo as `CardDescription` que só explicavam uma regra de negócio (ex. "O ativo é validado pelo ativos.public."). Regra seguida: texto que é *dado* (contagem de itens, etc.) continua visível; texto que é só *explicação* vira tooltip.
 
 ## Modais: AlertDialog
 
 `shared/ui/button` já cobria as variantes que a shadcn-svelte define (`default`, `outline`, `secondary`, `ghost`, `destructive`, `link`) mais tamanhos extras (`xs`, `icon-*`) — não havia lacuna real ali, só a sensação de "falta terminar a lib".
 
-O que faltava de verdade: duas ações destrutivas sem confirmação (Cancelar boleta em `trades`, Arquivar ativo em `instruments`), disparando direto no clique. Resolvido com `shared/ui/alert-dialog` — wrapper em cima de `bits-ui` (`AlertDialog` namespace, reaproveita os primitivos do `Dialog` por baixo) no mesmo estilo de `select`/`tooltip`: cada peça (`Trigger`, `Content`, `Overlay`, `Title`...) é um `.svelte` fino que só aplica classe e repassa props.
+O que faltava de verdade: duas ações destrutivas sem confirmação (Cancelar boleta em `boletas`, Arquivar ativo em `ativos`), disparando direto no clique. Resolvido com `shared/ui/alert-dialog` — wrapper em cima de `bits-ui` (`AlertDialog` namespace, reaproveita os primitivos do `Dialog` por baixo) no mesmo estilo de `select`/`tooltip`: cada peça (`Trigger`, `Content`, `Overlay`, `Title`...) é um `.svelte` fino que só aplica classe e repassa props.
 
 Não foi criado um `Dialog` genérico (não-alerta): não há, hoje, nenhum formulário ou conteúdo arbitrário que precise abrir em um modal — só confirmação de ação destrutiva. Adicionar um Dialog sem um uso concreto seria biblioteca por biblioteca.
 
