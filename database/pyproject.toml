@@ -1,0 +1,13 @@
+[project]
+name = "database"
+version = "0.1.0"
+description = "Models SQLAlchemy compartilhados, organizados por área de negócio — pensado pra virar um pacote instalável à parte (PyPI ou git) no futuro."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "advanced-alchemy>=1.11.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
