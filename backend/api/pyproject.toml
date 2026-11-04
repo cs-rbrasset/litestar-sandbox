@@ -141,56 +141,56 @@ source_modules = ["core"]
 forbidden_modules = ["modules"]
 
 [[tool.importlinter.contracts]]
-name = "instruments não depende de trades"
+name = "ativos não depende de boletas"
 type = "forbidden"
-source_modules = ["modules.instruments"]
-forbidden_modules = ["modules.trades"]
+source_modules = ["modules.ativos"]
+forbidden_modules = ["modules.boletas"]
 
 # Proíbe o pacote inteiro e libera só o public.py: um arquivo interno novo já nasce proibido.
 # allow_indirect_imports: o public.py importa o service do próprio módulo para montar o
-# provider, então trades -> instruments.public -> instruments.services é um caminho legítimo.
+# provider, então boletas -> ativos.public -> ativos.services é um caminho legítimo.
 [[tool.importlinter.contracts]]
-name = "trades só acessa instruments.public"
+name = "boletas só acessa ativos.public"
 type = "forbidden"
-source_modules = ["modules.trades"]
-forbidden_modules = ["modules.instruments"]
-ignore_imports = ["modules.trades.** -> modules.instruments.public"]
+source_modules = ["modules.boletas"]
+forbidden_modules = ["modules.ativos"]
+ignore_imports = ["modules.boletas.** -> modules.ativos.public"]
 allow_indirect_imports = true
 
-# positions consome o TradeSettled pelo contrato público do trades; o instrument_id e o
-# cetip_code chegam no evento, então não há motivo para conhecer o instruments.
+# posicoes consome o TradeSettled pelo contrato público do boletas; o instrument_id e o
+# cetip_code chegam no evento, então não há motivo para conhecer o ativos.
 [[tool.importlinter.contracts]]
-name = "positions só acessa trades.public"
+name = "posicoes só acessa boletas.public"
 type = "forbidden"
-source_modules = ["modules.positions"]
-forbidden_modules = ["modules.trades", "modules.instruments"]
-ignore_imports = ["modules.positions.** -> modules.trades.public"]
+source_modules = ["modules.posicoes"]
+forbidden_modules = ["modules.boletas", "modules.ativos"]
+ignore_imports = ["modules.posicoes.** -> modules.boletas.public"]
 allow_indirect_imports = true
 
-# positions é a ponta do fluxo: ninguém depende dele, só o app.py, que monta tudo.
+# posicoes é a ponta do fluxo: ninguém depende dele, só o app.py, que monta tudo.
 [[tool.importlinter.contracts]]
-name = "nenhum módulo depende de positions"
+name = "nenhum módulo depende de posicoes"
 type = "forbidden"
-source_modules = ["modules.instruments", "modules.trades"]
-forbidden_modules = ["modules.positions"]
+source_modules = ["modules.ativos", "modules.boletas"]
+forbidden_modules = ["modules.posicoes"]
 
-# notes é independente: um notepad por pessoa, sem relação com instruments/trades/positions.
+# notas é independente: um notepad por pessoa, sem relação com ativos/boletas/posicoes.
 [[tool.importlinter.contracts]]
-name = "notes não depende de outros módulos"
+name = "notas não depende de outros módulos"
 type = "forbidden"
-source_modules = ["modules.notes"]
+source_modules = ["modules.notas"]
 forbidden_modules = [
-    "modules.instruments",
-    "modules.trades",
-    "modules.positions",
+    "modules.ativos",
+    "modules.boletas",
+    "modules.posicoes",
 ]
 
 [[tool.importlinter.contracts]]
-name = "nenhum módulo depende de notes"
+name = "nenhum módulo depende de notas"
 type = "forbidden"
 source_modules = [
-    "modules.instruments",
-    "modules.trades",
-    "modules.positions",
+    "modules.ativos",
+    "modules.boletas",
+    "modules.posicoes",
 ]
-forbidden_modules = ["modules.notes"]
+forbidden_modules = ["modules.notas"]

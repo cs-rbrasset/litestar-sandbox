@@ -18,11 +18,11 @@ def anonymous_client(app: Litestar) -> Iterator[TestClient[Litestar]]:
 @pytest.mark.parametrize(
     ("method", "path"),
     [
-        ("GET", "/api/v1/instruments"),
-        ("POST", "/api/v1/instruments"),
-        ("GET", "/api/v1/trades"),
-        ("POST", "/api/v1/trades/1/settle"),
-        ("GET", "/api/v1/positions?fund_cnpj=12345678000190&reference_date=2026-10-20"),
+        ("GET", "/api/v1/ativos"),
+        ("POST", "/api/v1/ativos"),
+        ("GET", "/api/v1/boletas"),
+        ("POST", "/api/v1/boletas/1/settle"),
+        ("GET", "/api/v1/posicoes?fund_cnpj=12345678000190&reference_date=2026-10-20"),
     ],
 )
 def test_api_requires_token(anonymous_client: TestClient[Litestar], method: str, path: str) -> None:

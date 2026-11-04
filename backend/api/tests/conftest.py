@@ -44,7 +44,7 @@ def app_client(app: Litestar) -> Iterator[TestClient[Litestar]]:
 def create_instrument(app_client: TestClient[Litestar]) -> Callable[..., dict[str, Any]]:
     def _create(**overrides: str) -> dict[str, Any]:
         payload = {"name": "caneta azul", "cetip_code": "CANE4", "instrument_type": "CRI"}
-        response = app_client.post("/api/v1/instruments", data=payload | overrides)
+        response = app_client.post("/api/v1/ativos", data=payload | overrides)
         assert response.status_code == 201, response.text
         return response.json()
 
@@ -62,6 +62,6 @@ def post_trade(app_client: TestClient[Litestar]) -> Callable[..., httpx.Response
             "quantity": 100,
             "unit_price": "101.25",
         }
-        return app_client.post("/api/v1/trades", json=payload | overrides)
+        return app_client.post("/api/v1/boletas", json=payload | overrides)
 
     return _post
