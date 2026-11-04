@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DEFAULT_FUND } from "#shared/config/index.ts";
-  import { Positions, PositionsHistoryChart, PositionsReport } from "#pages/positions/index.ts";
+  import { Positions, PositionsHistoryChart, PositionsReport } from "#pages/posicoes/index.ts";
 </script>
 
 <div class="flex flex-col gap-6">

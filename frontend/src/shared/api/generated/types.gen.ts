@@ -141,9 +141,9 @@ export type WikiEntry = {
 };
 
 /**
- * modules.instruments.controllers.InstrumentController.create_instrumentInstrumentResponseBody
+ * modules.ativos.controllers.InstrumentController.create_instrumentInstrumentResponseBody
  */
-export type ModulesInstrumentsControllersInstrumentControllerCreateInstrumentInstrumentResponseBody = {
+export type ModulesAtivosControllersInstrumentControllerCreateInstrumentInstrumentResponseBody = {
     name: string;
     cetip_code: string;
     instrument_type: InstrumentType;
@@ -154,9 +154,9 @@ export type ModulesInstrumentsControllersInstrumentControllerCreateInstrumentIns
 };
 
 /**
- * modules.instruments.controllers.InstrumentController.get_instrumentInstrumentResponseBody
+ * modules.ativos.controllers.InstrumentController.get_instrumentInstrumentResponseBody
  */
-export type ModulesInstrumentsControllersInstrumentControllerGetInstrumentInstrumentResponseBody = {
+export type ModulesAtivosControllersInstrumentControllerGetInstrumentInstrumentResponseBody = {
     name: string;
     cetip_code: string;
     instrument_type: InstrumentType;
@@ -167,9 +167,9 @@ export type ModulesInstrumentsControllersInstrumentControllerGetInstrumentInstru
 };
 
 /**
- * modules.instruments.controllers.InstrumentController.list_instrumentsInstrumentResponseBody
+ * modules.ativos.controllers.InstrumentController.list_instrumentsInstrumentResponseBody
  */
-export type ModulesInstrumentsControllersInstrumentControllerListInstrumentsInstrumentResponseBody = {
+export type ModulesAtivosControllersInstrumentControllerListInstrumentsInstrumentResponseBody = {
     name: string;
     cetip_code: string;
     instrument_type: InstrumentType;
@@ -180,9 +180,9 @@ export type ModulesInstrumentsControllersInstrumentControllerListInstrumentsInst
 };
 
 /**
- * modules.instruments.controllers.InstrumentController.update_instrumentInstrumentResponseBody
+ * modules.ativos.controllers.InstrumentController.update_instrumentInstrumentResponseBody
  */
-export type ModulesInstrumentsControllersInstrumentControllerUpdateInstrumentInstrumentResponseBody = {
+export type ModulesAtivosControllersInstrumentControllerUpdateInstrumentInstrumentResponseBody = {
     name: string;
     cetip_code: string;
     instrument_type: InstrumentType;
@@ -193,9 +193,9 @@ export type ModulesInstrumentsControllersInstrumentControllerUpdateInstrumentIns
 };
 
 /**
- * modules.trades.controllers.TradeController.cancel_tradeTradeResponseBody
+ * modules.boletas.controllers.TradeController.cancel_tradeTradeResponseBody
  */
-export type ModulesTradesControllersTradeControllerCancelTradeTradeResponseBody = {
+export type ModulesBoletasControllersTradeControllerCancelTradeTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -210,9 +210,9 @@ export type ModulesTradesControllersTradeControllerCancelTradeTradeResponseBody 
 };
 
 /**
- * modules.trades.controllers.TradeController.create_tradeTradeResponseBody
+ * modules.boletas.controllers.TradeController.create_tradeTradeResponseBody
  */
-export type ModulesTradesControllersTradeControllerCreateTradeTradeResponseBody = {
+export type ModulesBoletasControllersTradeControllerCreateTradeTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -227,9 +227,9 @@ export type ModulesTradesControllersTradeControllerCreateTradeTradeResponseBody 
 };
 
 /**
- * modules.trades.controllers.TradeController.get_tradeTradeResponseBody
+ * modules.boletas.controllers.TradeController.get_tradeTradeResponseBody
  */
-export type ModulesTradesControllersTradeControllerGetTradeTradeResponseBody = {
+export type ModulesBoletasControllersTradeControllerGetTradeTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -244,9 +244,9 @@ export type ModulesTradesControllersTradeControllerGetTradeTradeResponseBody = {
 };
 
 /**
- * modules.trades.controllers.TradeController.list_tradesTradeResponseBody
+ * modules.boletas.controllers.TradeController.list_tradesTradeResponseBody
  */
-export type ModulesTradesControllersTradeControllerListTradesTradeResponseBody = {
+export type ModulesBoletasControllersTradeControllerListTradesTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -261,9 +261,9 @@ export type ModulesTradesControllersTradeControllerListTradesTradeResponseBody =
 };
 
 /**
- * modules.trades.controllers.TradeController.settle_tradeTradeResponseBody
+ * modules.boletas.controllers.TradeController.settle_tradeTradeResponseBody
  */
-export type ModulesTradesControllersTradeControllerSettleTradeTradeResponseBody = {
+export type ModulesBoletasControllersTradeControllerSettleTradeTradeResponseBody = {
     fund_cnpj: string;
     instrument_id: number;
     cetip_code: string;
@@ -293,7 +293,7 @@ export type ApiV1PingPingResponses = {
 
 export type ApiV1PingPingResponse = ApiV1PingPingResponses[keyof ApiV1PingPingResponses];
 
-export type ApiV1InstrumentsListInstrumentsData = {
+export type ApiV1AtivosListInstrumentsData = {
     body?: never;
     path?: never;
     query?: {
@@ -316,10 +316,10 @@ export type ApiV1InstrumentsListInstrumentsData = {
          */
         sortOrder?: 'asc' | 'desc' | null;
     };
-    url: '/api/v1/instruments';
+    url: '/api/v1/ativos';
 };
 
-export type ApiV1InstrumentsListInstrumentsErrors = {
+export type ApiV1AtivosListInstrumentsErrors = {
     /**
      * Validation Exception
      */
@@ -332,14 +332,14 @@ export type ApiV1InstrumentsListInstrumentsErrors = {
     };
 };
 
-export type ApiV1InstrumentsListInstrumentsError = ApiV1InstrumentsListInstrumentsErrors[keyof ApiV1InstrumentsListInstrumentsErrors];
+export type ApiV1AtivosListInstrumentsError = ApiV1AtivosListInstrumentsErrors[keyof ApiV1AtivosListInstrumentsErrors];
 
-export type ApiV1InstrumentsListInstrumentsResponses = {
+export type ApiV1AtivosListInstrumentsResponses = {
     /**
      * Request fulfilled, document follows
      */
     200: {
-        items?: Array<ModulesInstrumentsControllersInstrumentControllerListInstrumentsInstrumentResponseBody>;
+        items?: Array<ModulesAtivosControllersInstrumentControllerListInstrumentsInstrumentResponseBody>;
         /**
          * Maximal number of items to send.
          */
@@ -355,16 +355,16 @@ export type ApiV1InstrumentsListInstrumentsResponses = {
     };
 };
 
-export type ApiV1InstrumentsListInstrumentsResponse = ApiV1InstrumentsListInstrumentsResponses[keyof ApiV1InstrumentsListInstrumentsResponses];
+export type ApiV1AtivosListInstrumentsResponse = ApiV1AtivosListInstrumentsResponses[keyof ApiV1AtivosListInstrumentsResponses];
 
-export type ApiV1InstrumentsCreateInstrumentData = {
+export type ApiV1AtivosCreateInstrumentData = {
     body: InstrumentCreate;
     path?: never;
     query?: never;
-    url: '/api/v1/instruments';
+    url: '/api/v1/ativos';
 };
 
-export type ApiV1InstrumentsCreateInstrumentErrors = {
+export type ApiV1AtivosCreateInstrumentErrors = {
     /**
      * Validation Exception
      */
@@ -377,27 +377,27 @@ export type ApiV1InstrumentsCreateInstrumentErrors = {
     };
 };
 
-export type ApiV1InstrumentsCreateInstrumentError = ApiV1InstrumentsCreateInstrumentErrors[keyof ApiV1InstrumentsCreateInstrumentErrors];
+export type ApiV1AtivosCreateInstrumentError = ApiV1AtivosCreateInstrumentErrors[keyof ApiV1AtivosCreateInstrumentErrors];
 
-export type ApiV1InstrumentsCreateInstrumentResponses = {
+export type ApiV1AtivosCreateInstrumentResponses = {
     /**
      * Document created, URL follows
      */
-    201: ModulesInstrumentsControllersInstrumentControllerCreateInstrumentInstrumentResponseBody;
+    201: ModulesAtivosControllersInstrumentControllerCreateInstrumentInstrumentResponseBody;
 };
 
-export type ApiV1InstrumentsCreateInstrumentResponse = ApiV1InstrumentsCreateInstrumentResponses[keyof ApiV1InstrumentsCreateInstrumentResponses];
+export type ApiV1AtivosCreateInstrumentResponse = ApiV1AtivosCreateInstrumentResponses[keyof ApiV1AtivosCreateInstrumentResponses];
 
-export type ApiV1InstrumentsInstrumentIdDeleteInstrumentData = {
+export type ApiV1AtivosInstrumentIdDeleteInstrumentData = {
     body?: never;
     path: {
         instrument_id: number;
     };
     query?: never;
-    url: '/api/v1/instruments/{instrument_id}';
+    url: '/api/v1/ativos/{instrument_id}';
 };
 
-export type ApiV1InstrumentsInstrumentIdDeleteInstrumentErrors = {
+export type ApiV1AtivosInstrumentIdDeleteInstrumentErrors = {
     /**
      * Validation Exception
      */
@@ -410,27 +410,27 @@ export type ApiV1InstrumentsInstrumentIdDeleteInstrumentErrors = {
     };
 };
 
-export type ApiV1InstrumentsInstrumentIdDeleteInstrumentError = ApiV1InstrumentsInstrumentIdDeleteInstrumentErrors[keyof ApiV1InstrumentsInstrumentIdDeleteInstrumentErrors];
+export type ApiV1AtivosInstrumentIdDeleteInstrumentError = ApiV1AtivosInstrumentIdDeleteInstrumentErrors[keyof ApiV1AtivosInstrumentIdDeleteInstrumentErrors];
 
-export type ApiV1InstrumentsInstrumentIdDeleteInstrumentResponses = {
+export type ApiV1AtivosInstrumentIdDeleteInstrumentResponses = {
     /**
      * Request fulfilled, nothing follows
      */
     204: void;
 };
 
-export type ApiV1InstrumentsInstrumentIdDeleteInstrumentResponse = ApiV1InstrumentsInstrumentIdDeleteInstrumentResponses[keyof ApiV1InstrumentsInstrumentIdDeleteInstrumentResponses];
+export type ApiV1AtivosInstrumentIdDeleteInstrumentResponse = ApiV1AtivosInstrumentIdDeleteInstrumentResponses[keyof ApiV1AtivosInstrumentIdDeleteInstrumentResponses];
 
-export type ApiV1InstrumentsInstrumentIdGetInstrumentData = {
+export type ApiV1AtivosInstrumentIdGetInstrumentData = {
     body?: never;
     path: {
         instrument_id: number;
     };
     query?: never;
-    url: '/api/v1/instruments/{instrument_id}';
+    url: '/api/v1/ativos/{instrument_id}';
 };
 
-export type ApiV1InstrumentsInstrumentIdGetInstrumentErrors = {
+export type ApiV1AtivosInstrumentIdGetInstrumentErrors = {
     /**
      * Validation Exception
      */
@@ -443,27 +443,27 @@ export type ApiV1InstrumentsInstrumentIdGetInstrumentErrors = {
     };
 };
 
-export type ApiV1InstrumentsInstrumentIdGetInstrumentError = ApiV1InstrumentsInstrumentIdGetInstrumentErrors[keyof ApiV1InstrumentsInstrumentIdGetInstrumentErrors];
+export type ApiV1AtivosInstrumentIdGetInstrumentError = ApiV1AtivosInstrumentIdGetInstrumentErrors[keyof ApiV1AtivosInstrumentIdGetInstrumentErrors];
 
-export type ApiV1InstrumentsInstrumentIdGetInstrumentResponses = {
+export type ApiV1AtivosInstrumentIdGetInstrumentResponses = {
     /**
      * Request fulfilled, document follows
      */
-    200: ModulesInstrumentsControllersInstrumentControllerGetInstrumentInstrumentResponseBody;
+    200: ModulesAtivosControllersInstrumentControllerGetInstrumentInstrumentResponseBody;
 };
 
-export type ApiV1InstrumentsInstrumentIdGetInstrumentResponse = ApiV1InstrumentsInstrumentIdGetInstrumentResponses[keyof ApiV1InstrumentsInstrumentIdGetInstrumentResponses];
+export type ApiV1AtivosInstrumentIdGetInstrumentResponse = ApiV1AtivosInstrumentIdGetInstrumentResponses[keyof ApiV1AtivosInstrumentIdGetInstrumentResponses];
 
-export type ApiV1InstrumentsInstrumentIdUpdateInstrumentData = {
+export type ApiV1AtivosInstrumentIdUpdateInstrumentData = {
     body: InstrumentUpdate;
     path: {
         instrument_id: number;
     };
     query?: never;
-    url: '/api/v1/instruments/{instrument_id}';
+    url: '/api/v1/ativos/{instrument_id}';
 };
 
-export type ApiV1InstrumentsInstrumentIdUpdateInstrumentErrors = {
+export type ApiV1AtivosInstrumentIdUpdateInstrumentErrors = {
     /**
      * Validation Exception
      */
@@ -476,25 +476,27 @@ export type ApiV1InstrumentsInstrumentIdUpdateInstrumentErrors = {
     };
 };
 
-export type ApiV1InstrumentsInstrumentIdUpdateInstrumentError = ApiV1InstrumentsInstrumentIdUpdateInstrumentErrors[keyof ApiV1InstrumentsInstrumentIdUpdateInstrumentErrors];
+export type ApiV1AtivosInstrumentIdUpdateInstrumentError = ApiV1AtivosInstrumentIdUpdateInstrumentErrors[keyof ApiV1AtivosInstrumentIdUpdateInstrumentErrors];
 
-export type ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses = {
+export type ApiV1AtivosInstrumentIdUpdateInstrumentResponses = {
     /**
      * Request fulfilled, document follows
      */
-    200: ModulesInstrumentsControllersInstrumentControllerUpdateInstrumentInstrumentResponseBody;
+    200: ModulesAtivosControllersInstrumentControllerUpdateInstrumentInstrumentResponseBody;
 };
 
-export type ApiV1InstrumentsInstrumentIdUpdateInstrumentResponse = ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses[keyof ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses];
+export type ApiV1AtivosInstrumentIdUpdateInstrumentResponse = ApiV1AtivosInstrumentIdUpdateInstrumentResponses[keyof ApiV1AtivosInstrumentIdUpdateInstrumentResponses];
 
-export type ApiV1NotesCreateNoteData = {
-    body: NoteCreate;
-    path?: never;
+export type ApiV1BoletasTradeIdCancelCancelTradeData = {
+    body?: never;
+    path: {
+        trade_id: number;
+    };
     query?: never;
-    url: '/api/v1/notes';
+    url: '/api/v1/boletas/{trade_id}/cancel';
 };
 
-export type ApiV1NotesCreateNoteErrors = {
+export type ApiV1BoletasTradeIdCancelCancelTradeErrors = {
     /**
      * Validation Exception
      */
@@ -507,27 +509,219 @@ export type ApiV1NotesCreateNoteErrors = {
     };
 };
 
-export type ApiV1NotesCreateNoteError = ApiV1NotesCreateNoteErrors[keyof ApiV1NotesCreateNoteErrors];
+export type ApiV1BoletasTradeIdCancelCancelTradeError = ApiV1BoletasTradeIdCancelCancelTradeErrors[keyof ApiV1BoletasTradeIdCancelCancelTradeErrors];
 
-export type ApiV1NotesCreateNoteResponses = {
+export type ApiV1BoletasTradeIdCancelCancelTradeResponses = {
+    /**
+     * Request fulfilled, document follows
+     */
+    200: ModulesBoletasControllersTradeControllerCancelTradeTradeResponseBody;
+};
+
+export type ApiV1BoletasTradeIdCancelCancelTradeResponse = ApiV1BoletasTradeIdCancelCancelTradeResponses[keyof ApiV1BoletasTradeIdCancelCancelTradeResponses];
+
+export type ApiV1BoletasListTradesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        currentPage?: number;
+        pageSize?: number;
+        /**
+         * Field to search
+         */
+        searchString?: string | null;
+        /**
+         * Search should be case sensitive
+         */
+        searchIgnoreCase?: boolean | null;
+        /**
+         * Order by field
+         */
+        orderBy?: string | null;
+        /**
+         * Field to search
+         */
+        sortOrder?: 'asc' | 'desc' | null;
+    };
+    url: '/api/v1/boletas';
+};
+
+export type ApiV1BoletasListTradesErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | {
+            [key: string]: unknown;
+        } | Array<unknown>;
+    };
+};
+
+export type ApiV1BoletasListTradesError = ApiV1BoletasListTradesErrors[keyof ApiV1BoletasListTradesErrors];
+
+export type ApiV1BoletasListTradesResponses = {
+    /**
+     * Request fulfilled, document follows
+     */
+    200: {
+        items?: Array<ModulesBoletasControllersTradeControllerListTradesTradeResponseBody>;
+        /**
+         * Maximal number of items to send.
+         */
+        limit?: number;
+        /**
+         * Offset from the beginning of the query.
+         */
+        offset?: number;
+        /**
+         * Total number of items.
+         */
+        total?: number;
+    };
+};
+
+export type ApiV1BoletasListTradesResponse = ApiV1BoletasListTradesResponses[keyof ApiV1BoletasListTradesResponses];
+
+export type ApiV1BoletasCreateTradeData = {
+    body: TradeCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/boletas';
+};
+
+export type ApiV1BoletasCreateTradeErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | {
+            [key: string]: unknown;
+        } | Array<unknown>;
+    };
+};
+
+export type ApiV1BoletasCreateTradeError = ApiV1BoletasCreateTradeErrors[keyof ApiV1BoletasCreateTradeErrors];
+
+export type ApiV1BoletasCreateTradeResponses = {
+    /**
+     * Document created, URL follows
+     */
+    201: ModulesBoletasControllersTradeControllerCreateTradeTradeResponseBody;
+};
+
+export type ApiV1BoletasCreateTradeResponse = ApiV1BoletasCreateTradeResponses[keyof ApiV1BoletasCreateTradeResponses];
+
+export type ApiV1BoletasTradeIdGetTradeData = {
+    body?: never;
+    path: {
+        trade_id: number;
+    };
+    query?: never;
+    url: '/api/v1/boletas/{trade_id}';
+};
+
+export type ApiV1BoletasTradeIdGetTradeErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | {
+            [key: string]: unknown;
+        } | Array<unknown>;
+    };
+};
+
+export type ApiV1BoletasTradeIdGetTradeError = ApiV1BoletasTradeIdGetTradeErrors[keyof ApiV1BoletasTradeIdGetTradeErrors];
+
+export type ApiV1BoletasTradeIdGetTradeResponses = {
+    /**
+     * Request fulfilled, document follows
+     */
+    200: ModulesBoletasControllersTradeControllerGetTradeTradeResponseBody;
+};
+
+export type ApiV1BoletasTradeIdGetTradeResponse = ApiV1BoletasTradeIdGetTradeResponses[keyof ApiV1BoletasTradeIdGetTradeResponses];
+
+export type ApiV1BoletasTradeIdSettleSettleTradeData = {
+    body?: never;
+    path: {
+        trade_id: number;
+    };
+    query?: never;
+    url: '/api/v1/boletas/{trade_id}/settle';
+};
+
+export type ApiV1BoletasTradeIdSettleSettleTradeErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | {
+            [key: string]: unknown;
+        } | Array<unknown>;
+    };
+};
+
+export type ApiV1BoletasTradeIdSettleSettleTradeError = ApiV1BoletasTradeIdSettleSettleTradeErrors[keyof ApiV1BoletasTradeIdSettleSettleTradeErrors];
+
+export type ApiV1BoletasTradeIdSettleSettleTradeResponses = {
+    /**
+     * Request fulfilled, document follows
+     */
+    200: ModulesBoletasControllersTradeControllerSettleTradeTradeResponseBody;
+};
+
+export type ApiV1BoletasTradeIdSettleSettleTradeResponse = ApiV1BoletasTradeIdSettleSettleTradeResponses[keyof ApiV1BoletasTradeIdSettleSettleTradeResponses];
+
+export type ApiV1NotasCreateNoteData = {
+    body: NoteCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/notas';
+};
+
+export type ApiV1NotasCreateNoteErrors = {
+    /**
+     * Validation Exception
+     */
+    400: {
+        status_code: number;
+        detail: string;
+        extra?: null | {
+            [key: string]: unknown;
+        } | Array<unknown>;
+    };
+};
+
+export type ApiV1NotasCreateNoteError = ApiV1NotasCreateNoteErrors[keyof ApiV1NotasCreateNoteErrors];
+
+export type ApiV1NotasCreateNoteResponses = {
     /**
      * Document created, URL follows
      */
     201: NoteRead;
 };
 
-export type ApiV1NotesCreateNoteResponse = ApiV1NotesCreateNoteResponses[keyof ApiV1NotesCreateNoteResponses];
+export type ApiV1NotasCreateNoteResponse = ApiV1NotasCreateNoteResponses[keyof ApiV1NotasCreateNoteResponses];
 
-export type ApiV1NotesNoteIdDeleteNoteData = {
+export type ApiV1NotasNoteIdDeleteNoteData = {
     body?: never;
     path: {
         note_id: number;
     };
     query?: never;
-    url: '/api/v1/notes/{note_id}';
+    url: '/api/v1/notas/{note_id}';
 };
 
-export type ApiV1NotesNoteIdDeleteNoteErrors = {
+export type ApiV1NotasNoteIdDeleteNoteErrors = {
     /**
      * Validation Exception
      */
@@ -540,27 +734,27 @@ export type ApiV1NotesNoteIdDeleteNoteErrors = {
     };
 };
 
-export type ApiV1NotesNoteIdDeleteNoteError = ApiV1NotesNoteIdDeleteNoteErrors[keyof ApiV1NotesNoteIdDeleteNoteErrors];
+export type ApiV1NotasNoteIdDeleteNoteError = ApiV1NotasNoteIdDeleteNoteErrors[keyof ApiV1NotasNoteIdDeleteNoteErrors];
 
-export type ApiV1NotesNoteIdDeleteNoteResponses = {
+export type ApiV1NotasNoteIdDeleteNoteResponses = {
     /**
      * Request fulfilled, nothing follows
      */
     204: void;
 };
 
-export type ApiV1NotesNoteIdDeleteNoteResponse = ApiV1NotesNoteIdDeleteNoteResponses[keyof ApiV1NotesNoteIdDeleteNoteResponses];
+export type ApiV1NotasNoteIdDeleteNoteResponse = ApiV1NotasNoteIdDeleteNoteResponses[keyof ApiV1NotasNoteIdDeleteNoteResponses];
 
-export type ApiV1NotesNoteIdGetNoteData = {
+export type ApiV1NotasNoteIdGetNoteData = {
     body?: never;
     path: {
         note_id: number;
     };
     query?: never;
-    url: '/api/v1/notes/{note_id}';
+    url: '/api/v1/notas/{note_id}';
 };
 
-export type ApiV1NotesNoteIdGetNoteErrors = {
+export type ApiV1NotasNoteIdGetNoteErrors = {
     /**
      * Validation Exception
      */
@@ -573,27 +767,27 @@ export type ApiV1NotesNoteIdGetNoteErrors = {
     };
 };
 
-export type ApiV1NotesNoteIdGetNoteError = ApiV1NotesNoteIdGetNoteErrors[keyof ApiV1NotesNoteIdGetNoteErrors];
+export type ApiV1NotasNoteIdGetNoteError = ApiV1NotasNoteIdGetNoteErrors[keyof ApiV1NotasNoteIdGetNoteErrors];
 
-export type ApiV1NotesNoteIdGetNoteResponses = {
+export type ApiV1NotasNoteIdGetNoteResponses = {
     /**
      * Request fulfilled, document follows
      */
     200: NoteRead;
 };
 
-export type ApiV1NotesNoteIdGetNoteResponse = ApiV1NotesNoteIdGetNoteResponses[keyof ApiV1NotesNoteIdGetNoteResponses];
+export type ApiV1NotasNoteIdGetNoteResponse = ApiV1NotasNoteIdGetNoteResponses[keyof ApiV1NotasNoteIdGetNoteResponses];
 
-export type ApiV1NotesNoteIdUpdateNoteData = {
+export type ApiV1NotasNoteIdUpdateNoteData = {
     body: NoteUpdate;
     path: {
         note_id: number;
     };
     query?: never;
-    url: '/api/v1/notes/{note_id}';
+    url: '/api/v1/notas/{note_id}';
 };
 
-export type ApiV1NotesNoteIdUpdateNoteErrors = {
+export type ApiV1NotasNoteIdUpdateNoteErrors = {
     /**
      * Validation Exception
      */
@@ -606,60 +800,60 @@ export type ApiV1NotesNoteIdUpdateNoteErrors = {
     };
 };
 
-export type ApiV1NotesNoteIdUpdateNoteError = ApiV1NotesNoteIdUpdateNoteErrors[keyof ApiV1NotesNoteIdUpdateNoteErrors];
+export type ApiV1NotasNoteIdUpdateNoteError = ApiV1NotasNoteIdUpdateNoteErrors[keyof ApiV1NotasNoteIdUpdateNoteErrors];
 
-export type ApiV1NotesNoteIdUpdateNoteResponses = {
+export type ApiV1NotasNoteIdUpdateNoteResponses = {
     /**
      * Request fulfilled, document follows
      */
     200: NoteRead;
 };
 
-export type ApiV1NotesNoteIdUpdateNoteResponse = ApiV1NotesNoteIdUpdateNoteResponses[keyof ApiV1NotesNoteIdUpdateNoteResponses];
+export type ApiV1NotasNoteIdUpdateNoteResponse = ApiV1NotasNoteIdUpdateNoteResponses[keyof ApiV1NotasNoteIdUpdateNoteResponses];
 
-export type ApiV1NotesMineListMyNotesData = {
+export type ApiV1NotasMineListMyNotesData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/notes/mine';
+    url: '/api/v1/notas/mine';
 };
 
-export type ApiV1NotesMineListMyNotesResponses = {
+export type ApiV1NotasMineListMyNotesResponses = {
     /**
      * Request fulfilled, document follows
      */
     200: Array<NoteSummary>;
 };
 
-export type ApiV1NotesMineListMyNotesResponse = ApiV1NotesMineListMyNotesResponses[keyof ApiV1NotesMineListMyNotesResponses];
+export type ApiV1NotasMineListMyNotesResponse = ApiV1NotasMineListMyNotesResponses[keyof ApiV1NotasMineListMyNotesResponses];
 
-export type ApiV1NotesWikiListWikiEntriesData = {
+export type ApiV1NotasWikiListWikiEntriesData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/notes/wiki';
+    url: '/api/v1/notas/wiki';
 };
 
-export type ApiV1NotesWikiListWikiEntriesResponses = {
+export type ApiV1NotasWikiListWikiEntriesResponses = {
     /**
      * Request fulfilled, document follows
      */
     200: Array<WikiEntry>;
 };
 
-export type ApiV1NotesWikiListWikiEntriesResponse = ApiV1NotesWikiListWikiEntriesResponses[keyof ApiV1NotesWikiListWikiEntriesResponses];
+export type ApiV1NotasWikiListWikiEntriesResponse = ApiV1NotasWikiListWikiEntriesResponses[keyof ApiV1NotasWikiListWikiEntriesResponses];
 
-export type ApiV1PositionsGetPositionsData = {
+export type ApiV1PosicoesGetPositionsData = {
     body?: never;
     path?: never;
     query: {
         fund_cnpj: string;
         reference_date: string;
     };
-    url: '/api/v1/positions';
+    url: '/api/v1/posicoes';
 };
 
-export type ApiV1PositionsGetPositionsErrors = {
+export type ApiV1PosicoesGetPositionsErrors = {
     /**
      * Validation Exception
      */
@@ -672,27 +866,27 @@ export type ApiV1PositionsGetPositionsErrors = {
     };
 };
 
-export type ApiV1PositionsGetPositionsError = ApiV1PositionsGetPositionsErrors[keyof ApiV1PositionsGetPositionsErrors];
+export type ApiV1PosicoesGetPositionsError = ApiV1PosicoesGetPositionsErrors[keyof ApiV1PosicoesGetPositionsErrors];
 
-export type ApiV1PositionsGetPositionsResponses = {
+export type ApiV1PosicoesGetPositionsResponses = {
     /**
      * Request fulfilled, document follows
      */
     200: Array<Position>;
 };
 
-export type ApiV1PositionsGetPositionsResponse = ApiV1PositionsGetPositionsResponses[keyof ApiV1PositionsGetPositionsResponses];
+export type ApiV1PosicoesGetPositionsResponse = ApiV1PosicoesGetPositionsResponses[keyof ApiV1PosicoesGetPositionsResponses];
 
-export type ApiV1PositionsReportsTaskRunIdGetReportData = {
+export type ApiV1PosicoesReportsTaskRunIdGetReportData = {
     body?: never;
     path: {
         task_run_id: string;
     };
     query?: never;
-    url: '/api/v1/positions/reports/{task_run_id}';
+    url: '/api/v1/posicoes/reports/{task_run_id}';
 };
 
-export type ApiV1PositionsReportsTaskRunIdGetReportErrors = {
+export type ApiV1PosicoesReportsTaskRunIdGetReportErrors = {
     /**
      * Validation Exception
      */
@@ -705,27 +899,27 @@ export type ApiV1PositionsReportsTaskRunIdGetReportErrors = {
     };
 };
 
-export type ApiV1PositionsReportsTaskRunIdGetReportError = ApiV1PositionsReportsTaskRunIdGetReportErrors[keyof ApiV1PositionsReportsTaskRunIdGetReportErrors];
+export type ApiV1PosicoesReportsTaskRunIdGetReportError = ApiV1PosicoesReportsTaskRunIdGetReportErrors[keyof ApiV1PosicoesReportsTaskRunIdGetReportErrors];
 
-export type ApiV1PositionsReportsTaskRunIdGetReportResponses = {
+export type ApiV1PosicoesReportsTaskRunIdGetReportResponses = {
     /**
      * Request fulfilled, document follows
      */
     200: PositionsReportStatus;
 };
 
-export type ApiV1PositionsReportsTaskRunIdGetReportResponse = ApiV1PositionsReportsTaskRunIdGetReportResponses[keyof ApiV1PositionsReportsTaskRunIdGetReportResponses];
+export type ApiV1PosicoesReportsTaskRunIdGetReportResponse = ApiV1PosicoesReportsTaskRunIdGetReportResponses[keyof ApiV1PosicoesReportsTaskRunIdGetReportResponses];
 
-export type ApiV1PositionsReportsTaskRunIdPdfGetReportPdfData = {
+export type ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfData = {
     body?: never;
     path: {
         task_run_id: string;
     };
     query?: never;
-    url: '/api/v1/positions/reports/{task_run_id}/pdf';
+    url: '/api/v1/posicoes/reports/{task_run_id}/pdf';
 };
 
-export type ApiV1PositionsReportsTaskRunIdPdfGetReportPdfErrors = {
+export type ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfErrors = {
     /**
      * Validation Exception
      */
@@ -738,25 +932,25 @@ export type ApiV1PositionsReportsTaskRunIdPdfGetReportPdfErrors = {
     };
 };
 
-export type ApiV1PositionsReportsTaskRunIdPdfGetReportPdfError = ApiV1PositionsReportsTaskRunIdPdfGetReportPdfErrors[keyof ApiV1PositionsReportsTaskRunIdPdfGetReportPdfErrors];
+export type ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfError = ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfErrors[keyof ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfErrors];
 
-export type ApiV1PositionsReportsTaskRunIdPdfGetReportPdfResponses = {
+export type ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfResponses = {
     /**
      * Request fulfilled, document follows
      */
     200: PositionsReportPdfUrl;
 };
 
-export type ApiV1PositionsReportsTaskRunIdPdfGetReportPdfResponse = ApiV1PositionsReportsTaskRunIdPdfGetReportPdfResponses[keyof ApiV1PositionsReportsTaskRunIdPdfGetReportPdfResponses];
+export type ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfResponse = ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfResponses[keyof ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfResponses];
 
-export type ApiV1PositionsReportsTriggerReportData = {
+export type ApiV1PosicoesReportsTriggerReportData = {
     body: PositionsReportRequest;
     path?: never;
     query?: never;
-    url: '/api/v1/positions/reports';
+    url: '/api/v1/posicoes/reports';
 };
 
-export type ApiV1PositionsReportsTriggerReportErrors = {
+export type ApiV1PosicoesReportsTriggerReportErrors = {
     /**
      * Validation Exception
      */
@@ -769,207 +963,13 @@ export type ApiV1PositionsReportsTriggerReportErrors = {
     };
 };
 
-export type ApiV1PositionsReportsTriggerReportError = ApiV1PositionsReportsTriggerReportErrors[keyof ApiV1PositionsReportsTriggerReportErrors];
+export type ApiV1PosicoesReportsTriggerReportError = ApiV1PosicoesReportsTriggerReportErrors[keyof ApiV1PosicoesReportsTriggerReportErrors];
 
-export type ApiV1PositionsReportsTriggerReportResponses = {
+export type ApiV1PosicoesReportsTriggerReportResponses = {
     /**
      * Request accepted, processing continues off-line
      */
     202: PositionsReportHandle;
 };
 
-export type ApiV1PositionsReportsTriggerReportResponse = ApiV1PositionsReportsTriggerReportResponses[keyof ApiV1PositionsReportsTriggerReportResponses];
-
-export type ApiV1TradesTradeIdCancelCancelTradeData = {
-    body?: never;
-    path: {
-        trade_id: number;
-    };
-    query?: never;
-    url: '/api/v1/trades/{trade_id}/cancel';
-};
-
-export type ApiV1TradesTradeIdCancelCancelTradeErrors = {
-    /**
-     * Validation Exception
-     */
-    400: {
-        status_code: number;
-        detail: string;
-        extra?: null | {
-            [key: string]: unknown;
-        } | Array<unknown>;
-    };
-};
-
-export type ApiV1TradesTradeIdCancelCancelTradeError = ApiV1TradesTradeIdCancelCancelTradeErrors[keyof ApiV1TradesTradeIdCancelCancelTradeErrors];
-
-export type ApiV1TradesTradeIdCancelCancelTradeResponses = {
-    /**
-     * Request fulfilled, document follows
-     */
-    200: ModulesTradesControllersTradeControllerCancelTradeTradeResponseBody;
-};
-
-export type ApiV1TradesTradeIdCancelCancelTradeResponse = ApiV1TradesTradeIdCancelCancelTradeResponses[keyof ApiV1TradesTradeIdCancelCancelTradeResponses];
-
-export type ApiV1TradesListTradesData = {
-    body?: never;
-    path?: never;
-    query?: {
-        currentPage?: number;
-        pageSize?: number;
-        /**
-         * Field to search
-         */
-        searchString?: string | null;
-        /**
-         * Search should be case sensitive
-         */
-        searchIgnoreCase?: boolean | null;
-        /**
-         * Order by field
-         */
-        orderBy?: string | null;
-        /**
-         * Field to search
-         */
-        sortOrder?: 'asc' | 'desc' | null;
-    };
-    url: '/api/v1/trades';
-};
-
-export type ApiV1TradesListTradesErrors = {
-    /**
-     * Validation Exception
-     */
-    400: {
-        status_code: number;
-        detail: string;
-        extra?: null | {
-            [key: string]: unknown;
-        } | Array<unknown>;
-    };
-};
-
-export type ApiV1TradesListTradesError = ApiV1TradesListTradesErrors[keyof ApiV1TradesListTradesErrors];
-
-export type ApiV1TradesListTradesResponses = {
-    /**
-     * Request fulfilled, document follows
-     */
-    200: {
-        items?: Array<ModulesTradesControllersTradeControllerListTradesTradeResponseBody>;
-        /**
-         * Maximal number of items to send.
-         */
-        limit?: number;
-        /**
-         * Offset from the beginning of the query.
-         */
-        offset?: number;
-        /**
-         * Total number of items.
-         */
-        total?: number;
-    };
-};
-
-export type ApiV1TradesListTradesResponse = ApiV1TradesListTradesResponses[keyof ApiV1TradesListTradesResponses];
-
-export type ApiV1TradesCreateTradeData = {
-    body: TradeCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/trades';
-};
-
-export type ApiV1TradesCreateTradeErrors = {
-    /**
-     * Validation Exception
-     */
-    400: {
-        status_code: number;
-        detail: string;
-        extra?: null | {
-            [key: string]: unknown;
-        } | Array<unknown>;
-    };
-};
-
-export type ApiV1TradesCreateTradeError = ApiV1TradesCreateTradeErrors[keyof ApiV1TradesCreateTradeErrors];
-
-export type ApiV1TradesCreateTradeResponses = {
-    /**
-     * Document created, URL follows
-     */
-    201: ModulesTradesControllersTradeControllerCreateTradeTradeResponseBody;
-};
-
-export type ApiV1TradesCreateTradeResponse = ApiV1TradesCreateTradeResponses[keyof ApiV1TradesCreateTradeResponses];
-
-export type ApiV1TradesTradeIdGetTradeData = {
-    body?: never;
-    path: {
-        trade_id: number;
-    };
-    query?: never;
-    url: '/api/v1/trades/{trade_id}';
-};
-
-export type ApiV1TradesTradeIdGetTradeErrors = {
-    /**
-     * Validation Exception
-     */
-    400: {
-        status_code: number;
-        detail: string;
-        extra?: null | {
-            [key: string]: unknown;
-        } | Array<unknown>;
-    };
-};
-
-export type ApiV1TradesTradeIdGetTradeError = ApiV1TradesTradeIdGetTradeErrors[keyof ApiV1TradesTradeIdGetTradeErrors];
-
-export type ApiV1TradesTradeIdGetTradeResponses = {
-    /**
-     * Request fulfilled, document follows
-     */
-    200: ModulesTradesControllersTradeControllerGetTradeTradeResponseBody;
-};
-
-export type ApiV1TradesTradeIdGetTradeResponse = ApiV1TradesTradeIdGetTradeResponses[keyof ApiV1TradesTradeIdGetTradeResponses];
-
-export type ApiV1TradesTradeIdSettleSettleTradeData = {
-    body?: never;
-    path: {
-        trade_id: number;
-    };
-    query?: never;
-    url: '/api/v1/trades/{trade_id}/settle';
-};
-
-export type ApiV1TradesTradeIdSettleSettleTradeErrors = {
-    /**
-     * Validation Exception
-     */
-    400: {
-        status_code: number;
-        detail: string;
-        extra?: null | {
-            [key: string]: unknown;
-        } | Array<unknown>;
-    };
-};
-
-export type ApiV1TradesTradeIdSettleSettleTradeError = ApiV1TradesTradeIdSettleSettleTradeErrors[keyof ApiV1TradesTradeIdSettleSettleTradeErrors];
-
-export type ApiV1TradesTradeIdSettleSettleTradeResponses = {
-    /**
-     * Request fulfilled, document follows
-     */
-    200: ModulesTradesControllersTradeControllerSettleTradeTradeResponseBody;
-};
-
-export type ApiV1TradesTradeIdSettleSettleTradeResponse = ApiV1TradesTradeIdSettleSettleTradeResponses[keyof ApiV1TradesTradeIdSettleSettleTradeResponses];
+export type ApiV1PosicoesReportsTriggerReportResponse = ApiV1PosicoesReportsTriggerReportResponses[keyof ApiV1PosicoesReportsTriggerReportResponses];

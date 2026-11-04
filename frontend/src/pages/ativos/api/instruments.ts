@@ -1,8 +1,8 @@
 import { createMutation, useQueryClient } from "@tanstack/svelte-query";
 
 import {
-  apiV1InstrumentsCreateInstrument,
-  apiV1InstrumentsInstrumentIdDeleteInstrument,
+  apiV1AtivosCreateInstrument,
+  apiV1AtivosInstrumentIdDeleteInstrument,
   instrumentKeys as keys,
   unwrap,
   type InstrumentCreate,
@@ -11,7 +11,7 @@ import {
 export function useCreateInstrument() {
   const queryClient = useQueryClient();
   return createMutation(() => ({
-    mutationFn: (body: InstrumentCreate) => unwrap(apiV1InstrumentsCreateInstrument({ body })),
+    mutationFn: (body: InstrumentCreate) => unwrap(apiV1AtivosCreateInstrument({ body })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.instruments }),
   }));
 }
@@ -20,7 +20,7 @@ export function useArchiveInstrument() {
   const queryClient = useQueryClient();
   return createMutation(() => ({
     mutationFn: (id: number) =>
-      unwrap(apiV1InstrumentsInstrumentIdDeleteInstrument({ path: { instrument_id: id } })),
+      unwrap(apiV1AtivosInstrumentIdDeleteInstrument({ path: { instrument_id: id } })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.instruments }),
   }));
 }

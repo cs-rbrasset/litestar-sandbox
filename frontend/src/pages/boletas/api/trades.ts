@@ -1,10 +1,10 @@
 import { createMutation, createQuery, useQueryClient } from "@tanstack/svelte-query";
 
 import {
-  apiV1TradesCreateTrade,
-  apiV1TradesListTrades,
-  apiV1TradesTradeIdCancelCancelTrade,
-  apiV1TradesTradeIdSettleSettleTrade,
+  apiV1BoletasCreateTrade,
+  apiV1BoletasListTrades,
+  apiV1BoletasTradeIdCancelCancelTrade,
+  apiV1BoletasTradeIdSettleSettleTrade,
   unwrap,
   type TradeCreate,
 } from "#shared/api/index.ts";
@@ -16,14 +16,14 @@ export const keys = {
 export function useTrades() {
   return createQuery(() => ({
     queryKey: keys.trades,
-    queryFn: () => unwrap(apiV1TradesListTrades({ query: { pageSize: 100 } })),
+    queryFn: () => unwrap(apiV1BoletasListTrades({ query: { pageSize: 100 } })),
   }));
 }
 
 export function useCreateTrade() {
   const queryClient = useQueryClient();
   return createMutation(() => ({
-    mutationFn: (body: TradeCreate) => unwrap(apiV1TradesCreateTrade({ body })),
+    mutationFn: (body: TradeCreate) => unwrap(apiV1BoletasCreateTrade({ body })),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.trades }),
   }));
 }
@@ -35,8 +35,8 @@ export function useTransitionTrade() {
       const options = { path: { trade_id: id } };
       return unwrap(
         action === "settle"
-          ? apiV1TradesTradeIdSettleSettleTrade(options)
-          : apiV1TradesTradeIdCancelCancelTrade(options),
+          ? apiV1BoletasTradeIdSettleSettleTrade(options)
+          : apiV1BoletasTradeIdCancelCancelTrade(options),
       );
     },
     onSuccess: async () => {

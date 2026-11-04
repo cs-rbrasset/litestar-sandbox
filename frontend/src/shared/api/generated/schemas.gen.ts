@@ -335,7 +335,7 @@ export const WikiEntrySchema = {
     title: 'WikiEntry'
 } as const;
 
-export const modules_instruments_controllers_InstrumentController_create_instrumentInstrumentResponseBodySchema = {
+export const modules_ativos_controllers_InstrumentController_create_instrumentInstrumentResponseBodySchema = {
     properties: {
         name: {
             type: 'string'
@@ -376,10 +376,10 @@ export const modules_instruments_controllers_InstrumentController_create_instrum
         'instrument_type',
         'name'
     ],
-    title: 'modules.instruments.controllers.InstrumentController.create_instrumentInstrumentResponseBody'
+    title: 'modules.ativos.controllers.InstrumentController.create_instrumentInstrumentResponseBody'
 } as const;
 
-export const modules_instruments_controllers_InstrumentController_get_instrumentInstrumentResponseBodySchema = {
+export const modules_ativos_controllers_InstrumentController_get_instrumentInstrumentResponseBodySchema = {
     properties: {
         name: {
             type: 'string'
@@ -420,10 +420,10 @@ export const modules_instruments_controllers_InstrumentController_get_instrument
         'instrument_type',
         'name'
     ],
-    title: 'modules.instruments.controllers.InstrumentController.get_instrumentInstrumentResponseBody'
+    title: 'modules.ativos.controllers.InstrumentController.get_instrumentInstrumentResponseBody'
 } as const;
 
-export const modules_instruments_controllers_InstrumentController_list_instrumentsInstrumentResponseBodySchema = {
+export const modules_ativos_controllers_InstrumentController_list_instrumentsInstrumentResponseBodySchema = {
     properties: {
         name: {
             type: 'string'
@@ -464,10 +464,10 @@ export const modules_instruments_controllers_InstrumentController_list_instrumen
         'instrument_type',
         'name'
     ],
-    title: 'modules.instruments.controllers.InstrumentController.list_instrumentsInstrumentResponseBody'
+    title: 'modules.ativos.controllers.InstrumentController.list_instrumentsInstrumentResponseBody'
 } as const;
 
-export const modules_instruments_controllers_InstrumentController_update_instrumentInstrumentResponseBodySchema = {
+export const modules_ativos_controllers_InstrumentController_update_instrumentInstrumentResponseBodySchema = {
     properties: {
         name: {
             type: 'string'
@@ -508,10 +508,10 @@ export const modules_instruments_controllers_InstrumentController_update_instrum
         'instrument_type',
         'name'
     ],
-    title: 'modules.instruments.controllers.InstrumentController.update_instrumentInstrumentResponseBody'
+    title: 'modules.ativos.controllers.InstrumentController.update_instrumentInstrumentResponseBody'
 } as const;
 
-export const modules_trades_controllers_TradeController_cancel_tradeTradeResponseBodySchema = {
+export const modules_boletas_controllers_TradeController_cancel_tradeTradeResponseBodySchema = {
     properties: {
         fund_cnpj: {
             type: 'string'
@@ -561,10 +561,10 @@ export const modules_trades_controllers_TradeController_cancel_tradeTradeRespons
         'trade_date',
         'unit_price'
     ],
-    title: 'modules.trades.controllers.TradeController.cancel_tradeTradeResponseBody'
+    title: 'modules.boletas.controllers.TradeController.cancel_tradeTradeResponseBody'
 } as const;
 
-export const modules_trades_controllers_TradeController_create_tradeTradeResponseBodySchema = {
+export const modules_boletas_controllers_TradeController_create_tradeTradeResponseBodySchema = {
     properties: {
         fund_cnpj: {
             type: 'string'
@@ -614,10 +614,10 @@ export const modules_trades_controllers_TradeController_create_tradeTradeRespons
         'trade_date',
         'unit_price'
     ],
-    title: 'modules.trades.controllers.TradeController.create_tradeTradeResponseBody'
+    title: 'modules.boletas.controllers.TradeController.create_tradeTradeResponseBody'
 } as const;
 
-export const modules_trades_controllers_TradeController_get_tradeTradeResponseBodySchema = {
+export const modules_boletas_controllers_TradeController_get_tradeTradeResponseBodySchema = {
     properties: {
         fund_cnpj: {
             type: 'string'
@@ -667,10 +667,10 @@ export const modules_trades_controllers_TradeController_get_tradeTradeResponseBo
         'trade_date',
         'unit_price'
     ],
-    title: 'modules.trades.controllers.TradeController.get_tradeTradeResponseBody'
+    title: 'modules.boletas.controllers.TradeController.get_tradeTradeResponseBody'
 } as const;
 
-export const modules_trades_controllers_TradeController_list_tradesTradeResponseBodySchema = {
+export const modules_boletas_controllers_TradeController_list_tradesTradeResponseBodySchema = {
     properties: {
         fund_cnpj: {
             type: 'string'
@@ -720,10 +720,10 @@ export const modules_trades_controllers_TradeController_list_tradesTradeResponse
         'trade_date',
         'unit_price'
     ],
-    title: 'modules.trades.controllers.TradeController.list_tradesTradeResponseBody'
+    title: 'modules.boletas.controllers.TradeController.list_tradesTradeResponseBody'
 } as const;
 
-export const modules_trades_controllers_TradeController_settle_tradeTradeResponseBodySchema = {
+export const modules_boletas_controllers_TradeController_settle_tradeTradeResponseBodySchema = {
     properties: {
         fund_cnpj: {
             type: 'string'
@@ -773,5 +773,5 @@ export const modules_trades_controllers_TradeController_settle_tradeTradeRespons
         'trade_date',
         'unit_price'
     ],
-    title: 'modules.trades.controllers.TradeController.settle_tradeTradeResponseBody'
+    title: 'modules.boletas.controllers.TradeController.settle_tradeTradeResponseBody'
 } as const;

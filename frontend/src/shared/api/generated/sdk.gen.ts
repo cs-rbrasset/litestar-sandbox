@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { ApiV1InstrumentsCreateInstrumentData, ApiV1InstrumentsCreateInstrumentErrors, ApiV1InstrumentsCreateInstrumentResponses, ApiV1InstrumentsInstrumentIdDeleteInstrumentData, ApiV1InstrumentsInstrumentIdDeleteInstrumentErrors, ApiV1InstrumentsInstrumentIdDeleteInstrumentResponses, ApiV1InstrumentsInstrumentIdGetInstrumentData, ApiV1InstrumentsInstrumentIdGetInstrumentErrors, ApiV1InstrumentsInstrumentIdGetInstrumentResponses, ApiV1InstrumentsInstrumentIdUpdateInstrumentData, ApiV1InstrumentsInstrumentIdUpdateInstrumentErrors, ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses, ApiV1InstrumentsListInstrumentsData, ApiV1InstrumentsListInstrumentsErrors, ApiV1InstrumentsListInstrumentsResponses, ApiV1NotesCreateNoteData, ApiV1NotesCreateNoteErrors, ApiV1NotesCreateNoteResponses, ApiV1NotesMineListMyNotesData, ApiV1NotesMineListMyNotesResponses, ApiV1NotesNoteIdDeleteNoteData, ApiV1NotesNoteIdDeleteNoteErrors, ApiV1NotesNoteIdDeleteNoteResponses, ApiV1NotesNoteIdGetNoteData, ApiV1NotesNoteIdGetNoteErrors, ApiV1NotesNoteIdGetNoteResponses, ApiV1NotesNoteIdUpdateNoteData, ApiV1NotesNoteIdUpdateNoteErrors, ApiV1NotesNoteIdUpdateNoteResponses, ApiV1NotesWikiListWikiEntriesData, ApiV1NotesWikiListWikiEntriesResponses, ApiV1PingPingData, ApiV1PingPingResponses, ApiV1PositionsGetPositionsData, ApiV1PositionsGetPositionsErrors, ApiV1PositionsGetPositionsResponses, ApiV1PositionsReportsTaskRunIdGetReportData, ApiV1PositionsReportsTaskRunIdGetReportErrors, ApiV1PositionsReportsTaskRunIdGetReportResponses, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfData, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfErrors, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfResponses, ApiV1PositionsReportsTriggerReportData, ApiV1PositionsReportsTriggerReportErrors, ApiV1PositionsReportsTriggerReportResponses, ApiV1TradesCreateTradeData, ApiV1TradesCreateTradeErrors, ApiV1TradesCreateTradeResponses, ApiV1TradesListTradesData, ApiV1TradesListTradesErrors, ApiV1TradesListTradesResponses, ApiV1TradesTradeIdCancelCancelTradeData, ApiV1TradesTradeIdCancelCancelTradeErrors, ApiV1TradesTradeIdCancelCancelTradeResponses, ApiV1TradesTradeIdGetTradeData, ApiV1TradesTradeIdGetTradeErrors, ApiV1TradesTradeIdGetTradeResponses, ApiV1TradesTradeIdSettleSettleTradeData, ApiV1TradesTradeIdSettleSettleTradeErrors, ApiV1TradesTradeIdSettleSettleTradeResponses } from './types.gen';
+import type { ApiV1AtivosCreateInstrumentData, ApiV1AtivosCreateInstrumentErrors, ApiV1AtivosCreateInstrumentResponses, ApiV1AtivosInstrumentIdDeleteInstrumentData, ApiV1AtivosInstrumentIdDeleteInstrumentErrors, ApiV1AtivosInstrumentIdDeleteInstrumentResponses, ApiV1AtivosInstrumentIdGetInstrumentData, ApiV1AtivosInstrumentIdGetInstrumentErrors, ApiV1AtivosInstrumentIdGetInstrumentResponses, ApiV1AtivosInstrumentIdUpdateInstrumentData, ApiV1AtivosInstrumentIdUpdateInstrumentErrors, ApiV1AtivosInstrumentIdUpdateInstrumentResponses, ApiV1AtivosListInstrumentsData, ApiV1AtivosListInstrumentsErrors, ApiV1AtivosListInstrumentsResponses, ApiV1BoletasCreateTradeData, ApiV1BoletasCreateTradeErrors, ApiV1BoletasCreateTradeResponses, ApiV1BoletasListTradesData, ApiV1BoletasListTradesErrors, ApiV1BoletasListTradesResponses, ApiV1BoletasTradeIdCancelCancelTradeData, ApiV1BoletasTradeIdCancelCancelTradeErrors, ApiV1BoletasTradeIdCancelCancelTradeResponses, ApiV1BoletasTradeIdGetTradeData, ApiV1BoletasTradeIdGetTradeErrors, ApiV1BoletasTradeIdGetTradeResponses, ApiV1BoletasTradeIdSettleSettleTradeData, ApiV1BoletasTradeIdSettleSettleTradeErrors, ApiV1BoletasTradeIdSettleSettleTradeResponses, ApiV1NotasCreateNoteData, ApiV1NotasCreateNoteErrors, ApiV1NotasCreateNoteResponses, ApiV1NotasMineListMyNotesData, ApiV1NotasMineListMyNotesResponses, ApiV1NotasNoteIdDeleteNoteData, ApiV1NotasNoteIdDeleteNoteErrors, ApiV1NotasNoteIdDeleteNoteResponses, ApiV1NotasNoteIdGetNoteData, ApiV1NotasNoteIdGetNoteErrors, ApiV1NotasNoteIdGetNoteResponses, ApiV1NotasNoteIdUpdateNoteData, ApiV1NotasNoteIdUpdateNoteErrors, ApiV1NotasNoteIdUpdateNoteResponses, ApiV1NotasWikiListWikiEntriesData, ApiV1NotasWikiListWikiEntriesResponses, ApiV1PingPingData, ApiV1PingPingResponses, ApiV1PosicoesGetPositionsData, ApiV1PosicoesGetPositionsErrors, ApiV1PosicoesGetPositionsResponses, ApiV1PosicoesReportsTaskRunIdGetReportData, ApiV1PosicoesReportsTaskRunIdGetReportErrors, ApiV1PosicoesReportsTaskRunIdGetReportResponses, ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfData, ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfErrors, ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfResponses, ApiV1PosicoesReportsTriggerReportData, ApiV1PosicoesReportsTriggerReportErrors, ApiV1PosicoesReportsTriggerReportResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -26,19 +26,19 @@ export const apiV1PingPing = <ThrowOnError extends boolean = false>(options?: Op
 /**
  * ListInstruments
  */
-export const apiV1InstrumentsListInstruments = <ThrowOnError extends boolean = false>(options?: Options<ApiV1InstrumentsListInstrumentsData, ThrowOnError>): RequestResult<ApiV1InstrumentsListInstrumentsResponses, ApiV1InstrumentsListInstrumentsErrors, ThrowOnError> => (options?.client ?? client).get<ApiV1InstrumentsListInstrumentsResponses, ApiV1InstrumentsListInstrumentsErrors, ThrowOnError>({
+export const apiV1AtivosListInstruments = <ThrowOnError extends boolean = false>(options?: Options<ApiV1AtivosListInstrumentsData, ThrowOnError>): RequestResult<ApiV1AtivosListInstrumentsResponses, ApiV1AtivosListInstrumentsErrors, ThrowOnError> => (options?.client ?? client).get<ApiV1AtivosListInstrumentsResponses, ApiV1AtivosListInstrumentsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/instruments',
+    url: '/api/v1/ativos',
     ...options
 });
 
 /**
  * CreateInstrument
  */
-export const apiV1InstrumentsCreateInstrument = <ThrowOnError extends boolean = false>(options: Options<ApiV1InstrumentsCreateInstrumentData, ThrowOnError>): RequestResult<ApiV1InstrumentsCreateInstrumentResponses, ApiV1InstrumentsCreateInstrumentErrors, ThrowOnError> => (options.client ?? client).post<ApiV1InstrumentsCreateInstrumentResponses, ApiV1InstrumentsCreateInstrumentErrors, ThrowOnError>({
+export const apiV1AtivosCreateInstrument = <ThrowOnError extends boolean = false>(options: Options<ApiV1AtivosCreateInstrumentData, ThrowOnError>): RequestResult<ApiV1AtivosCreateInstrumentResponses, ApiV1AtivosCreateInstrumentErrors, ThrowOnError> => (options.client ?? client).post<ApiV1AtivosCreateInstrumentResponses, ApiV1AtivosCreateInstrumentErrors, ThrowOnError>({
     ...urlSearchParamsBodySerializer,
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/instruments',
+    url: '/api/v1/ativos',
     ...options,
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -49,129 +49,27 @@ export const apiV1InstrumentsCreateInstrument = <ThrowOnError extends boolean = 
 /**
  * DeleteInstrument
  */
-export const apiV1InstrumentsInstrumentIdDeleteInstrument = <ThrowOnError extends boolean = false>(options: Options<ApiV1InstrumentsInstrumentIdDeleteInstrumentData, ThrowOnError>): RequestResult<ApiV1InstrumentsInstrumentIdDeleteInstrumentResponses, ApiV1InstrumentsInstrumentIdDeleteInstrumentErrors, ThrowOnError> => (options.client ?? client).delete<ApiV1InstrumentsInstrumentIdDeleteInstrumentResponses, ApiV1InstrumentsInstrumentIdDeleteInstrumentErrors, ThrowOnError>({
+export const apiV1AtivosInstrumentIdDeleteInstrument = <ThrowOnError extends boolean = false>(options: Options<ApiV1AtivosInstrumentIdDeleteInstrumentData, ThrowOnError>): RequestResult<ApiV1AtivosInstrumentIdDeleteInstrumentResponses, ApiV1AtivosInstrumentIdDeleteInstrumentErrors, ThrowOnError> => (options.client ?? client).delete<ApiV1AtivosInstrumentIdDeleteInstrumentResponses, ApiV1AtivosInstrumentIdDeleteInstrumentErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/instruments/{instrument_id}',
+    url: '/api/v1/ativos/{instrument_id}',
     ...options
 });
 
 /**
  * GetInstrument
  */
-export const apiV1InstrumentsInstrumentIdGetInstrument = <ThrowOnError extends boolean = false>(options: Options<ApiV1InstrumentsInstrumentIdGetInstrumentData, ThrowOnError>): RequestResult<ApiV1InstrumentsInstrumentIdGetInstrumentResponses, ApiV1InstrumentsInstrumentIdGetInstrumentErrors, ThrowOnError> => (options.client ?? client).get<ApiV1InstrumentsInstrumentIdGetInstrumentResponses, ApiV1InstrumentsInstrumentIdGetInstrumentErrors, ThrowOnError>({
+export const apiV1AtivosInstrumentIdGetInstrument = <ThrowOnError extends boolean = false>(options: Options<ApiV1AtivosInstrumentIdGetInstrumentData, ThrowOnError>): RequestResult<ApiV1AtivosInstrumentIdGetInstrumentResponses, ApiV1AtivosInstrumentIdGetInstrumentErrors, ThrowOnError> => (options.client ?? client).get<ApiV1AtivosInstrumentIdGetInstrumentResponses, ApiV1AtivosInstrumentIdGetInstrumentErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/instruments/{instrument_id}',
+    url: '/api/v1/ativos/{instrument_id}',
     ...options
 });
 
 /**
  * UpdateInstrument
  */
-export const apiV1InstrumentsInstrumentIdUpdateInstrument = <ThrowOnError extends boolean = false>(options: Options<ApiV1InstrumentsInstrumentIdUpdateInstrumentData, ThrowOnError>): RequestResult<ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses, ApiV1InstrumentsInstrumentIdUpdateInstrumentErrors, ThrowOnError> => (options.client ?? client).patch<ApiV1InstrumentsInstrumentIdUpdateInstrumentResponses, ApiV1InstrumentsInstrumentIdUpdateInstrumentErrors, ThrowOnError>({
+export const apiV1AtivosInstrumentIdUpdateInstrument = <ThrowOnError extends boolean = false>(options: Options<ApiV1AtivosInstrumentIdUpdateInstrumentData, ThrowOnError>): RequestResult<ApiV1AtivosInstrumentIdUpdateInstrumentResponses, ApiV1AtivosInstrumentIdUpdateInstrumentErrors, ThrowOnError> => (options.client ?? client).patch<ApiV1AtivosInstrumentIdUpdateInstrumentResponses, ApiV1AtivosInstrumentIdUpdateInstrumentErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/instruments/{instrument_id}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * CreateNote
- */
-export const apiV1NotesCreateNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotesCreateNoteData, ThrowOnError>): RequestResult<ApiV1NotesCreateNoteResponses, ApiV1NotesCreateNoteErrors, ThrowOnError> => (options.client ?? client).post<ApiV1NotesCreateNoteResponses, ApiV1NotesCreateNoteErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/notes',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * DeleteNote
- */
-export const apiV1NotesNoteIdDeleteNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotesNoteIdDeleteNoteData, ThrowOnError>): RequestResult<ApiV1NotesNoteIdDeleteNoteResponses, ApiV1NotesNoteIdDeleteNoteErrors, ThrowOnError> => (options.client ?? client).delete<ApiV1NotesNoteIdDeleteNoteResponses, ApiV1NotesNoteIdDeleteNoteErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/notes/{note_id}',
-    ...options
-});
-
-/**
- * GetNote
- */
-export const apiV1NotesNoteIdGetNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotesNoteIdGetNoteData, ThrowOnError>): RequestResult<ApiV1NotesNoteIdGetNoteResponses, ApiV1NotesNoteIdGetNoteErrors, ThrowOnError> => (options.client ?? client).get<ApiV1NotesNoteIdGetNoteResponses, ApiV1NotesNoteIdGetNoteErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/notes/{note_id}',
-    ...options
-});
-
-/**
- * UpdateNote
- */
-export const apiV1NotesNoteIdUpdateNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotesNoteIdUpdateNoteData, ThrowOnError>): RequestResult<ApiV1NotesNoteIdUpdateNoteResponses, ApiV1NotesNoteIdUpdateNoteErrors, ThrowOnError> => (options.client ?? client).put<ApiV1NotesNoteIdUpdateNoteResponses, ApiV1NotesNoteIdUpdateNoteErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/notes/{note_id}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * ListMyNotes
- */
-export const apiV1NotesMineListMyNotes = <ThrowOnError extends boolean = false>(options?: Options<ApiV1NotesMineListMyNotesData, ThrowOnError>): RequestResult<ApiV1NotesMineListMyNotesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ApiV1NotesMineListMyNotesResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/notes/mine',
-    ...options
-});
-
-/**
- * ListWikiEntries
- */
-export const apiV1NotesWikiListWikiEntries = <ThrowOnError extends boolean = false>(options?: Options<ApiV1NotesWikiListWikiEntriesData, ThrowOnError>): RequestResult<ApiV1NotesWikiListWikiEntriesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ApiV1NotesWikiListWikiEntriesResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/notes/wiki',
-    ...options
-});
-
-/**
- * GetPositions
- */
-export const apiV1PositionsGetPositions = <ThrowOnError extends boolean = false>(options: Options<ApiV1PositionsGetPositionsData, ThrowOnError>): RequestResult<ApiV1PositionsGetPositionsResponses, ApiV1PositionsGetPositionsErrors, ThrowOnError> => (options.client ?? client).get<ApiV1PositionsGetPositionsResponses, ApiV1PositionsGetPositionsErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/positions',
-    ...options
-});
-
-/**
- * GetReport
- */
-export const apiV1PositionsReportsTaskRunIdGetReport = <ThrowOnError extends boolean = false>(options: Options<ApiV1PositionsReportsTaskRunIdGetReportData, ThrowOnError>): RequestResult<ApiV1PositionsReportsTaskRunIdGetReportResponses, ApiV1PositionsReportsTaskRunIdGetReportErrors, ThrowOnError> => (options.client ?? client).get<ApiV1PositionsReportsTaskRunIdGetReportResponses, ApiV1PositionsReportsTaskRunIdGetReportErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/positions/reports/{task_run_id}',
-    ...options
-});
-
-/**
- * GetReportPdf
- */
-export const apiV1PositionsReportsTaskRunIdPdfGetReportPdf = <ThrowOnError extends boolean = false>(options: Options<ApiV1PositionsReportsTaskRunIdPdfGetReportPdfData, ThrowOnError>): RequestResult<ApiV1PositionsReportsTaskRunIdPdfGetReportPdfResponses, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfErrors, ThrowOnError> => (options.client ?? client).get<ApiV1PositionsReportsTaskRunIdPdfGetReportPdfResponses, ApiV1PositionsReportsTaskRunIdPdfGetReportPdfErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/positions/reports/{task_run_id}/pdf',
-    ...options
-});
-
-/**
- * TriggerReport
- */
-export const apiV1PositionsReportsTriggerReport = <ThrowOnError extends boolean = false>(options: Options<ApiV1PositionsReportsTriggerReportData, ThrowOnError>): RequestResult<ApiV1PositionsReportsTriggerReportResponses, ApiV1PositionsReportsTriggerReportErrors, ThrowOnError> => (options.client ?? client).post<ApiV1PositionsReportsTriggerReportResponses, ApiV1PositionsReportsTriggerReportErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/positions/reports',
+    url: '/api/v1/ativos/{instrument_id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -182,27 +80,27 @@ export const apiV1PositionsReportsTriggerReport = <ThrowOnError extends boolean 
 /**
  * CancelTrade
  */
-export const apiV1TradesTradeIdCancelCancelTrade = <ThrowOnError extends boolean = false>(options: Options<ApiV1TradesTradeIdCancelCancelTradeData, ThrowOnError>): RequestResult<ApiV1TradesTradeIdCancelCancelTradeResponses, ApiV1TradesTradeIdCancelCancelTradeErrors, ThrowOnError> => (options.client ?? client).post<ApiV1TradesTradeIdCancelCancelTradeResponses, ApiV1TradesTradeIdCancelCancelTradeErrors, ThrowOnError>({
+export const apiV1BoletasTradeIdCancelCancelTrade = <ThrowOnError extends boolean = false>(options: Options<ApiV1BoletasTradeIdCancelCancelTradeData, ThrowOnError>): RequestResult<ApiV1BoletasTradeIdCancelCancelTradeResponses, ApiV1BoletasTradeIdCancelCancelTradeErrors, ThrowOnError> => (options.client ?? client).post<ApiV1BoletasTradeIdCancelCancelTradeResponses, ApiV1BoletasTradeIdCancelCancelTradeErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/trades/{trade_id}/cancel',
+    url: '/api/v1/boletas/{trade_id}/cancel',
     ...options
 });
 
 /**
  * ListTrades
  */
-export const apiV1TradesListTrades = <ThrowOnError extends boolean = false>(options?: Options<ApiV1TradesListTradesData, ThrowOnError>): RequestResult<ApiV1TradesListTradesResponses, ApiV1TradesListTradesErrors, ThrowOnError> => (options?.client ?? client).get<ApiV1TradesListTradesResponses, ApiV1TradesListTradesErrors, ThrowOnError>({
+export const apiV1BoletasListTrades = <ThrowOnError extends boolean = false>(options?: Options<ApiV1BoletasListTradesData, ThrowOnError>): RequestResult<ApiV1BoletasListTradesResponses, ApiV1BoletasListTradesErrors, ThrowOnError> => (options?.client ?? client).get<ApiV1BoletasListTradesResponses, ApiV1BoletasListTradesErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/trades',
+    url: '/api/v1/boletas',
     ...options
 });
 
 /**
  * CreateTrade
  */
-export const apiV1TradesCreateTrade = <ThrowOnError extends boolean = false>(options: Options<ApiV1TradesCreateTradeData, ThrowOnError>): RequestResult<ApiV1TradesCreateTradeResponses, ApiV1TradesCreateTradeErrors, ThrowOnError> => (options.client ?? client).post<ApiV1TradesCreateTradeResponses, ApiV1TradesCreateTradeErrors, ThrowOnError>({
+export const apiV1BoletasCreateTrade = <ThrowOnError extends boolean = false>(options: Options<ApiV1BoletasCreateTradeData, ThrowOnError>): RequestResult<ApiV1BoletasCreateTradeResponses, ApiV1BoletasCreateTradeErrors, ThrowOnError> => (options.client ?? client).post<ApiV1BoletasCreateTradeResponses, ApiV1BoletasCreateTradeErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/trades',
+    url: '/api/v1/boletas',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -213,17 +111,119 @@ export const apiV1TradesCreateTrade = <ThrowOnError extends boolean = false>(opt
 /**
  * GetTrade
  */
-export const apiV1TradesTradeIdGetTrade = <ThrowOnError extends boolean = false>(options: Options<ApiV1TradesTradeIdGetTradeData, ThrowOnError>): RequestResult<ApiV1TradesTradeIdGetTradeResponses, ApiV1TradesTradeIdGetTradeErrors, ThrowOnError> => (options.client ?? client).get<ApiV1TradesTradeIdGetTradeResponses, ApiV1TradesTradeIdGetTradeErrors, ThrowOnError>({
+export const apiV1BoletasTradeIdGetTrade = <ThrowOnError extends boolean = false>(options: Options<ApiV1BoletasTradeIdGetTradeData, ThrowOnError>): RequestResult<ApiV1BoletasTradeIdGetTradeResponses, ApiV1BoletasTradeIdGetTradeErrors, ThrowOnError> => (options.client ?? client).get<ApiV1BoletasTradeIdGetTradeResponses, ApiV1BoletasTradeIdGetTradeErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/trades/{trade_id}',
+    url: '/api/v1/boletas/{trade_id}',
     ...options
 });
 
 /**
  * SettleTrade
  */
-export const apiV1TradesTradeIdSettleSettleTrade = <ThrowOnError extends boolean = false>(options: Options<ApiV1TradesTradeIdSettleSettleTradeData, ThrowOnError>): RequestResult<ApiV1TradesTradeIdSettleSettleTradeResponses, ApiV1TradesTradeIdSettleSettleTradeErrors, ThrowOnError> => (options.client ?? client).post<ApiV1TradesTradeIdSettleSettleTradeResponses, ApiV1TradesTradeIdSettleSettleTradeErrors, ThrowOnError>({
+export const apiV1BoletasTradeIdSettleSettleTrade = <ThrowOnError extends boolean = false>(options: Options<ApiV1BoletasTradeIdSettleSettleTradeData, ThrowOnError>): RequestResult<ApiV1BoletasTradeIdSettleSettleTradeResponses, ApiV1BoletasTradeIdSettleSettleTradeErrors, ThrowOnError> => (options.client ?? client).post<ApiV1BoletasTradeIdSettleSettleTradeResponses, ApiV1BoletasTradeIdSettleSettleTradeErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/trades/{trade_id}/settle',
+    url: '/api/v1/boletas/{trade_id}/settle',
     ...options
+});
+
+/**
+ * CreateNote
+ */
+export const apiV1NotasCreateNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotasCreateNoteData, ThrowOnError>): RequestResult<ApiV1NotasCreateNoteResponses, ApiV1NotasCreateNoteErrors, ThrowOnError> => (options.client ?? client).post<ApiV1NotasCreateNoteResponses, ApiV1NotasCreateNoteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notas',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * DeleteNote
+ */
+export const apiV1NotasNoteIdDeleteNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotasNoteIdDeleteNoteData, ThrowOnError>): RequestResult<ApiV1NotasNoteIdDeleteNoteResponses, ApiV1NotasNoteIdDeleteNoteErrors, ThrowOnError> => (options.client ?? client).delete<ApiV1NotasNoteIdDeleteNoteResponses, ApiV1NotasNoteIdDeleteNoteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notas/{note_id}',
+    ...options
+});
+
+/**
+ * GetNote
+ */
+export const apiV1NotasNoteIdGetNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotasNoteIdGetNoteData, ThrowOnError>): RequestResult<ApiV1NotasNoteIdGetNoteResponses, ApiV1NotasNoteIdGetNoteErrors, ThrowOnError> => (options.client ?? client).get<ApiV1NotasNoteIdGetNoteResponses, ApiV1NotasNoteIdGetNoteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notas/{note_id}',
+    ...options
+});
+
+/**
+ * UpdateNote
+ */
+export const apiV1NotasNoteIdUpdateNote = <ThrowOnError extends boolean = false>(options: Options<ApiV1NotasNoteIdUpdateNoteData, ThrowOnError>): RequestResult<ApiV1NotasNoteIdUpdateNoteResponses, ApiV1NotasNoteIdUpdateNoteErrors, ThrowOnError> => (options.client ?? client).put<ApiV1NotasNoteIdUpdateNoteResponses, ApiV1NotasNoteIdUpdateNoteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notas/{note_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * ListMyNotes
+ */
+export const apiV1NotasMineListMyNotes = <ThrowOnError extends boolean = false>(options?: Options<ApiV1NotasMineListMyNotesData, ThrowOnError>): RequestResult<ApiV1NotasMineListMyNotesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ApiV1NotasMineListMyNotesResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notas/mine',
+    ...options
+});
+
+/**
+ * ListWikiEntries
+ */
+export const apiV1NotasWikiListWikiEntries = <ThrowOnError extends boolean = false>(options?: Options<ApiV1NotasWikiListWikiEntriesData, ThrowOnError>): RequestResult<ApiV1NotasWikiListWikiEntriesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ApiV1NotasWikiListWikiEntriesResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/notas/wiki',
+    ...options
+});
+
+/**
+ * GetPositions
+ */
+export const apiV1PosicoesGetPositions = <ThrowOnError extends boolean = false>(options: Options<ApiV1PosicoesGetPositionsData, ThrowOnError>): RequestResult<ApiV1PosicoesGetPositionsResponses, ApiV1PosicoesGetPositionsErrors, ThrowOnError> => (options.client ?? client).get<ApiV1PosicoesGetPositionsResponses, ApiV1PosicoesGetPositionsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/posicoes',
+    ...options
+});
+
+/**
+ * GetReport
+ */
+export const apiV1PosicoesReportsTaskRunIdGetReport = <ThrowOnError extends boolean = false>(options: Options<ApiV1PosicoesReportsTaskRunIdGetReportData, ThrowOnError>): RequestResult<ApiV1PosicoesReportsTaskRunIdGetReportResponses, ApiV1PosicoesReportsTaskRunIdGetReportErrors, ThrowOnError> => (options.client ?? client).get<ApiV1PosicoesReportsTaskRunIdGetReportResponses, ApiV1PosicoesReportsTaskRunIdGetReportErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/posicoes/reports/{task_run_id}',
+    ...options
+});
+
+/**
+ * GetReportPdf
+ */
+export const apiV1PosicoesReportsTaskRunIdPdfGetReportPdf = <ThrowOnError extends boolean = false>(options: Options<ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfData, ThrowOnError>): RequestResult<ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfResponses, ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfErrors, ThrowOnError> => (options.client ?? client).get<ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfResponses, ApiV1PosicoesReportsTaskRunIdPdfGetReportPdfErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/posicoes/reports/{task_run_id}/pdf',
+    ...options
+});
+
+/**
+ * TriggerReport
+ */
+export const apiV1PosicoesReportsTriggerReport = <ThrowOnError extends boolean = false>(options: Options<ApiV1PosicoesReportsTriggerReportData, ThrowOnError>): RequestResult<ApiV1PosicoesReportsTriggerReportResponses, ApiV1PosicoesReportsTriggerReportErrors, ThrowOnError> => (options.client ?? client).post<ApiV1PosicoesReportsTriggerReportResponses, ApiV1PosicoesReportsTriggerReportErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/posicoes/reports',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });

@@ -1,10 +1,10 @@
 import { createMutation, createQuery } from "@tanstack/svelte-query";
 
 import {
-  apiV1PositionsGetPositions,
-  apiV1PositionsReportsTaskRunIdGetReport,
-  apiV1PositionsReportsTaskRunIdPdfGetReportPdf,
-  apiV1PositionsReportsTriggerReport,
+  apiV1PosicoesGetPositions,
+  apiV1PosicoesReportsTaskRunIdGetReport,
+  apiV1PosicoesReportsTaskRunIdPdfGetReportPdf,
+  apiV1PosicoesReportsTriggerReport,
   unwrap,
   type PositionsReportRequest,
 } from "#shared/api/index.ts";
@@ -22,7 +22,7 @@ export function usePositions(fundCnpj: () => string, referenceDate: () => string
     queryKey: keys.positions(fundCnpj(), referenceDate()),
     queryFn: () =>
       unwrap(
-        apiV1PositionsGetPositions({
+        apiV1PosicoesGetPositions({
           query: { fund_cnpj: fundCnpj(), reference_date: referenceDate() },
         }),
       ),
@@ -37,7 +37,7 @@ export function usePositionsHistory(fundCnpj: () => string, dates: () => string[
     queryFn: async () => {
       const byDate = await Promise.all(
         dates().map((reference_date) =>
-          unwrap(apiV1PositionsGetPositions({ query: { fund_cnpj: fundCnpj(), reference_date } })),
+          unwrap(apiV1PosicoesGetPositions({ query: { fund_cnpj: fundCnpj(), reference_date } })),
         ),
       );
       return dates().map((date, i) => ({ date, items: byDate[i] }));
@@ -49,7 +49,7 @@ export function usePositionsHistory(fundCnpj: () => string, dates: () => string[
 export function useTriggerPositionsReport() {
   return createMutation(() => ({
     mutationFn: (body: PositionsReportRequest) =>
-      unwrap(apiV1PositionsReportsTriggerReport({ body })),
+      unwrap(apiV1PosicoesReportsTriggerReport({ body })),
   }));
 }
 
@@ -57,7 +57,7 @@ export function usePositionsReportStatus(taskRunId: () => string | null) {
   return createQuery(() => ({
     queryKey: ["positions-report", taskRunId()],
     queryFn: () =>
-      unwrap(apiV1PositionsReportsTaskRunIdGetReport({ path: { task_run_id: taskRunId()! } })),
+      unwrap(apiV1PosicoesReportsTaskRunIdGetReport({ path: { task_run_id: taskRunId()! } })),
     enabled: taskRunId() !== null,
     refetchInterval: (query) =>
       REPORT_TERMINAL_STATES.has(query.state.data?.state ?? "") ? false : 1500,
@@ -67,6 +67,6 @@ export function usePositionsReportStatus(taskRunId: () => string | null) {
 export function useRequestPdfUrl() {
   return createMutation(() => ({
     mutationFn: (taskRunId: string) =>
-      unwrap(apiV1PositionsReportsTaskRunIdPdfGetReportPdf({ path: { task_run_id: taskRunId } })),
+      unwrap(apiV1PosicoesReportsTaskRunIdPdfGetReportPdf({ path: { task_run_id: taskRunId } })),
   }));
 }
