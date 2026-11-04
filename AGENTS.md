@@ -40,6 +40,18 @@ Nesta branch os agentes estão liberados para implementar: funções completas, 
 - Lógica de domínio é testada sem banco.
 - Teste que depende de Postgres (por exemplo, `FOR UPDATE`) é pulado quando o banco for SQLite.
 
+## Checklist: endpoint ou módulo novo no backend
+
+1. Recurso novo e sem relação com `instruments`/`trades`/`positions`? Módulo próprio em `src/litestar_sandbox/modules/<nome>/` (ver `notes/` como referência recente de módulo isolado: `models`, `repositories`, `services`, `protocols`, `controllers`, `deps`, `schemas` — sem `public.py` enquanto nada mais consumir). O `litestar-autowire` descobre `controllers.py`/`listeners.py` sozinho; não precisa registrar nada em `app.py`.
+2. Contrato de import-linter novo **no mesmo commit** do módulo (`pyproject.toml`, seção `[tool.importlinter]`). Módulo isolado = dois contratos `forbidden` espelhados (ele não depende de ninguém, ninguém depende dele), igual `notes`. Módulo que consome outro só pelo `public.py` dele = contrato `ignore_imports` no caminho do `public.py`, igual `trades`→`instruments`.
+3. Recurso por pessoa (todo mundo só vê o próprio)? Toda rota de dono responde **404, não 403**, pra quem não é dono — nunca revela que o recurso existe pra quem não deveria saber. `request.user.user.db_role` é o identificador estável da pessoa (`core/security.py`); nunca monte uma role a partir de texto do usuário, só o formato de `DB_ROLE_PATTERN`.
+4. Sem FK entre módulos. O dado que outro módulo precisa é copiado no registro (ex.: `author_name` copiado da `Identity` no save) ou viaja num evento.
+5. Fluxo longo/job assíncrono: controller publica um evento (`core/events.py: publish()`), nunca importa a task/o client do Prefect direto; só o listener do módulo (`listeners.py`) conhece a task. Consulta de status que só lê (sem efeito colateral) pode ir direto, sem evento.
+6. Schemas em `msgspec.Struct`; `Parameter(...)` pra restrição em query/path (não `msgspec.Meta`, ignorado fora do body); aliases de DI com `TypeAlias = NamedDependency[SkipValidation[...]]`, nunca `type X = ...`.
+7. Teste junto no mesmo commit (`app_client` pra API, sem banco pra lógica de domínio). Pelo menos um teste de isolamento entre duas pessoas quando o recurso for por dono (ver `test_notes_are_isolated_per_owner` como modelo).
+8. **Mudou uma tabela que já existe no Postgres compartilhado (Supabase)?** `create_all=True` só cria tabela que falta — nunca altera uma que já existe. Reiniciar a API sozinho não corrige nada; sem um `ALTER TABLE` manual (via `asyncpg`, mesma sessão que você usaria pra inspecionar) a API fica no ar mas quebra em runtime pra quem estiver testando. Isso é temporário: o handoff do banco (ver `README.md`, seção "Autenticação e identidade") prevê migrations com Alembic e a conexão trocando de `postgres` pra `app_login` com privilégio restrito de verdade. Enquanto esse handoff não for aplicado, o passo manual é seu, não pule — mas confira primeiro se já existe `alembic/` ou migration no repo antes de assumir `create_all`.
+9. Antes de considerar pronto: `uv run pytest`, `uv run ruff check src tests`, `uv run lint-imports` — os três, sempre, mesmo pra mudança pequena.
+
 ## Storybook
 
 - `web-svelte-kit/src/shared/ui/` tem ~45 componentes shadcn-svelte prontos (biblioteca), mas o Storybook (`npm run storybook`) só mostra story de componente **em uso de verdade** em alguma página (`src/pages/`, `src/app/layout/`). Componente novo na biblioteca não ganha `.stories.svelte` ainda.
@@ -50,11 +62,23 @@ Nesta branch os agentes estão liberados para implementar: funções completas, 
 
 - Toda exclusão (artigo, boleta, ativo, o que for) passa por `AlertDialog` confirmando antes de executar — nunca `onclick` direto num botão de deletar/cancelar/arquivar. Padrão: `AlertDialogTrigger` no botão, `AlertDialogAction variant="destructive"` disparando a ação de verdade (ver `shared/ui/alert-dialog`, usado em `Trades.svelte`, `Instruments.svelte`, `NotepadEditor.svelte`).
 
+## Checklist: tela nova no front
+
+1. Endpoint novo no backend primeiro, API rodando com ele (reinicie o processo: `litestar run` sem `--reload` não pega controller novo sozinho), **depois** `npm run generate-types` — sem isso os hooks do TanStack Query não têm o que chamar. `openapi-ts.config.ts` lê de `http://localhost:8000/api/v1/schema/openapi.json` por padrão.
+2. Estrutura FSD: `src/pages/<feature>/{ui,api,index.ts}`; a rota em `src/app/routes/.../+page.svelte` só importa de `#pages/<feature>/index.ts` e renderiza — nenhuma lógica na rota.
+3. `api/<feature>.ts`: `createQuery`/`createMutation` do `@tanstack/svelte-query` recebendo uma função reativa (`() => ({...})`, não um objeto direto — é assim que o resto do app já faz, inclusive pra reler um `id` de prop). Toda chamada do SDK gerado passa por `unwrap()` (`#shared/api/index.ts`). **Toda mutation leva `onError: (error) => notify(describeError(error), true)`** — sem isso, uma falha de verdade fica muda: parece que "não salvou nada" sem motivo nenhum aparente (foi exatamente isso que aconteceu nesta sessão).
+4. Componente shadcn só se importa de `#shared/ui/index.ts` (a barrel) — nunca do caminho interno (`#shared/ui/<componente>/<arquivo>.svelte`). O linter de FSD (`npm run lint:fsd`) recusa esse sidestep. Componente que ainda não está na barrel entra lá no mesmo commit que passa a usá-lo.
+5. Dois-way binding usa `bind:` (`bind:value`, `bind:checked`, `bind:pressed`) — é o padrão que o resto do app usa em todo lugar (`Select`, `Input`, `Switch`...). Não troque por `value`/`checked` controlado + `onChange`/`onCheckedChange` mesmo que o componente aceite os dois: já causou um bug real aqui (switch não refletia o próprio estado).
+6. Prefira ação explícita (botão) a autosave via `$effect` reagindo a toda digitação/toggle — debounce com temporizador dentro de `$effect` é fácil de acertar na superfície e errar na prática; já gerou um loop infinito de requisições nesta sessão. Se o pedido for autosave de verdade, teste contra a API rodando de verdade antes de considerar pronto, não só o typecheck.
+7. Depois de qualquer mudança: `npm run typecheck` e `npm run lint:fsd`, os dois, sempre — e teste contra a API real (`curl` nos endpoints, ou o dev server) quando o typecheck sozinho não prova que o fluxo funciona (mutations, navegação, efeitos).
+8. Dev server às vezes quebra com `EPERM` em `.svelte-kit/types/...` (corrida de arquivo com outro processo escrevendo, ex. `svelte-check` rodando em paralelo). Limpar `.svelte-kit/` e reiniciar o `npm run dev` resolve.
+
 ## Git
 
 - Conventional Commits em português, com o corpo em tópicos explicando o porquê.
 - Um assunto por commit.
 - Nunca commitar `.env` nem credenciais.
+- Working tree com mudanças de outra tarefa, não discutidas com você nesta conversa (código de outro agente, outra sessão, um WIP alheio)? Não commite — nem para "limpar", nem para "aproveitar que já está ali". Sinalize o que achou e separe do que é seu. Se mexer no mesmo arquivo que essa mudança alheia, reconstrua a versão intermediária (stage só a sua parte, commit, restaura o resto em seguida) em vez de misturar os dois num commit só.
 
 ## Segurança
 
