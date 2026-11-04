@@ -10,7 +10,7 @@ Requisito: [uv](https://docs.astral.sh/uv/). Ele instala o Python 3.14 e as depe
 
 ```bash
 uv sync
-uv run litestar --app litestar_sandbox.app:create_app run --reload
+cd backend/api && uv run litestar --app app:create_app run --reload
 ```
 
 - API: <http://127.0.0.1:8000/api/v1>
@@ -21,7 +21,7 @@ O `app.py` expõe uma fábrica (`create_app`), e não uma instância pronta. Por
 O banco é um arquivo `sandbox.db` criado no diretório onde você roda o comando, com as tabelas geradas no startup. Para usar outro banco, defina a variável `DATABASE_URL`:
 
 ```bash
-DATABASE_URL="sqlite+aiosqlite:///./outro.db" uv run litestar --app litestar_sandbox.app:create_app run
+DATABASE_URL="sqlite+aiosqlite:///./outro.db" uv run litestar --app app:create_app run
 ```
 
 O `create_all` só cria tabelas que ainda não existem: ele não acrescenta colunas novas a uma tabela existente. Depois de mudar um model, apague o `sandbox.db`. (Migrations com Alembic estão no roadmap.)
@@ -72,15 +72,15 @@ Boletas não são editadas nem apagadas: uma boleta errada é cancelada e regist
 
 ### Front-end
 
-Uma SPA em SvelteKit (Svelte 5, Tailwind, TanStack Query), em `web-svelte-kit/`, processo próprio — a API é pura, sem front same-origin, e o front fala com ela por HTTP cross-origin (`CORSConfig` em `app.py`).
+Uma SPA em SvelteKit (Svelte 5, Tailwind, TanStack Query), em `frontend/`, processo próprio — a API é pura, sem front same-origin, e o front fala com ela por HTTP cross-origin (`CORSConfig` em `app.py`).
 
 ```bash
-cd web-svelte-kit && npm install && npm run dev   # porta 5173
-uv run litestar --app litestar_sandbox.app:create_app run
+cd frontend && npm install && npm run dev   # porta 5173
+cd backend/api && uv run litestar --app app:create_app run
 ```
 
 ```bash
-cd web-svelte-kit && npm run generate-types   # lê o schema direto de /api/v1/schema/openapi.json
+cd frontend && npm run generate-types   # lê o schema direto de /api/v1/schema/openapi.json
 ```
 
 O prefixo `/api/v1` fica num `Router` (o `ApiRouter`, onde o autowire registra os controllers), e não em `Litestar(path=...)` — convenção mantida mesmo sem front same-origin pra registrar.
@@ -92,7 +92,7 @@ Já existiram portes do mesmo front em React (`web/`, servido pela própria API 
 Toda a API exige `Authorization: Bearer <token>`, menos o `/api/v1/ping` e o OpenAPI (`/api/v1/schema`). Sem token, ou com token desconhecido, a resposta é `401`.
 
 ```bash
-AUTH_DEV_TOKENS="tok-alice=u_alice:Alice,tok-bob=u_bob:Bob" uv run litestar --app litestar_sandbox.app:create_app run
+AUTH_DEV_TOKENS="tok-alice=u_alice:Alice,tok-bob=u_bob:Bob" uv run litestar --app app:create_app run
 curl -H "Authorization: Bearer tok-alice" http://127.0.0.1:8000/api/v1/instruments
 ```
 
@@ -104,48 +104,53 @@ O fluxo segue o handoff do banco (seções 2 e 3):
 
 Estado atual:
 
-- **Verificador composto** (`build_verifier()`): `DevTokenVerifier` (tokens fixos em `AUTH_DEV_TOKENS`) sempre ativo; `EntraTokenVerifier` (login via Entra ID, `core/entra.py`) entra junto quando `ENTRA_TENANT_ID` está setado. O backend é resource server puro: nunca fala com o Entra, só valida o id_token que cada front já pediu (MSAL.js, PKCE, sem secret) contra o JWKS do tenant — `aud` esperado é o client_id do App registration (`ENTRA_API_AUDIENCE`), não um scope de API própria (exigiria "Expose an API", que pede acesso de admin no Entra). Falta o job de espelhamento que cria a role `u_<oid>` no Postgres (ver `db/identity.sql`).
-- **`SET ROLE` desligado por padrão** (`DB_ASSUME_IDENTITY=false`): ligue só depois de aplicar o `db/identity.sql` no banco, senão toda transação no Postgres falha. O SQL está aplicado no Supabase de testes (Postgres 17.11), e o `db/identity_rollback.sql` desfaz. A função é `SECURITY INVOKER`, e não `SECURITY DEFINER` como o handoff sugeria: o Postgres recusa com `cannot set parameter "role" within security-definer function` (verificado).
+- **Verificador composto** (`build_verifier()`): `DevTokenVerifier` (tokens fixos em `AUTH_DEV_TOKENS`) sempre ativo; `EntraTokenVerifier` (login via Entra ID, `core/entra.py`) entra junto quando `ENTRA_TENANT_ID` está setado. O backend é resource server puro: nunca fala com o Entra, só valida o access_token que cada front já pediu (MSAL.js, PKCE, sem secret) contra o JWKS do tenant — `aud` esperado é o client_id do App registration (`ENTRA_API_AUDIENCE`). O job de espelhamento que cria a role `u_<oid>` no Postgres já está implementado (ver `database/ddl/identity_mirror.sql`).
+- **`SET ROLE` desligado por padrão** (`DB_ASSUME_IDENTITY=false`): ligue só depois de aplicar o `database/ddl/identity.sql` no banco, senão toda transação no Postgres falha. O SQL está aplicado no Supabase de testes (Postgres 17.11), e o `database/ddl/identity_rollback.sql` desfaz. A função é `SECURITY INVOKER`, e não `SECURITY DEFINER` como o handoff sugeria: o Postgres recusa com `cannot set parameter "role" within security-definer function` (verificado).
 - **Enquanto a app conectar como `postgres`**, o `SET ROLE` registra quem fez, mas não restringe nada: o `postgres` já lê tudo. A separação de privilégios do handoff vale quando a conexão for o `app_login`, o que pede migrations com Alembic no lugar do `create_all`.
-- **Testes contra Postgres:** `TEST_DATABASE_URL=<url do Supabase de testes> uv run pytest tests/core/test_identity_postgres.py`. Sem a variável, são pulados.
+- **Testes contra Postgres:** `TEST_DATABASE_URL=<url do Supabase de testes> uv run pytest tests/core/test_identity_postgres.py` (dentro de `backend/api/`). Sem a variável, são pulados.
 - **Windows + psycopg:** o psycopg assíncrono não roda no `ProactorEventLoop`, o padrão do asyncio no Windows, e o `litestar run` falha no startup com `Psycopg cannot use the 'ProactorEventLoop'`. Os testes contra Postgres usam o `SelectorEventLoop`; para rodar a app no Windows contra Postgres, use o `asyncpg` (`postgresql+asyncpg://`).
 - **A armadilha do advanced-alchemy:** passar `sync_session_class` no `session_config` não registra nada, porque ele sobrescreve o parâmetro com o próprio `sessionmaker`. O evento vai no `sessionmaker` síncrono que ele cria (`IdentityAsyncConfig`).
-- **Front:** `web-svelte-kit/` é cliente público do Entra ID via MSAL.js (`@azure/msal-browser`) — login redireciona pro próprio Entra, sem servidor nem banco no meio; o id_token é anexado em cada chamada pelo interceptor do cliente gerado.
+- **Front:** `frontend/` é cliente público do Entra ID via MSAL.js (`@azure/msal-browser`) — login redireciona pro próprio Entra, sem servidor nem banco no meio; o access_token é anexado em cada chamada pelo interceptor do cliente gerado.
 
 ### Qualidade
 
+Dentro de `backend/api/`:
+
 ```bash
-uv run ruff check src tests     # lint
-uv run ruff format src tests    # formatação
-uv run ty check                 # checagem de tipos
-uv run lint-imports             # fronteiras entre módulos
-uv run pytest                   # testes (cada teste usa um banco SQLite temporário)
+uv run ruff check .     # lint
+uv run ruff format .    # formatação
+uv run ty check         # checagem de tipos
+uv run lint-imports     # fronteiras entre módulos
+uv run pytest           # testes (cada teste usa um banco SQLite temporário)
 ```
 
 ## Arquitetura
 
 ```text
-src/litestar_sandbox/
+backend/api/                # flat, sem pacote wrapper — from core.X / from modules.X
 ├── app.py                  # create_app(): registra os módulos sob /api/v1
 ├── core/                   # compartilhado; não conhece nenhum módulo
 │   ├── settings.py         # DatabaseSettings (lê DATABASE_URL)
 │   ├── database.py         # config do SQLAlchemy e plugin
-│   ├── auth.py             # AuthMiddleware e verificadores de token
+│   ├── auth.py             # verificadores de token
 │   ├── identity.py         # Identity, ContextVar e use_identity()
 │   └── deps.py             # aliases de injeção de dependência genéricos (FilterDep, SessionDep)
 └── modules/
     ├── instruments/        # cadastro de ativos
-    │   ├── __init__.py     # instruments_router
     │   ├── public.py       # a ÚNICA porta para outros módulos
     │   ├── controllers.py  # HTTP
     │   ├── deps.py         # alias de DI do service e config dos filtros
     │   ├── protocols.py    # contrato do service usado pelo controller
-    │   ├── enums.py        # InstrumentType (re-exportado pelo public.py)
+    │   ├── enums.py        # shim: re-exporta de database/models/instruments/enums.py
     │   ├── schemas.py      # DTOs de entrada HTTP (msgspec)
     │   ├── services.py     # regras de negócio
     │   ├── repositories.py # acesso a dados
-    │   └── models.py       # tabelas
-    └── trades/             # boletas; usa o instruments só pelo public.py
+    │   └── models.py       # shim: re-exporta de database/models/instruments/model.py
+    ├── trades/              # boletas; usa o instruments só pelo public.py
+    ├── positions/           # posições, alimentado por eventos do trades
+    └── notes/               # artigos por pessoa + wiki (independente dos outros três)
+
+database/models/<área>/     # o model SQLAlchemy de verdade mora aqui, não no módulo da API
 ```
 
 Uma requisição percorre as camadas nesta ordem: controller → service → repository → model.
@@ -222,7 +227,7 @@ Em andamento (WIP).
 
 ## Contract-first (em avaliação)
 
-Hoje a API é **code-first**: o Litestar gera o OpenAPI a partir dos `Struct`s e dos handlers (`uv run litestar --app litestar_sandbox.app:create_app schema openapi --output openapi.json`). A proposta é passar a **contract-first** quando houver um front-end em outra linguagem consumindo a API.
+Hoje a API é **code-first**: o Litestar gera o OpenAPI a partir dos `Struct`s e dos handlers (`uv run litestar --app app:create_app schema openapi --output openapi.json`, dentro de `backend/api/`). A proposta é passar a **contract-first** quando houver um front-end em outra linguagem consumindo a API.
 
 O front-end é uma SPA em React servida pela própria API (seção "Front-end"), e o contrato OpenAPI é o ponto de encontro entre os dois lados: o cliente TypeScript é gerado dele. O Next.js, cogitado antes por familiaridade, ficou para ser reavaliado quando o portal de clientes sair do papel: a SPA mantém um runtime e uma autenticação só, atendendo o front e o MCP, e componentes React com um SDK gerado migram para o Next.js se for preciso.
 

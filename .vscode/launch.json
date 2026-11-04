@@ -6,7 +6,7 @@
       "request": "launch",
       "name": "Svelte: Launch + Debug (sobe o vite dev)",
       "url": "http://127.0.0.1:5173",
-      "webRoot": "${workspaceFolder}/web-svelte-kit",
+      "webRoot": "${workspaceFolder}/frontend",
       "preLaunchTask": "svelte: dev",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
@@ -20,7 +20,7 @@
       "request": "launch",
       "name": "Svelte: Debug (dev server já rodando em :5173)",
       "url": "http://127.0.0.1:5173",
-      "webRoot": "${workspaceFolder}/web-svelte-kit",
+      "webRoot": "${workspaceFolder}/frontend",
       "sourceMaps": true
     },
     {
@@ -28,8 +28,8 @@
       "request": "launch",
       "name": "Python: Litestar API (debug)",
       "module": "litestar",
-      "args": ["--app", "litestar_sandbox.app:create_app", "run"],
-      "cwd": "${workspaceFolder}",
+      "args": ["--app", "app:create_app", "run"],
+      "cwd": "${workspaceFolder}/backend/api",
       "python": "${workspaceFolder}/.venv/Scripts/python.exe",
       "envFile": "${workspaceFolder}/.env",
       "env": { "PYTHONUTF8": "1" },
