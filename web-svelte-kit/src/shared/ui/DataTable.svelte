@@ -1,13 +1,20 @@
 <script lang="ts" module>
-  import { tableFeatures } from "@tanstack/svelte-table";
+  import { columnVisibilityFeature, createSortedRowModel, rowSortingFeature, tableFeatures } from "@tanstack/svelte-table";
 
   // estável em módulo, como o próprio guia da lib recomenda: não invalida os row models a cada
   // render. Exportado porque createColumnHelper também precisa dele (mesmo TFeatures sempre).
-  export const features = tableFeatures({});
+  // rowSortingFeature + columnVisibilityFeature: sort clicável no cabeçalho (DataTableColumnHeader)
+  // e esconder coluna (DataTableView) — ambos opcionais por coluna, só habilita quem usa.
+  export const features = tableFeatures({
+    rowSortingFeature,
+    columnVisibilityFeature,
+    sortedRowModel: createSortedRowModel(),
+  });
 </script>
 
 <script lang="ts" generics="TData extends Record<string, any>">
-  import { createTable, FlexRender, type ColumnDef } from "@tanstack/svelte-table";
+  import type { Snippet } from "svelte";
+  import { createTable, FlexRender, type ColumnDef, type SvelteTable } from "@tanstack/svelte-table";
 
   import { cn } from "../lib/utils.ts";
   import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table/index.ts";
@@ -18,10 +25,14 @@
     columns,
     data,
     numericColumnIds = [],
+    toolbar,
   }: {
     columns: ColumnDef<typeof features, TData, any>[];
     data: TData[];
     numericColumnIds?: string[];
+    // recebe o table instance pronto: quem usa decide o que mostrar (DataTableView pra
+    // esconder coluna, DebounceInput pra filtro...) sem o DataTable precisar saber disso.
+    toolbar?: Snippet<[{ table: SvelteTable<typeof features, TData> }]>;
   } = $props();
 
   const table = createTable({
@@ -34,6 +45,12 @@
     },
   });
 </script>
+
+{#if toolbar}
+  <div class="mb-3 flex items-center gap-2">
+    {@render toolbar({ table })}
+  </div>
+{/if}
 
 <Table>
   <TableHeader>

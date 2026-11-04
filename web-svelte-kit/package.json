@@ -52,6 +52,7 @@
     "lowlight": "^3.3.0",
     "mermaid": "^12.3.0",
     "mode-watcher": "^1.1.0",
+    "runed": "^0.38.0",
     "svelte-number-format": "^2.2.0",
     "svelte-sonner": "^1.2.0",
     "sveltekit-superforms": "^3.1.0",

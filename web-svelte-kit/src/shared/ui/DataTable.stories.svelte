@@ -1,7 +1,9 @@
 <script module lang="ts">
   import { defineMeta } from "@storybook/addon-svelte-csf";
-  import { createColumnHelper } from "@tanstack/svelte-table";
+  import { createColumnHelper, renderComponent } from "@tanstack/svelte-table";
   import DataTable, { features } from "./DataTable.svelte";
+  import DataTableColumnHeader from "./table/data-table-column-header/data-table-column-header.svelte";
+  import DataTableView from "./table/data-table-view/data-table-view.svelte";
 
   const { Story } = defineMeta({
     title: "UI/DataTable",
@@ -13,9 +15,13 @@
 
   const helper = createColumnHelper<typeof features, Row>();
   const columns = [
-    helper.accessor("ativo", { header: "Ativo" }),
-    helper.accessor("quantidade", { header: "Qtd." }),
-    helper.accessor("preco", { header: "Preço" }),
+    helper.accessor("ativo", {
+      header: (ctx) => renderComponent(DataTableColumnHeader, { column: ctx.column, title: "Ativo" }),
+    }),
+    helper.accessor("quantidade", {
+      header: (ctx) => renderComponent(DataTableColumnHeader, { column: ctx.column, title: "Qtd." }),
+    }),
+    helper.accessor("preco", { header: "Preço", enableSorting: false }),
   ];
 
   const data: Row[] = [
@@ -24,10 +30,19 @@
   ];
 </script>
 
-<!-- numericColumnIds alinha cabeçalho e célula à direita — é o único "feature" que o
-  DataTable expõe além da renderização padrão do tanstack table (mesmo uso de Trades.svelte).
-  Story não carrega os generics do DataTable (TData); `as any` só pra calar o typecheck. -->
-<Story
-  name="Playground"
-  args={{ columns, data, numericColumnIds: ["quantidade", "preco"] } as any}
-/>
+<!-- numericColumnIds alinha cabeçalho e célula à direita. Cabeçalho ordenável usa
+  DataTableColumnHeader (sort/esconder no menu); DataTableView no toolbar esconde/mostra
+  coluna globalmente — mesmo uso de Trades.svelte. -->
+<Story name="Playground">
+  {#snippet template()}
+    <DataTable
+      {columns}
+      {data}
+      numericColumnIds={["quantidade", "preco"]}
+    >
+      {#snippet toolbar({ table })}
+        <DataTableView {table} label="Colunas" />
+      {/snippet}
+    </DataTable>
+  {/snippet}
+</Story>
