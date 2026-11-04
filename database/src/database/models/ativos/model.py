@@ -5,7 +5,7 @@ from advanced_alchemy.types import DateTimeUTC
 from sqlalchemy import Enum, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from database.models.instruments.enums import InstrumentType
+from database.models.ativos.enums import InstrumentType
 
 
 class Instrument(BigIntAuditBase):

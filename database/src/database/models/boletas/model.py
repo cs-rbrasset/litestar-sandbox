@@ -5,7 +5,7 @@ from advanced_alchemy.base import BigIntAuditBase
 from sqlalchemy import Date, Enum, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from database.models.trades.enums import TradeSide, TradeStatus
+from database.models.boletas.enums import TradeSide, TradeStatus
 
 
 class Trade(BigIntAuditBase):

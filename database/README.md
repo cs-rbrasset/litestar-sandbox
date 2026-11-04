@@ -4,7 +4,7 @@ Models SQLAlchemy compartilhados, organizados por área de negócio (`models/<á
 importa nada de `backend/api` — a dependência é sempre no sentido `backend/api` → `database`,
 nunca o contrário, pra esse pacote poder ser publicado/instalado à parte no futuro.
 
-- `models/` — um subpacote por área (hoje: `instruments`, `trades`, `positions`, `notes`),
+- `models/` — um subpacote por área (hoje: `ativos`, `boletas`, `posicoes`, `notas`),
   cada um com o(s) model(s) SQLAlchemy e os enums que as colunas usam.
 - `ddl/` — SQL de setup que não é gerado pelo `create_all` da aplicação (roles, funções,
   triggers de identidade — ver `ddl/identity.sql`).
