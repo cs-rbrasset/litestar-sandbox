@@ -32,6 +32,33 @@ A task roda em processo separado do processo web principal. Ela não herda a ses
 
 Se o repo usa `DB_ASSUME_IDENTITY` ou equivalente (ver capítulo 5), código fora de request **precisa declarar identidade explicitamente** antes de abrir transação — não existe usuário implícito vindo de header nenhum aqui.
 
+### Ciclo de vida de recursos no worker (engine/pool) — lacuna que a documentação do Prefect não cobre
+
+A documentação de *background tasks* do Prefect (`.delay()` no endpoint, `serve(task)` num processo à parte, polling via client) não trata do ciclo de vida de recurso com estado — os exemplos não usam banco, então não mostram onde abrir/fechar engine e pool de conexão. O Prefect **não tem hook de startup/shutdown pro task worker**: `serve()`/`aserve()` só rodam a task, não dão lugar pra inicializar e desligar um recurso compartilhado entre execuções.
+
+Sem isso declarado explicitamente, o erro mais comum é criar engine (e pool de conexão) **dentro da função auxiliar chamada por data/item**, em vez de uma vez por execução da task — isso vaza uma engine e um pool novos a cada iteração de um loop interno, nunca liberados.
+
+Duas soluções válidas, em ordem de quando usar cada uma:
+
+1. **Correção mínima (comece aqui)**: crie a config/engine **uma vez no topo da função decorada com `@task`**, não dentro do laço nem na função auxiliar que ele chama; dê `dispose()` nela num `finally` antes de a task retornar. Isso garante **uma engine por execução da task** (não por item processado) e mata o vazamento, com custo de reabrir a engine a cada execução — aceitável no volume de poucas execuções por dia/hora.
+
+   ```python
+   @task(name="minha-task", persist_result=True)
+   async def minha_task(...) -> ...:
+       config = create_sqlalchemy_config(DatabaseSettings.from_env())
+       try:
+           resultado = [await _trabalho(config, item) for item in itens]
+       finally:
+           await config.get_engine().dispose()
+       ...
+   ```
+
+2. **Lifespan no worker, com `aserve`** (quando volume ou número de tasks crescer): o Prefect expõe `serve()` (síncrono, roda `aserve` no próprio loop interno) e `aserve()` (a versão `await`-ável). Rodando o processo do worker como `asyncio.run(main())`, onde `main()` abre a engine/pool **antes** de `await aserve(minha_task)` e faz dispose só quando o processo encerra, a engine é criada **uma vez por processo**, reusada entre execuções — custo de abrir engine pago uma vez, não a cada execução.
+
+   Tasks `async` (como as deste padrão) rodam no mesmo loop do `aserve`, então uma engine criada antes, no mesmo `asyncio.run`, funciona sem truque adicional — tasks síncronas rodam num `ThreadPoolExecutor` à parte e não compartilham esse mesmo loop.
+
+**Qual escolher**: aplique a opção 1 assim que a task existir — é a correção que fecha o vazamento com a menor mudança. Suba pra opção 2 só quando aparecer a segunda task que também precise de banco no mesmo worker (reabrir engine por execução duas vezes justifica menos o custo do lifespan dedicado antes disso).
+
 ### Onde o resultado do job pesado é guardado
 
 Arquivo gerado (PDF, etc.) não fica no banco da aplicação nem no disco do worker — vai pra um object storage externo (ex.: Supabase Storage, ou equivalente do provedor escolhido) **[AJUSTAR]**, usando uma credencial de serviço separada da credencial de banco. O resultado que a task devolve é só o caminho/chave do objeto; quem pede o arquivo recebe uma signed URL de validade curta, não o arquivo em si nem uma URL pública permanente.

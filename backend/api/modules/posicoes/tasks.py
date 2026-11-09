@@ -8,6 +8,10 @@ Roda fora do request, num worker à parte (sem app do Litestar no processo): abr
 sessão com create_sqlalchemy_config(DatabaseSettings.from_env()), como os listeners, faz
 commit à mão (aqui só leitura, mas a sessão segue o mesmo padrão) e é idempotente.
 
+A engine é criada uma vez por execução da task (não por data) e recebe dispose() no fim:
+o Prefect não tem hook de startup/shutdown pro task worker (serve()/aserve() só rodam a
+task), então sem isso cada chamada vazaria uma engine e um pool de conexão novos.
+
 O Prefect guarda o estado da execução (histórico, retry) sozinho: não existe tabela própria
 de "jobs" nem um dispatcher — o controller só chama .delay() e consulta pelo client. O PDF em
 si vai pro Supabase Storage (core/storage.py); o resultado da task é só o path do objeto.
@@ -22,6 +26,7 @@ Pré-requisitos (fora deste processo):
 import dataclasses
 import datetime
 import io
+from typing import TYPE_CHECKING
 
 from prefect import task
 from prefect.runtime import task_run
@@ -34,6 +39,9 @@ from core.storage import upload_object
 from modules.posicoes.domain import Position  # noqa: TC001
 from modules.posicoes.services import PositionService
 
+if TYPE_CHECKING:
+    from advanced_alchemy.extensions.litestar import SQLAlchemyAsyncConfig
+
 # o Prefect serializa a task pra rodar num worker à parte e resolve __annotate__ do dataclass
 # fora do módulo original: em TYPE_CHECKING, "Position" não existe nesse momento e quebra.
 
@@ -44,9 +52,9 @@ class DatedPositions:
     positions: list[Position]
 
 
-async def _positions_at(fund_cnpj: str, reference_date: datetime.date) -> DatedPositions:
-    settings = DatabaseSettings.from_env()
-    config = create_sqlalchemy_config(settings)
+async def _positions_at(
+    config: SQLAlchemyAsyncConfig, fund_cnpj: str, reference_date: datetime.date
+) -> DatedPositions:
     with use_identity(SYSTEM):
         async with config.get_session() as session:
             service = PositionService(session=session)
@@ -96,7 +104,11 @@ def _html_to_pdf(html: str) -> bytes:
 @task(name="recompute-positions-report", persist_result=True)
 async def recompute_positions_report(fund_cnpj: str, reference_dates: list[datetime.date]) -> str:
     """Devolve o path do PDF no bucket (não o PDF em si): o front pede a signed URL à parte."""
-    dated = [await _positions_at(fund_cnpj, reference_date) for reference_date in reference_dates]
+    config = create_sqlalchemy_config(DatabaseSettings.from_env())
+    try:
+        dated = [await _positions_at(config, fund_cnpj, d) for d in reference_dates]
+    finally:
+        await config.get_engine().dispose()
     pdf_bytes = _html_to_pdf(_render_html(fund_cnpj, dated))
     path = f"reports/{task_run.id}.pdf"
     await upload_object(SupabaseSettings.from_env(), path, pdf_bytes, content_type="application/pdf")
