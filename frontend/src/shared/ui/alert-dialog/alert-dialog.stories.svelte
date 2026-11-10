@@ -16,28 +16,30 @@
     component: Root,
     tags: ["autodocs"],
     argTypes: {
-      open: { control: "boolean" },
+      open: { control: "boolean", description: "Força o diálogo aberto (útil para inspecionar o conteúdo)." },
     },
     args: { open: false },
   });
 </script>
 
+<!-- Toda ação destrutiva passa por aqui (AGENTS.md): Trigger no botão, Action destructive dispara
+  a ação de verdade. Mesmo texto do cancelamento de boleta em Trades.svelte. -->
 <Story name="Playground">
   {#snippet template(args)}
     <Root open={args.open}>
       <Trigger>
         {#snippet child({ props })}
-          <Button {...props} variant="destructive">Excluir</Button>
+          <Button {...props} size="sm" variant="ghost">Cancelar</Button>
         {/snippet}
       </Trigger>
       <Content>
         <Header>
-          <Title>Confirmar exclusão?</Title>
+          <Title>Cancelar boleta #42?</Title>
           <Description>Essa ação não pode ser desfeita.</Description>
         </Header>
         <Footer>
           <Cancel>Voltar</Cancel>
-          <Action variant="destructive">Excluir</Action>
+          <Action variant="destructive">Cancelar boleta</Action>
         </Footer>
       </Content>
     </Root>

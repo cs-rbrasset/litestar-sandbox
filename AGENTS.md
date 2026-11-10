@@ -74,6 +74,7 @@ root/
 - `frontend/src/shared/ui/` tem ~45 componentes shadcn-svelte prontos (biblioteca), mas o Storybook (`npm run storybook`) só mostra story de componente **em uso de verdade** em alguma página (`src/pages/`, `src/app/layout/`). Componente novo na biblioteca não ganha `.stories.svelte` ainda.
 - Quando um componente passa a ser usado numa página pela primeira vez, o mesmo commit cria a `.stories.svelte` dele (mesmo padrão dos outros: `defineMeta` do `@storybook/addon-svelte-csf`, `<script module lang="ts">`).
 - Se um componente para de ser usado em qualquer página, remova a story dele junto.
+- **`npm run storybook` trava nesta máquina (Windows).** Reproduzido de forma consistente em `storybook@10.6.5` e `10.6.7`, com e sem `@storybook/addon-a11y`: o processo Node fica preso em loop (~1 núcleo a 100%, minutos a fio) servindo `/sb-preview/runtime.js` (confirmado via `curl` direto, sem navegador — não é bug de story nem de addon isolado). `@storybook/addon-a11y` está desligado em `.storybook/main.ts` por precaução, mas o travamento acontece mesmo assim. Não investigado além disso (sem WSL disponível nesta máquina); se for crítico, testar em outra máquina/Linux ou abrir issue upstream em `@storybook/sveltekit`.
 
 ## Ações destrutivas (front-end)
 
