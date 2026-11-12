@@ -1,14 +1,20 @@
+"""Relatório de posições pela porta `core/jobs.py` — sem server nem worker no ar no teste.
+
+Os dublês trocam exatamente a fronteira que o módulo conhece (`enfileirar`, `status`,
+armazenamento), nunca o client do orquestrador: se alguém reintroduzir `prefect` dentro do
+módulo, estes testes continuam passando e o `lint-imports` é que acusa.
+"""
+
 import datetime
 import uuid
 from typing import TYPE_CHECKING, Any
 
-import httpx
 import pytest
-from prefect.client.schemas.objects import StateType
-from prefect.exceptions import ObjectNotFound
 
+from core.jobs import EstadoJob, ExecucaoNaoEncontradaError, OrquestradorIndisponivelError
+from core.storage import ArmazenamentoEmMemoria
 from modules.posicoes import controllers as positions_controllers
-from modules.posicoes import listeners as positions_listeners
+from modules.posicoes import services as positions_services
 
 if TYPE_CHECKING:
     from litestar import Litestar
@@ -17,28 +23,27 @@ if TYPE_CHECKING:
 FUND_CNPJ = "12345678000190"
 
 
-class _FakeFuture:
-    def __init__(self, task_run_id: uuid.UUID) -> None:
-        self.task_run_id = task_run_id
-
-
 @pytest.fixture
-def fake_delay(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
-    """Troca a chamada ao Prefect por um dublê: sem server/worker no ar no teste."""
-    calls: dict[str, Any] = {"task_run_id": uuid.uuid4()}
+def fake_enfileirar(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
+    chamadas: dict[str, Any] = {"task_run_id": str(uuid.uuid4())}
 
-    def _fake_delay(**kwargs: Any) -> _FakeFuture:
-        calls["kwargs"] = kwargs
-        return _FakeFuture(calls["task_run_id"])
+    async def _enfileirar(_job: Any, **parametros: Any) -> str:
+        chamadas["parametros"] = parametros
+        return chamadas["task_run_id"]
 
-    monkeypatch.setattr(
-        positions_listeners.recompute_positions_report, "delay", _fake_delay
-    )
-    return calls
+    monkeypatch.setattr(positions_services, "enfileirar", _enfileirar)
+    return chamadas
 
 
-def test_trigger_report_schedules_background_task(
-    app_client: TestClient[Litestar], fake_delay: dict[str, Any]
+def _com_status(monkeypatch: pytest.MonkeyPatch, estado: EstadoJob) -> None:
+    async def _status(task_run_id: str) -> EstadoJob:
+        return estado
+
+    monkeypatch.setattr(positions_controllers, "status", _status)
+
+
+def test_trigger_report_schedules_background_job(
+    app_client: TestClient[Litestar], fake_enfileirar: dict[str, Any]
 ) -> None:
     response = app_client.post(
         "/api/v1/posicoes/reports",
@@ -46,20 +51,20 @@ def test_trigger_report_schedules_background_task(
     )
 
     assert response.status_code == 202, response.text
-    assert response.json() == {"task_run_id": str(fake_delay["task_run_id"])}
-    assert fake_delay["kwargs"] == {
+    assert response.json() == {"task_run_id": fake_enfileirar["task_run_id"]}
+    assert fake_enfileirar["parametros"] == {
         "fund_cnpj": FUND_CNPJ,
         "reference_dates": [datetime.date(2026, 10, 1), datetime.date(2026, 10, 2)],
     }
 
 
-def test_trigger_report_503_when_prefect_unreachable(
+def test_trigger_report_503_when_orchestrator_unreachable(
     app_client: TestClient[Litestar], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def _unreachable(**kwargs: Any) -> Any:
-        raise httpx.ConnectError("connection refused")
+    async def _indisponivel(_job: Any, **parametros: Any) -> str:
+        raise OrquestradorIndisponivelError("connection refused")
 
-    monkeypatch.setattr(positions_listeners.recompute_positions_report, "delay", _unreachable)
+    monkeypatch.setattr(positions_services, "enfileirar", _indisponivel)
 
     response = app_client.post(
         "/api/v1/posicoes/reports",
@@ -67,49 +72,21 @@ def test_trigger_report_503_when_prefect_unreachable(
     )
 
     assert response.status_code == 503, response.text
-    assert "Prefect" in response.json()["detail"]
-
-
-class _FakeState:
-    def __init__(self, *, completed: bool, result_value: Any) -> None:
-        self._completed = completed
-        self._result_value = result_value
-
-    def is_completed(self) -> bool:
-        return self._completed
-
-    async def aresult(self, raise_on_failure: bool = True) -> Any:
-        return self._result_value
-
-
-class _FakeTaskRunDetail:
-    def __init__(self, *, state_type: Any, state: Any) -> None:
-        self.state_type = state_type
-        self.state = state
-
-
-class _FakeClient:
-    def __init__(self, task_run: _FakeTaskRunDetail) -> None:
-        self._task_run = task_run
-
-    async def __aenter__(self) -> _FakeClient:
-        return self
-
-    async def __aexit__(self, *exc: Any) -> None:
-        return None
-
-    async def read_task_run(self, task_run_id: str) -> _FakeTaskRunDetail:
-        return self._task_run
+    assert "orquestrador" in response.json()["detail"]
 
 
 def test_get_report_returns_completed_state(
     app_client: TestClient[Litestar], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    task_run = _FakeTaskRunDetail(
-        state_type=StateType.COMPLETED,
-        state=_FakeState(completed=True, result_value="reports/some-task-run-id.pdf"),
+    _com_status(
+        monkeypatch,
+        EstadoJob(
+            id="some-task-run-id",
+            estado="COMPLETED",
+            concluido=True,
+            resultado="reports/some-task-run-id.pdf",
+        ),
     )
-    monkeypatch.setattr(positions_controllers, "get_client", lambda: _FakeClient(task_run))
 
     response = app_client.get("/api/v1/posicoes/reports/some-task-run-id")
 
@@ -117,20 +94,13 @@ def test_get_report_returns_completed_state(
     assert response.json() == {"task_run_id": "some-task-run-id", "state": "COMPLETED"}
 
 
-def test_get_report_404_when_task_run_unknown(
+def test_get_report_404_when_execution_unknown(
     app_client: TestClient[Litestar], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    class _NotFoundClient:
-        async def __aenter__(self) -> _NotFoundClient:
-            return self
+    async def _nao_encontrada(task_run_id: str) -> EstadoJob:
+        raise ExecucaoNaoEncontradaError(task_run_id)
 
-        async def __aexit__(self, *exc: Any) -> None:
-            return None
-
-        async def read_task_run(self, task_run_id: str) -> Any:
-            raise ObjectNotFound(http_exc=Exception("404"))
-
-    monkeypatch.setattr(positions_controllers, "get_client", _NotFoundClient)
+    monkeypatch.setattr(positions_controllers, "status", _nao_encontrada)
 
     response = app_client.get("/api/v1/posicoes/reports/does-not-exist")
 
@@ -140,11 +110,9 @@ def test_get_report_404_when_task_run_unknown(
 def test_get_report_returns_running_state(
     app_client: TestClient[Litestar], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    task_run = _FakeTaskRunDetail(
-        state_type=StateType.RUNNING,
-        state=_FakeState(completed=False, result_value=None),
+    _com_status(
+        monkeypatch, EstadoJob(id="some-task-run-id", estado="RUNNING", concluido=False)
     )
-    monkeypatch.setattr(positions_controllers, "get_client", lambda: _FakeClient(task_run))
 
     response = app_client.get("/api/v1/posicoes/reports/some-task-run-id")
 
@@ -155,34 +123,27 @@ def test_get_report_returns_running_state(
 def test_get_report_pdf_returns_signed_url_when_completed(
     app_client: TestClient[Litestar], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    task_run = _FakeTaskRunDetail(
-        state_type=StateType.COMPLETED,
-        state=_FakeState(completed=True, result_value="reports/some-task-run-id.pdf"),
+    caminho = "reports/some-task-run-id.pdf"
+    _com_status(
+        monkeypatch,
+        EstadoJob(id="some-task-run-id", estado="COMPLETED", concluido=True, resultado=caminho),
     )
-    monkeypatch.setattr(positions_controllers, "get_client", lambda: _FakeClient(task_run))
-
-    async def _fake_create_signed_url(settings: Any, path: str, expires_in: int = 3600) -> str:
-        return f"https://storage.example/{path}?token=fake"
-
-    monkeypatch.setattr(positions_controllers, "create_signed_url", _fake_create_signed_url)
-    monkeypatch.setenv("SUPABASE_URL", "https://storage.example")
-    monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "fake-key")
-    monkeypatch.setenv("SUPABASE_STORAGE_BUCKET", "PDF")
+    armazenamento = ArmazenamentoEmMemoria()
+    armazenamento.objetos[caminho] = b"%PDF-fake"
+    monkeypatch.setattr(positions_controllers, "armazenamento_padrao", lambda: armazenamento)
 
     response = app_client.get("/api/v1/posicoes/reports/some-task-run-id/pdf")
 
     assert response.status_code == 200, response.text
-    assert response.json() == {"url": "https://storage.example/reports/some-task-run-id.pdf?token=fake"}
+    assert response.json() == {"url": f"memoria://{caminho}?expira_em=3600"}
 
 
 def test_get_report_pdf_conflicts_while_not_completed(
     app_client: TestClient[Litestar], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    task_run = _FakeTaskRunDetail(
-        state_type=StateType.RUNNING,
-        state=_FakeState(completed=False, result_value=None),
+    _com_status(
+        monkeypatch, EstadoJob(id="some-task-run-id", estado="RUNNING", concluido=False)
     )
-    monkeypatch.setattr(positions_controllers, "get_client", lambda: _FakeClient(task_run))
 
     response = app_client.get("/api/v1/posicoes/reports/some-task-run-id/pdf")
 

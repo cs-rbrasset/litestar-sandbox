@@ -10,3 +10,7 @@ class PositionServiceProtocol(Protocol):
     async def positions_at(
         self, fund_cnpj: str, reference_date: datetime.date
     ) -> list[Position]: ...
+
+    async def request_report(
+        self, fund_cnpj: str, reference_dates: list[datetime.date]
+    ) -> str: ...

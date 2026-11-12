@@ -1,49 +1,29 @@
-"""Job mais longo (relatório de posições em várias datas, em PDF) via Prefect background tasks.
+"""Job mais longo (relatório de posições em várias datas, em PDF).
 
-Sem flow nem deployment: `.delay()` cria o task run direto a partir da task; o worker
-(`prefect.task_worker.serve`, chamado aqui por `.serve()`) executa. Mais simples que o
-flow+deployment que usávamos antes, e é exatamente pra isso que o recurso existe.
+Nada de `prefect` aqui: o módulo só conhece a porta `core/jobs.py` (`@job`, `sessao_de_job`,
+`id_execucao_atual`). O worker (`backend/api/worker.py`) descobre este arquivo sozinho — não
+precisa registrar a task em lugar nenhum.
 
-Roda fora do request, num worker à parte (sem app do Litestar no processo): abre a própria
-sessão com create_sqlalchemy_config(DatabaseSettings.from_env()), como os listeners, faz
-commit à mão (aqui só leitura, mas a sessão segue o mesmo padrão) e é idempotente.
+Roda fora do request, num processo sem app Litestar: a sessão vem de `sessao_de_job()`, que já
+declara a identidade de sistema e cuida da engine (uma por execução, com dispose no fim).
 
-A engine é criada uma vez por execução da task (não por data) e recebe dispose() no fim:
-o Prefect não tem hook de startup/shutdown pro task worker (serve()/aserve() só rodam a
-task), então sem isso cada chamada vazaria uma engine e um pool de conexão novos.
-
-O Prefect guarda o estado da execução (histórico, retry) sozinho: não existe tabela própria
-de "jobs" nem um dispatcher — o controller só chama .delay() e consulta pelo client. O PDF em
-si vai pro Supabase Storage (core/storage.py); o resultado da task é só o path do objeto.
-
-Pré-requisitos (fora deste processo):
-  - server: prefect server start   (ou PREFECT_API_URL apontando para um já no ar)
-  - worker: uv run --env-file .env python -m modules.posicoes.tasks
-            (--env-file é obrigatório: ao contrário de "litestar run", um "python -m" solto
-            não carrega o .env sozinho)
+O PDF vai pro object storage (`core/storage.py`); o resultado do job é só o path do objeto, e
+quem pede o arquivo recebe uma signed URL curta.
 """
 
 import dataclasses
 import datetime
 import io
-from typing import TYPE_CHECKING
 
-from prefect import task
-from prefect.runtime import task_run
 from xhtml2pdf import pisa
 
-from core.database import create_sqlalchemy_config
-from core.identity import SYSTEM, use_identity
-from core.settings import DatabaseSettings, SupabaseSettings
-from core.storage import upload_object
+from core.jobs import id_execucao_atual, job, sessao_de_job
+from core.storage import armazenamento_padrao
 from modules.posicoes.domain import Position  # noqa: TC001
 from modules.posicoes.services import PositionService
 
-if TYPE_CHECKING:
-    from advanced_alchemy.extensions.litestar import SQLAlchemyAsyncConfig
-
-# o Prefect serializa a task pra rodar num worker à parte e resolve __annotate__ do dataclass
-# fora do módulo original: em TYPE_CHECKING, "Position" não existe nesse momento e quebra.
+# o orquestrador serializa o job pra rodar num worker à parte e resolve __annotate__ do
+# dataclass fora do módulo original: em TYPE_CHECKING, "Position" não existe nesse momento.
 
 
 @dataclasses.dataclass(frozen=True)
@@ -52,13 +32,10 @@ class DatedPositions:
     positions: list[Position]
 
 
-async def _positions_at(
-    config: SQLAlchemyAsyncConfig, fund_cnpj: str, reference_date: datetime.date
-) -> DatedPositions:
-    with use_identity(SYSTEM):
-        async with config.get_session() as session:
-            service = PositionService(session=session)
-            positions = await service.positions_at(fund_cnpj, reference_date)
+async def _positions_at(fund_cnpj: str, reference_date: datetime.date) -> DatedPositions:
+    async with sessao_de_job() as session:
+        service = PositionService(session=session)
+        positions = await service.positions_at(fund_cnpj, reference_date)
     return DatedPositions(reference_date=reference_date, positions=positions)
 
 
@@ -101,19 +78,11 @@ def _html_to_pdf(html: str) -> bytes:
     return buffer.getvalue()
 
 
-@task(name="recompute-positions-report", persist_result=True)
+@job("recompute-positions-report")
 async def recompute_positions_report(fund_cnpj: str, reference_dates: list[datetime.date]) -> str:
     """Devolve o path do PDF no bucket (não o PDF em si): o front pede a signed URL à parte."""
-    config = create_sqlalchemy_config(DatabaseSettings.from_env())
-    try:
-        dated = [await _positions_at(config, fund_cnpj, d) for d in reference_dates]
-    finally:
-        await config.get_engine().dispose()
+    dated = [await _positions_at(fund_cnpj, d) for d in reference_dates]
     pdf_bytes = _html_to_pdf(_render_html(fund_cnpj, dated))
-    path = f"reports/{task_run.id}.pdf"
-    await upload_object(SupabaseSettings.from_env(), path, pdf_bytes, content_type="application/pdf")
+    path = f"reports/{id_execucao_atual()}.pdf"
+    await armazenamento_padrao().put(path, pdf_bytes, "application/pdf")
     return path
-
-
-if __name__ == "__main__":
-    recompute_positions_report.serve()

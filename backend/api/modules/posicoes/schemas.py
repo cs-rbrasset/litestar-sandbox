@@ -12,7 +12,7 @@ class PositionsReportRequest(msgspec.Struct):
 
 
 class PositionsReportHandle(msgspec.Struct):
-    """Devolvida ao agendar: o estado de verdade mora no Prefect, não aqui."""
+    """Devolvida ao agendar: o estado de verdade mora no orquestrador, não aqui."""
 
     task_run_id: str
 
@@ -25,6 +25,6 @@ class PositionsReportStatus(msgspec.Struct):
 
 
 class PositionsReportPdfUrl(msgspec.Struct):
-    """Signed URL do Supabase Storage, curta (1h): o front baixa direto de lá, sem passar por aqui."""
+    """Signed URL do object storage, curta (1h): o front baixa direto de lá, sem passar por aqui."""
 
     url: str

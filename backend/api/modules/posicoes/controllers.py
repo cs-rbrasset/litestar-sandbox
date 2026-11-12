@@ -1,24 +1,20 @@
-import asyncio
 import datetime
 
-import httpx
 from advanced_alchemy.extensions.litestar.providers import create_service_provider
-from litestar import Controller, Request, get, post
+from litestar import Controller, get, post
 from litestar.di import Provide
 from litestar.exceptions import ClientException, NotFoundException, ServiceUnavailableException
 from litestar.params import FromPath
-from prefect import get_client
-from prefect.exceptions import ObjectNotFound
 
-from core.events import publish
-from core.settings import SupabaseSettings
-from core.storage import create_signed_url
+from core.jobs import (
+    EstadoJob,
+    ExecucaoNaoEncontradaError,
+    OrquestradorIndisponivelError,
+    status,
+)
+from core.storage import armazenamento_padrao
 from modules.posicoes.deps import PositionServiceDep
 from modules.posicoes.domain import Position
-from modules.posicoes.events import (
-    POSITIONS_REPORT_REQUESTED,
-    PositionsReportRequested,
-)
 from modules.posicoes.schemas import (
     PositionsReportHandle,
     PositionsReportPdfUrl,
@@ -26,8 +22,6 @@ from modules.posicoes.schemas import (
     PositionsReportStatus,
 )
 from modules.posicoes.services import PositionService
-
-REPORT_DISPATCH_TIMEOUT_SECONDS = 10
 
 
 class PositionController(Controller):
@@ -45,57 +39,44 @@ class PositionController(Controller):
 
     @post("/reports", status_code=202)
     async def trigger_report(
-        self, data: PositionsReportRequest, request: Request
+        self, data: PositionsReportRequest, position_service: PositionServiceDep
     ) -> PositionsReportHandle:
-        """Publica o pedido como evento: quem fala com o Prefect é o listener, não aqui.
+        """Controller → service → `core.jobs.enfileirar`: nenhum dos três conhece o orquestrador.
 
-        Mesmo sem deployment nem flow do lado do Prefect (`.delay()` só cria o task run), o
-        controller segue sem importar `recompute_positions_report` — só o listener conhece essa
-        task. O `await` no future é o que mantém a resposta síncrona com o `task_run_id`.
+        O id da execução volta na hora; o PDF fica pronto depois, no worker.
         """
-        future: asyncio.Future[str] = asyncio.get_running_loop().create_future()
-        publish(
-            request.app,
-            POSITIONS_REPORT_REQUESTED,
-            PositionsReportRequested(
-                fund_cnpj=data.fund_cnpj, reference_dates=data.reference_dates, future=future
-            ),
-        )
         try:
-            task_run_id = await asyncio.wait_for(future, timeout=REPORT_DISPATCH_TIMEOUT_SECONDS)
-        except (TimeoutError, httpx.ConnectError) as error:
-            raise _prefect_unavailable() from error
+            task_run_id = await position_service.request_report(
+                data.fund_cnpj, data.reference_dates
+            )
+        except OrquestradorIndisponivelError as error:
+            raise _orquestrador_indisponivel() from error
         return PositionsReportHandle(task_run_id=task_run_id)
 
     @get("/reports/{task_run_id:str}")
     async def get_report(self, task_run_id: FromPath[str]) -> PositionsReportStatus:
-        try:
-            async with get_client() as client:
-                task_run = await client.read_task_run(task_run_id)
-        except httpx.ConnectError as error:
-            raise _prefect_unavailable() from error
-        except ObjectNotFound as error:
-            raise NotFoundException(detail=f"task_run {task_run_id!r} não existe") from error
-        state = task_run.state_type.value if task_run.state_type else "UNKNOWN"
-        return PositionsReportStatus(task_run_id=task_run_id, state=state)
+        execucao = await _estado(task_run_id)
+        return PositionsReportStatus(task_run_id=task_run_id, state=execucao.estado)
 
     @get("/reports/{task_run_id:str}/pdf")
     async def get_report_pdf(self, task_run_id: FromPath[str]) -> PositionsReportPdfUrl:
-        """O PDF mora no Supabase Storage; aqui só devolve uma signed URL curta pra ele."""
-        try:
-            async with get_client() as client:
-                task_run = await client.read_task_run(task_run_id)
-        except httpx.ConnectError as error:
-            raise _prefect_unavailable() from error
-        except ObjectNotFound as error:
-            raise NotFoundException(detail=f"task_run {task_run_id!r} não existe") from error
-        if task_run.state is None or not task_run.state.is_completed():
+        """O PDF mora no object storage; aqui só devolve uma signed URL curta pra ele."""
+        execucao = await _estado(task_run_id)
+        if not execucao.concluido:
             raise ClientException(status_code=409, detail="relatório ainda não terminou")
-        # dentro de um handler async: a versão sem "a" devolve uma coroutine e não o valor
-        path = await task_run.state.aresult(raise_on_failure=False)
-        url = await create_signed_url(SupabaseSettings.from_env(), path)
+        url = await armazenamento_padrao().url_assinada(str(execucao.resultado))
         return PositionsReportPdfUrl(url=url)
 
 
-def _prefect_unavailable() -> ServiceUnavailableException:
-    return ServiceUnavailableException(detail="Prefect indisponível: PREFECT_API_URL não respondeu")
+async def _estado(task_run_id: str) -> EstadoJob:
+    """Consulta de status é leitura pura: vai direto na porta, sem evento no meio."""
+    try:
+        return await status(task_run_id)
+    except OrquestradorIndisponivelError as error:
+        raise _orquestrador_indisponivel() from error
+    except ExecucaoNaoEncontradaError as error:
+        raise NotFoundException(detail=f"execução {task_run_id!r} não existe") from error
+
+
+def _orquestrador_indisponivel() -> ServiceUnavailableException:
+    return ServiceUnavailableException(detail="orquestrador de jobs indisponível")
