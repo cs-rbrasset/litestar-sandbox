@@ -7,7 +7,9 @@ Dentro de `backend/api/`, a árvore é **flat, sem pacote wrapper**:
 ```
 backend/api/
 ├── app.py            # monta o app, não conhece módulos individualmente
-├── worker.py         # a outra metade do backend: serve os jobs (capítulo 4)
+├── worker.py         # a outra metade do backend: serve os jobs em dev (capítulo 4)
+├── fluxos.py         # entrypoint dos jobs em produção — o que o container carrega
+├── implantar.py      # publica os jobs no servidor Prefect da RBR (rbr-prefect)
 ├── core/             # infraestrutura compartilhada — nunca importa de modules/
 └── modules/
     ├── <modulo-a>/    # ex.: ativos, boletas, posicoes, notas [AJUSTAR]

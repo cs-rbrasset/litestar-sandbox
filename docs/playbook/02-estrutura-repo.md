@@ -8,7 +8,8 @@ root/
 ├── frontend/               # SvelteKit, processo à parte, FSD
 ├── backend/
 │   ├── api/                # a API em si — core/ + modules/, flat, sem pacote wrapper
-│   │                       #   app.py (web) e worker.py (jobs) são as duas metades
+│   │                       #   app.py (web) e worker.py (jobs) são as duas metades;
+│   │                       #   fluxos.py + implantar.py publicam os jobs em produção
 
 │   ├── mcp/                # servidor MCP, se o projeto expuser ferramentas pra agentes [AJUSTAR: pode não existir]
 │   └── external/           # projetos externos vendorizados, cada pasta um projeto separado [AJUSTAR]

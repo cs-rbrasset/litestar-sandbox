@@ -73,7 +73,7 @@ Regras, as três:
 
 1. **Baixar e parsear são sempre duas chamadas separadas**, orquestradas pelo job. Um gateway que "já devolve a carteira pronta" mata o reprocessamento.
 2. **O bruto é salvo antes do parse.** Se o parse quebrar, o arquivo que quebrou está guardado — é exatamente ele que se reprocessa depois.
-3. **Retry só para falha de coleta.** Erro de domínio (layout não reconhecido, validação, documento indisponível) entra em `nao_repetir`: o arquivo é o mesmo, repetir não muda nada.
+3. **Retry por etapa, só para falha transitória.** Baixar, guardar e gravar são `@etapa`s separadas, cada uma com o próprio retry (capítulo 4): storage ou banco piscando repetem só a própria etapa, **sem chamar o custodiante de novo**. Erro de domínio (layout não reconhecido, validação, documento indisponível) entra em `nao_repetir`: o arquivo é o mesmo, repetir não muda nada.
 
 ## O arquivo bruto
 
