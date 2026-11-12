@@ -12,3 +12,5 @@
 - [11. Banco de dados](11-banco-de-dados.md)
 - [12. Git e fluxo](12-git-e-fluxo.md)
 - [13. Agentes de IA](13-trabalhando-com-agentes-ia.md)
+- [14. Integrações externas](14-integracoes-externas.md)
+- [15. Decisões em aberto](15-decisoes-em-aberto.md)

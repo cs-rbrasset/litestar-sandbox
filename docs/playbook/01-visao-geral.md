@@ -29,7 +29,8 @@ As regras deste playbook (contratos de import-linter, proibição de FK entre m�
 | Fronteira entre módulos | import-linter (contratos `forbidden`/`ignore_imports`) | Fronteira é enforced em CI, não só documentada. |
 | Validação/schema | `msgspec.Struct` | Mais rápido que Pydantic, integra nativo com Litestar DTO. |
 | Models SQLAlchemy | pacote `database/` separado, fora da API | Pensado pra virar instalável à parte (outro serviço/worker lendo o mesmo schema sem depender da API). |
-| Job longo | Prefect self-hosted, via evento + listener | Controller não acopla com client do Prefect; troca de orquestrador fica isolada no listener do módulo. |
+| Job longo | Prefect self-hosted, atrás da porta `core/jobs.py` | Nenhum módulo importa o orquestrador (fiscalizado por contrato); trocar de orquestrador é reescrever um arquivo. |
+| Object storage | porta `core/storage.py` (`put`/`get`/`list`/`url_assinada`) | Arquivo gerado ou recebido não mora no banco nem no disco do worker; acesso só por URL assinada curta. |
 | Auth | Entra ID (MSAL.js no front, resource-server no back) | Front é cliente público, zero segredo no servidor pro login; backend só valida JWT contra JWKS. |
 | Front-end | SvelteKit + Feature-Sliced Design | Processo separado da API (sem same-origin), FSD dá fronteira de import no front espelhando a fronteira de módulo no back. |
 
