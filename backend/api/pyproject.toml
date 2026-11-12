@@ -133,13 +133,183 @@ unused-ignore-comment = "error"
 testpaths = ["tests"]
 
 [tool.importlinter]
-root_packages = ["core", "modules"]
+# `database` entra como root package (e não como externo) pra dar granularidade por área:
+# como externo, o grimp só enxergaria o nome de topo e "cada módulo só importa a própria área"
+# seria inexprimível. Um `lint-imports` só cobre os três pacotes.
+root_packages = ["core", "modules", "database"]
+# necessário pros contratos que proíbem pacote de terceiro (prefect, sqlalchemy, playwright...)
+include_external_packages = true
+# import sob `if TYPE_CHECKING` não existe em runtime: é isso que torna os contratos de pureza
+# de `domain/` e `parsers/` uma afirmação sobre o que o código realmente carrega.
+exclude_type_checking_imports = true
 
 [[tool.importlinter.contracts]]
 name = "core não depende de módulos"
 type = "forbidden"
 source_modules = ["core"]
 forbidden_modules = ["modules"]
+
+# O pacote `database` é publicável à parte: a dependência é num sentido só.
+[[tool.importlinter.contracts]]
+name = "database não depende da API nem do framework"
+type = "forbidden"
+source_modules = ["database"]
+forbidden_modules = ["core", "modules", "litestar", "prefect", "niquests", "httpx"]
+
+# Porta de jobs: `core.jobs` é o único lugar do backend que fala com o orquestrador.
+# allow_indirect_imports: modules -> core.jobs -> prefect é justamente o caminho permitido.
+[[tool.importlinter.contracts]]
+name = "nenhum módulo importa prefect (só core.jobs)"
+type = "forbidden"
+source_modules = ["modules"]
+forbidden_modules = ["prefect"]
+allow_indirect_imports = true
+
+# Direção da integração: custodiante -> carteira/extrato, nunca o inverso.
+[[tool.importlinter.contracts]]
+name = "carteira e extrato não conhecem custodiante"
+type = "forbidden"
+source_modules = ["modules.carteira", "modules.extrato"]
+forbidden_modules = ["modules.custodiante"]
+
+[[tool.importlinter.contracts]]
+name = "custodiante só acessa carteira.public e extrato.public"
+type = "forbidden"
+source_modules = ["modules.custodiante"]
+forbidden_modules = ["modules.carteira", "modules.extrato"]
+ignore_imports = [
+    "modules.custodiante.** -> modules.carteira.public",
+    "modules.custodiante.** -> modules.extrato.public",
+]
+allow_indirect_imports = true
+
+# carteira e extrato são irmãos independentes: um não fala com o outro.
+[[tool.importlinter.contracts]]
+name = "carteira e extrato são independentes entre si"
+type = "independence"
+modules = ["modules.carteira", "modules.extrato"]
+
+# Pureza: o canônico e os parsers não podem carregar banco, framework, rede nem navegador.
+# É o que permite testá-los sem fixture e reprocessar um bruto sem subir infraestrutura.
+# allow_indirect_imports: o que importa aqui é o import direto — o caminho legítimo
+# parsers -> carteira.public é o que leva (indiretamente) ao resto.
+[[tool.importlinter.contracts]]
+name = "domínio e parsers são puros"
+type = "forbidden"
+source_modules = [
+    "modules.carteira.domain",
+    "modules.extrato.domain",
+    "modules.custodiante.parsers",
+]
+forbidden_modules = [
+    "sqlalchemy",
+    "advanced_alchemy",
+    "prefect",
+    "litestar",
+    "httpx",
+    "niquests",
+    "playwright",
+    "paramiko",
+    "database",
+    "modules.custodiante.gateways",
+]
+allow_indirect_imports = true
+
+# Cada módulo só importa a própria área de `database.models` — um contrato por área.
+# allow_indirect_imports: um módulo chega a outra área indiretamente pelo `public.py` do dono,
+# e isso é permitido; o que não pode é importar a área alheia direto.
+[[tool.importlinter.contracts]]
+name = "só ativos importa database.models.ativos"
+type = "forbidden"
+source_modules = [
+    "modules.boletas",
+    "modules.posicoes",
+    "modules.notas",
+    "modules.carteira",
+    "modules.extrato",
+    "modules.custodiante",
+]
+forbidden_modules = ["database.models.ativos"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "só boletas importa database.models.boletas"
+type = "forbidden"
+source_modules = [
+    "modules.ativos",
+    "modules.posicoes",
+    "modules.notas",
+    "modules.carteira",
+    "modules.extrato",
+    "modules.custodiante",
+]
+forbidden_modules = ["database.models.boletas"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "só posicoes importa database.models.posicoes"
+type = "forbidden"
+source_modules = [
+    "modules.ativos",
+    "modules.boletas",
+    "modules.notas",
+    "modules.carteira",
+    "modules.extrato",
+    "modules.custodiante",
+]
+forbidden_modules = ["database.models.posicoes"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "só notas importa database.models.notas"
+type = "forbidden"
+source_modules = [
+    "modules.ativos",
+    "modules.boletas",
+    "modules.posicoes",
+    "modules.carteira",
+    "modules.extrato",
+    "modules.custodiante",
+]
+forbidden_modules = ["database.models.notas"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "só carteira importa database.models.carteira"
+type = "forbidden"
+source_modules = [
+    "modules.ativos",
+    "modules.boletas",
+    "modules.posicoes",
+    "modules.notas",
+    "modules.extrato",
+    "modules.custodiante",
+]
+forbidden_modules = ["database.models.carteira"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "só extrato importa database.models.extrato"
+type = "forbidden"
+source_modules = [
+    "modules.ativos",
+    "modules.boletas",
+    "modules.posicoes",
+    "modules.notas",
+    "modules.carteira",
+    "modules.custodiante",
+]
+forbidden_modules = ["database.models.extrato"]
+allow_indirect_imports = true
+
+# custodiante não tem área no database: o bruto mora no object storage, e carteira/extrato
+# guardam só uma referência opaca. Se um dia precisar de tabela, a área nasce junto do contrato.
+[[tool.importlinter.contracts]]
+name = "custodiante não tem tabela própria"
+type = "forbidden"
+source_modules = ["modules.custodiante"]
+forbidden_modules = ["database"]
+allow_indirect_imports = true
 
 [[tool.importlinter.contracts]]
 name = "ativos não depende de boletas"
@@ -172,7 +342,13 @@ allow_indirect_imports = true
 [[tool.importlinter.contracts]]
 name = "nenhum módulo depende de posicoes"
 type = "forbidden"
-source_modules = ["modules.ativos", "modules.boletas"]
+source_modules = [
+    "modules.ativos",
+    "modules.boletas",
+    "modules.carteira",
+    "modules.extrato",
+    "modules.custodiante",
+]
 forbidden_modules = ["modules.posicoes"]
 
 # notas é independente: um notepad por pessoa, sem relação com ativos/boletas/posicoes.
@@ -184,6 +360,9 @@ forbidden_modules = [
     "modules.ativos",
     "modules.boletas",
     "modules.posicoes",
+    "modules.carteira",
+    "modules.extrato",
+    "modules.custodiante",
 ]
 
 [[tool.importlinter.contracts]]
@@ -193,5 +372,8 @@ source_modules = [
     "modules.ativos",
     "modules.boletas",
     "modules.posicoes",
+    "modules.carteira",
+    "modules.extrato",
+    "modules.custodiante",
 ]
 forbidden_modules = ["modules.notas"]

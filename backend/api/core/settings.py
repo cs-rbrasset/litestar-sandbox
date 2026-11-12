@@ -19,6 +19,23 @@ class DatabaseSettings:
 
 
 @dataclass(frozen=True)
+class CustodianteSettings:
+    """Credencial de um custodiante, por código: `CUSTODIANTE_<CODIGO>_URL` / `_TOKEN`.
+
+    Uma entrada por custodiante no `.env`, nunca uma credencial compartilhada: revogar o acesso
+    de um não pode derrubar os outros.
+    """
+
+    url_base: str
+    token: str
+
+    @classmethod
+    def from_env(cls, codigo: str) -> CustodianteSettings:
+        prefixo = f"CUSTODIANTE_{codigo.upper()}"
+        return cls(url_base=os.environ[f"{prefixo}_URL"], token=os.environ[f"{prefixo}_TOKEN"])
+
+
+@dataclass(frozen=True)
 class SupabaseSettings:
     """Storage do Supabase: API REST própria, não é a conexão do Postgres (DatabaseSettings)."""
 

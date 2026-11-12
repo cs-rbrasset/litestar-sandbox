@@ -11,3 +11,15 @@ dependencies = [
 [build-system]
 requires = ["uv_build>=0.12.17,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# Os contratos de import do pacote (database não depende de core/modules, cada módulo só
+# importa a própria área) ficam no `backend/api/pyproject.toml`: um `lint-imports` só,
+# rodando com os três pacotes como root. Quando este pacote sair do workspace, eles vêm junto.
