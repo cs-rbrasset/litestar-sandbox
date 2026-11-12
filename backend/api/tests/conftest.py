@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, Any
 import pytest
 from advanced_alchemy.base import orm_registry
 from litestar.testing import TestClient
+from prefect.settings import PREFECT_LOCAL_STORAGE_PATH, temporary_settings
+from prefect.testing.utilities import prefect_test_harness
 
 from app import create_app
 from core.auth import DevTokenVerifier
@@ -20,6 +22,19 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 FUND_CNPJ = "12345678000190"
+
+
+@pytest.fixture(scope="session")
+def orquestrador(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    """Server do orquestrador temporário, pra teste que **executa** um job de verdade.
+
+    Caro (~15s pra subir), por isso uma vez por sessão e só pra quem pede: é o único jeito de
+    provar o retry por etapa, que é do orquestrador, não do nosso código. Os resultados
+    persistidos vão pro `tmp`, não pro `~/.prefect` de quem roda.
+    """
+    resultados = tmp_path_factory.mktemp("resultados-de-jobs")
+    with temporary_settings({PREFECT_LOCAL_STORAGE_PATH: resultados}), prefect_test_harness():
+        yield
 
 
 @pytest.fixture

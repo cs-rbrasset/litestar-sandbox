@@ -4,7 +4,11 @@ O que este arquivo trava: as etapas **não se fundem**. Baixar, guardar o bruto,
 registrar são quatro passos, nessa ordem, e o bruto é gravado **antes** do parse — é o que
 torna o reprocessamento possível quando um parser está errado.
 
-Nada de Prefect no ar: chama-se `.fn` do job, que é a função que o worker executaria.
+E que uma falha tardia **não refaz a coleta**: storage ou banco piscando repetem só a própria
+etapa, com os arquivos baixados ainda em memória.
+
+Os jobs rodam de verdade, contra o orquestrador temporário (fixture `orquestrador`): o retry
+por etapa é dele, e é justamente o que está em teste.
 """
 
 import asyncio
@@ -90,14 +94,14 @@ def gateway(monkeypatch: pytest.MonkeyPatch) -> GatewayFake:
     )
 
 
-@pytest.mark.usefixtures("banco_do_job")
+@pytest.mark.usefixtures("orquestrador", "banco_do_job")
 def test_importacao_baixa_guarda_parseia_e_registra(
     armazenamento: ArmazenamentoEmMemoria,
     gateway: GatewayFake,
     rodar_com_sessao: Callable[[Callable[[AsyncSession], Awaitable[Any]]], Any],
 ) -> None:
     prefixo = asyncio.run(
-        tasks.importar_carteira.fn(codigo=CodigoCustodiante.BTG.value, fundo_cnpj=FUNDO, data=DATA)
+        tasks.importar_carteira(codigo=CodigoCustodiante.BTG.value, fundo_cnpj=FUNDO, data=DATA)
     )
 
     assert gateway.chamadas == [(FUNDO, DATA)]
@@ -113,7 +117,7 @@ def test_importacao_baixa_guarda_parseia_e_registra(
     assert {p.referencia_origem for p in posicoes} == {prefixo}
 
 
-@pytest.mark.usefixtures("banco_do_job")
+@pytest.mark.usefixtures("orquestrador", "banco_do_job")
 def test_bruto_fica_guardado_mesmo_quando_o_parse_quebra(
     armazenamento: ArmazenamentoEmMemoria, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -122,7 +126,7 @@ def test_bruto_fica_guardado_mesmo_quando_o_parse_quebra(
 
     with pytest.raises(LayoutNaoReconhecidoError):
         asyncio.run(
-            tasks.importar_carteira.fn(
+            tasks.importar_carteira(
                 codigo=CodigoCustodiante.BTG.value, fundo_cnpj=FUNDO, data=DATA
             )
         )
@@ -131,18 +135,18 @@ def test_bruto_fica_guardado_mesmo_quando_o_parse_quebra(
     assert guardados, "o bruto tem que ser gravado antes do parse"
 
 
-@pytest.mark.usefixtures("banco_do_job")
+@pytest.mark.usefixtures("orquestrador", "banco_do_job")
 def test_reprocessamento_nao_chama_o_custodiante(
     armazenamento: ArmazenamentoEmMemoria,
     gateway: GatewayFake,
     rodar_com_sessao: Callable[[Callable[[AsyncSession], Awaitable[Any]]], Any],
 ) -> None:
     prefixo = asyncio.run(
-        tasks.importar_carteira.fn(codigo=CodigoCustodiante.BTG.value, fundo_cnpj=FUNDO, data=DATA)
+        tasks.importar_carteira(codigo=CodigoCustodiante.BTG.value, fundo_cnpj=FUNDO, data=DATA)
     )
     chamadas_apos_importar = len(gateway.chamadas)
 
-    asyncio.run(tasks.reprocessar_carteira.fn(prefixo=prefixo))
+    asyncio.run(tasks.reprocessar_carteira(prefixo=prefixo))
 
     assert len(gateway.chamadas) == chamadas_apos_importar, "reprocessar lê o bruto, não coleta"
 
@@ -150,3 +154,67 @@ def test_reprocessamento_nao_chama_o_custodiante(
         return await CarteiraService(sessao).posicoes_em(FUNDO, DATA)
 
     assert len(rodar_com_sessao(ler)) == 4
+
+
+class ArmazenamentoQuePisca(ArmazenamentoEmMemoria):
+    """Recusa as primeiras gravações, como um storage com um blip de rede."""
+
+    def __init__(self, falhas: int) -> None:
+        super().__init__()
+        self.falhas_restantes = falhas
+
+    async def put(self, caminho: str, conteudo: bytes, tipo: str) -> None:
+        if self.falhas_restantes:
+            self.falhas_restantes -= 1
+            raise ConnectionError("storage fora do ar")
+        await super().put(caminho, conteudo, tipo)
+
+
+def _sem_espera(monkeypatch: pytest.MonkeyPatch, *nomes: str) -> None:
+    """Mesma política de retry, sem o intervalo de produção — o teste não espera minutos."""
+    for nome in nomes:
+        monkeypatch.setattr(tasks, nome, getattr(tasks, nome).with_options(retry_delay_seconds=0))
+
+
+@pytest.mark.usefixtures("orquestrador", "banco_do_job")
+def test_falha_ao_guardar_o_bruto_nao_baixa_de_novo(
+    monkeypatch: pytest.MonkeyPatch, gateway: GatewayFake
+) -> None:
+    memoria = ArmazenamentoQuePisca(falhas=1)
+    monkeypatch.setattr(tasks, "armazenamento_padrao", lambda: memoria)
+    _sem_espera(monkeypatch, "guardar")
+
+    prefixo = asyncio.run(
+        tasks.importar_carteira(codigo=CodigoCustodiante.BTG.value, fundo_cnpj=FUNDO, data=DATA)
+    )
+
+    assert gateway.chamadas == [(FUNDO, DATA)], "o retry de guardar não pode chamar o custodiante"
+    assert f"{prefixo}/carteira.xml" in memoria.objetos
+
+
+@pytest.mark.usefixtures("orquestrador", "banco_do_job")
+def test_falha_ao_gravar_nao_baixa_nem_guarda_de_novo(
+    monkeypatch: pytest.MonkeyPatch,
+    armazenamento: ArmazenamentoEmMemoria,
+    gateway: GatewayFake,
+) -> None:
+    """Banco caído na gravação: repete só a gravação — sem coleta nova nem bruto duplicado."""
+    registrar_de_verdade = tasks.registrar_carteira
+    falhas = {"restantes": 1}
+
+    async def registrar_que_pisca(*args: Any, **kwargs: Any) -> int:
+        if falhas["restantes"]:
+            falhas["restantes"] -= 1
+            raise ConnectionError("banco fora do ar")
+        return await registrar_de_verdade(*args, **kwargs)
+
+    monkeypatch.setattr(tasks, "registrar_carteira", registrar_que_pisca)
+    _sem_espera(monkeypatch, "gravar_carteira")
+
+    asyncio.run(
+        tasks.importar_carteira(codigo=CodigoCustodiante.BTG.value, fundo_cnpj=FUNDO, data=DATA)
+    )
+
+    assert gateway.chamadas == [(FUNDO, DATA)]
+    manifestos = [c for c in armazenamento.objetos if c.endswith(MANIFESTO)]
+    assert len(manifestos) == 1, "um bruto por coleta, mesmo com retry na gravação"

@@ -106,7 +106,8 @@ runtime-evaluated-decorators = [
     "litestar.get", "litestar.post", "litestar.put",
     "litestar.patch", "litestar.delete", "litestar.route",
     "prefect.flow", "prefect.task",
-    "core.jobs.job",  # a porta de jobs resolve as anotações em runtime, igual ao prefect.task
+    "core.jobs.job",  # a porta de jobs resolve as anotações em runtime, igual ao prefect.flow
+    "core.jobs.etapa",
 ]
 exempt-modules = ["typing", "core.deps"] # aliases do core.deps são lidos pelo di do litestar em runtime
 
