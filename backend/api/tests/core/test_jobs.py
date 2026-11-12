@@ -93,7 +93,7 @@ def test_enfileirar_dispara_o_deployment_sem_esperar(monkeypatch: pytest.MonkeyP
 @pytest.mark.parametrize(
     ("erro", "esperado"),
     [
-        (ObjectNotFound(None), jobs.JobNaoPublicadoError),
+        (ObjectNotFound(Exception("404")), jobs.JobNaoPublicadoError),
         (httpx.ConnectError("recusado"), jobs.OrquestradorIndisponivelError),
     ],
 )
