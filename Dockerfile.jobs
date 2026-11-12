@@ -1,0 +1,35 @@
+# Imagem dos jobs em produção: Python + dependências de terceiros, e nada do nosso código.
+#
+# O código (backend/api e database) vem do clone do GitHub em cada run, fixado no commit que
+# o `backend/api/implantar.py` publicou — por isso não é copiado aqui. Esta imagem só precisa
+# ser refeita quando o uv.lock muda.
+#
+# Existe porque as imagens padrão do rbr-prefect são Python 3.12 e o repositório exige 3.14.
+#
+#   docker build -f Dockerfile.jobs -t 10.214.20.79:5000/litestar-sandbox-jobs:<tag> .
+#   docker push 10.214.20.79:5000/litestar-sandbox-jobs:<tag>
+
+FROM python:3.14-slim
+
+# git: o Prefect clona o repositório no início de cada run (pull step do GitRepository)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.12.17 /uv /usr/local/bin/uv
+
+WORKDIR /tmp/build
+COPY pyproject.toml uv.lock ./
+COPY backend/api/pyproject.toml backend/api/
+COPY database/pyproject.toml database/
+
+# --no-emit-workspace: `database` e a própria API ficam de fora — vêm do clone, na mesma
+# versão do resto do código (`backend/api/fluxos.py` põe os dois no sys.path).
+# --no-default-groups: nem dev nem `implantacao` (rbr-prefect é ferramenta de quem publica).
+RUN uv export --frozen --package litestar-sandbox-api --no-default-groups --no-emit-workspace \
+        --no-hashes -o requirements.txt \
+    && uv pip install --system --no-cache -r requirements.txt \
+    && rm -rf /tmp/build
+
+# o worker docker do Prefect executa o run a partir daqui; o clone cai embaixo deste diretório
+WORKDIR /opt/prefect

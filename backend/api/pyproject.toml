@@ -42,6 +42,14 @@ dev = [
     "ruff>=0.16.10",
     "ty>=0.0.85",
 ]
+# Publicação dos jobs no servidor Prefect da RBR (`implantar.py`). Grupo padrão pra que o
+# `uv run` do dev não o desinstale; a imagem de jobs exporta com --no-default-groups.
+implantacao = [
+    "rbr-prefect>=1.1.0",
+]
+
+[tool.uv]
+default-groups = ["dev", "implantacao"]
 
 [tool.ruff]
 target-version = "py314"
@@ -165,6 +173,14 @@ type = "forbidden"
 source_modules = ["modules"]
 forbidden_modules = ["prefect"]
 allow_indirect_imports = true
+
+# `rbr_prefect` é ferramenta de publicação (`implantar.py`, fora dos root packages): o app não
+# depende dela em runtime — nem a imagem de jobs a instala.
+[[tool.importlinter.contracts]]
+name = "o app não importa rbr_prefect (só implantar.py)"
+type = "forbidden"
+source_modules = ["core", "modules", "database"]
+forbidden_modules = ["rbr_prefect"]
 
 # Direção da integração: custodiante -> carteira/extrato, nunca o inverso.
 [[tool.importlinter.contracts]]

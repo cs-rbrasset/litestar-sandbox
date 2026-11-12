@@ -127,6 +127,15 @@ wheels = [
 ]
 
 [[package]]
+name = "astroid"
+version = "4.3.4"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/2d/87/5732fa68bf100a095cfcbd108f919220d995db99e1a7502b8119a869fd62/astroid-4.3.4.tar.gz", hash = "sha256:d515a105722b72098bbe82d430d65e635f742b6cbac3bdfaf8b7c188b87c5e39", size = 444627, upload-time = "2026-10-08T09:36:44.122Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/16/d4/f23c0ac6e6de33ba5686cb21c672c95e0c2d3d4c9351f16d3b5fed818652/astroid-4.3.4-py3-none-any.whl", hash = "sha256:2bcd0d02648a443a4b818c952c3550091989daefac3c12d3b83b2289482e0818", size = 288310, upload-time = "2026-10-08T09:36:42.284Z" },
+]
+
+[[package]]
 name = "asyncpg"
 version = "0.32.0"
 source = { registry = "https://pypi.org/simple" }
@@ -412,6 +421,27 @@ wheels = [
 ]
 
 [[package]]
+name = "cron-builder"
+version = "0.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1f/a4/23d5673a0b745ae82540a8fec4942e4c3e93dd816ccab2215e000d46c1b1/cron_builder-0.1.1.tar.gz", hash = "sha256:66fdabcdc628afafbfcacabd6d0e94dcfd2356ab976e78f8cf4dcfdd628f7ed7", size = 28840, upload-time = "2026-01-12T00:52:22.532Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ae/4b/51a66006bae575ab7bb1c3520ab7edbf49dae428058f5e331cbd2f5d9007/cron_builder-0.1.1-py3-none-any.whl", hash = "sha256:0328107abccb01140f6635bcc52440c6cbf557d4e725a66361540449eb905163", size = 8479, upload-time = "2026-01-12T00:52:20.743Z" },
+]
+
+[[package]]
+name = "cron-descriptor"
+version = "2.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/41/6b/9ebac1857c0e90d5ba487090f4f9b23e8bf9adead62922550621de21cbf2/cron_descriptor-2.2.1.tar.gz", hash = "sha256:6759056f43b3cabca274b5df182bb63571f2f383bdd4d9d3ff4662c527430a65", size = 53562, upload-time = "2026-10-13T12:39:33.386Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/f8/c9c61b0fd465aaa2b2ac2f51c77dfe49e09dc6c907a8d476c4870b738f2a/cron_descriptor-2.2.1-py3-none-any.whl", hash = "sha256:23b42aca983841333aaf28095024e0457f005621d03e658edbd7316a5f2bbd42", size = 76628, upload-time = "2026-10-13T12:39:31.663Z" },
+]
+
+[[package]]
 name = "cronsim"
 version = "2.7"
 source = { registry = "https://pypi.org/simple" }
@@ -621,6 +651,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/77/cd/9be253869fc42e764de7f3dedd6969af7d44ff9c3375214a3442a6f3fc08/fsspec-2026.9.0.tar.gz", hash = "sha256:0f08147951c8cb31d844c3547d631053b127863b60be04cf06e121333ee0e2fe", size = 333545, upload-time = "2026-09-18T17:50:42.825Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/6c/c0/a98505f18594f1bce828bb159cec0fcf9860562f1a2c85913409fc8f3d9e/fsspec-2026.9.0-py3-none-any.whl", hash = "sha256:8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f", size = 221738, upload-time = "2026-09-18T17:50:41.341Z" },
+]
+
+[[package]]
+name = "graphql-core"
+version = "3.2.14"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9f/55/3f86cc857125e0a9d4ddf7a85a54c69d8c6436cd3c4e360ab6c4686140b8/graphql_core-3.2.14.tar.gz", hash = "sha256:efec124d951f2997e8f28bb9f056d0a3b4b11dce720e2225723ec20fac570af5", size = 610310, upload-time = "2026-11-06T21:41:59.878Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5d/b8/c45a999940326178a32cc3ba7c88f7c661d0cff9399e78cb3898f9e96387/graphql_core-3.2.14-py3-none-any.whl", hash = "sha256:fb0eaaad81c558325f037a79dab7c6dd568cd17196030fb5c46fc4996948cc42", size = 279946, upload-time = "2026-11-06T21:41:58.085Z" },
 ]
 
 [[package]]
@@ -1230,6 +1269,9 @@ dev = [
     { name = "ruff" },
     { name = "ty" },
 ]
+implantacao = [
+    { name = "rbr-prefect" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -1255,6 +1297,7 @@ dev = [
     { name = "ruff", specifier = ">=0.16.10" },
     { name = "ty", specifier = ">=0.0.85" },
 ]
+implantacao = [{ name = "rbr-prefect", specifier = ">=1.1.0" }]
 
 [[package]]
 name = "litestar-security"
@@ -1854,6 +1897,19 @@ wheels = [
 ]
 
 [[package]]
+name = "prefect-github"
+version = "0.4.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "prefect" },
+    { name = "sgqlc" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6c/7d/ff6beb3864c730ba7656fa96ac14f94712cdcefe04b970085b6d1f218d84/prefect_github-0.4.4.tar.gz", hash = "sha256:4ee1ee45a5f77dca3fbf2bda187fa31f5d93919019bc1948d7a0490482ce3b01", size = 338121, upload-time = "2026-06-12T20:18:26.899Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/eb/47801be99b546e5880e885ad1636f28d71ec51069d321fde6f5a6ee44e78/prefect_github-0.4.4-py3-none-any.whl", hash = "sha256:2e5c2db909ff7ba25ad2f9c464cee017d257df957c60784285d29054a24c0b5a", size = 366191, upload-time = "2026-06-12T20:18:25.111Z" },
+]
+
+[[package]]
 name = "prometheus-client"
 version = "0.26.0"
 source = { registry = "https://pypi.org/simple" }
@@ -2275,6 +2331,22 @@ wheels = [
 ]
 
 [[package]]
+name = "rbr-prefect"
+version = "1.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cron-builder" },
+    { name = "cron-descriptor" },
+    { name = "prefect" },
+    { name = "prefect-github" },
+    { name = "requirements-detector" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/35/96/6b9b16456c5968234526dfb70e9e98328cf391b9f91f5038c0a9209eb4a9/rbr_prefect-1.1.0.tar.gz", hash = "sha256:d0b23192e3c2afefffa219f401dd78ed71b2a74a2f101b81e41d958d30074343", size = 219223, upload-time = "2026-08-19T16:59:30.1Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4e/95/097559fe7b29787302a22a4dca9994b39dc3f57d3c52572ac297c77b9f4e/rbr_prefect-1.1.0-py3-none-any.whl", hash = "sha256:d7b272a45b9b99760a7582e527d8ae09df6b3cf5b4a4fe5aaba7fd7910c5de3c", size = 46034, upload-time = "2026-08-19T16:59:28.316Z" },
+]
+
+[[package]]
 name = "readchar"
 version = "4.2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -2416,6 +2488,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/42/f2/05f29bc3913aea15eb670be136045bf5c5bbf4b99ecb839da9b422bb2c85/requests-oauthlib-2.0.0.tar.gz", hash = "sha256:b3dffaebd884d8cd778494369603a9e7b58d29111bf6b41bdc2dcd87203af4e9", size = 55650, upload-time = "2024-03-22T20:32:29.939Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3b/5d/63d4ae3b9daea098d5d6f5da83984853c1bbacd5dc826764b249fe119d24/requests_oauthlib-2.0.0-py2.py3-none-any.whl", hash = "sha256:7dd8a5c40426b779b0868c404bdef9768deccf22749cde15852df527e6269b36", size = 24179, upload-time = "2024-03-22T20:32:28.055Z" },
+]
+
+[[package]]
+name = "requirements-detector"
+version = "1.6.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "astroid" },
+    { name = "packaging" },
+    { name = "semver" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f6/fa/6f9194a51dd9d7dac6a01cad7ea1a99e8f2cf8c4badb84e7446c8f4509a8/requirements_detector-1.6.0.tar.gz", hash = "sha256:601a57092f7a25fbbcf0985fbc91f2af64b1f882e951336cd4920ecee8fb03b1", size = 16085, upload-time = "2026-08-11T08:12:46.929Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/14/db/7ffd0113e60fd2ecd3918800a4e75567749ce5b5a2f31ecf20977bb5ab7d/requirements_detector-1.6.0-py3-none-any.whl", hash = "sha256:2f103d23f38a4c5d8f8858cb30c61c4ff1b0567e0315f8fe2b1595aa4e3ae0e8", size = 21216, upload-time = "2026-08-11T08:12:45.695Z" },
 ]
 
 [[package]]
@@ -2577,6 +2663,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/92/f5/e1dfe8e1d91c54ce212fd93916eb01fd1c590f413be0a0978c39a97aa1bb/semver-3.1.0.tar.gz", hash = "sha256:14bc073439513d7773662a338f4db9829cf16c12b74b9568e2d2689975fbd7fc", size = 304162, upload-time = "2026-09-12T18:38:14.045Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/be/02/bce7a1d70e9d0f6ea8623c16386138c251b5855af6cd3a11433d3fba4e66/semver-3.1.0-py3-none-any.whl", hash = "sha256:6e4998f8b4762acdfea85f9bfd5b4032e0bb50038dc04bf82011b42d5d1145c5", size = 18783, upload-time = "2026-09-12T18:38:12.457Z" },
+]
+
+[[package]]
+name = "sgqlc"
+version = "18"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "graphql-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/13/60/3b8c93b3d5df873bd13bc8fe0a4021d5f7442ca7ee6b98c5152dd55e18c7/sgqlc-18.tar.gz", hash = "sha256:a09f76fb69a2760523144f8d3acbf06a1b3710f63bf87fbac142d3538b1d639b", size = 245818, upload-time = "2026-02-06T19:56:23.957Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/96/8a5b972de8ede610aa088360927411b05c50ebcd669e52b0a3bfd1ed3ed9/sgqlc-18-py3-none-any.whl", hash = "sha256:7af53b5c1aab4602a98a36d6d32bd641e33f602b9b72468885f2505c59c536af", size = 86121, upload-time = "2026-02-06T19:56:22.07Z" },
 ]
 
 [[package]]
